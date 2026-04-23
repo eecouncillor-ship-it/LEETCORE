@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
 import { requireAuth } from "@/lib/auth";
 import { createProblem, updateProblemBySlug } from "@/lib/db";
 import { updateUserBlockedStatus } from "@/lib/db";
@@ -84,11 +83,9 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
 }
 
 export async function toggleUserBlockAction(
-  _previousState: unknown,
   formData: FormData,
 ) {
   const user = await requireAuth("admin");
-
   const userId = String(formData.get("userId") ?? "").trim();
   const block = String(formData.get("block") ?? "0") === "1";
 
@@ -97,7 +94,6 @@ export async function toggleUserBlockAction(
   }
 
   await updateUserBlockedStatus(userId, block);
-
   revalidatePath("/admin");
   revalidatePath("/admin/users");
   redirect("/admin/users");
