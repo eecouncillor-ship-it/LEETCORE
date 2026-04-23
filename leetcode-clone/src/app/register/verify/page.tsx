@@ -1,7 +1,8 @@
 import { VerifyForm } from "../verify-form";
 
-export default function VerifyPage({ searchParams }: { searchParams: { token?: string } }) {
-  const token = searchParams.token ?? "";
+export default async function VerifyPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
+  const { token: tokenParam } = await searchParams;
+  const token = tokenParam ?? "";
 
   return (
     <div className="mx-auto max-w-md">
@@ -9,7 +10,9 @@ export default function VerifyPage({ searchParams }: { searchParams: { token?: s
       {token ? (
         <VerifyForm token={token} />
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">Missing token. Please use the link provided after registration.</div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+          Missing token. Please use the link provided after registration.
+        </div>
       )}
     </div>
   );
