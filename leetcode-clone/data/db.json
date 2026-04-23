@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 2,
+  "users": [
+    {
+      "id": "bd80fe62-f048-4d03-95a9-5424568a1e49",
+      "name": "Admin",
+      "email": "admin@codearena.dev",
+      "passwordHash": "0e38f245b7f2941a32ee9aa3a7ec816c409be8645b8d077b71cfdba8b75df4efcf5690609c0f2d602d2f219199bf721b209ab46201a8eca42ce430e4b58fb7c8",
+      "role": "admin",
+      "createdAt": "2026-04-22T23:02:45.689Z"
+    },
+    {
+      "id": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "name": "Student",
+      "email": "student@codearena.dev",
+      "passwordHash": "a9820bc7f05ca61f1393ee4d83415a173d470b77a0473a120828b17e7f5e6d2535b765428eabe5d6010aeb8a65e0187580be80b5f4e77184ae220087b58eb027",
+      "role": "user",
+      "createdAt": "2026-04-22T23:02:45.689Z"
+    }
+  ],
+  "problems": [
+    {
+      "id": "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
+      "createdAt": "2026-04-23T00:05:22.887Z",
+      "title": "waf",
+      "slug": "waf",
+      "difficulty": "Medium",
+      "category": "afw",
+      "description": "afwfaw",
+      "options": [
+        {
+          "id": "A",
+          "text": "awf"
+        },
+        {
+          "id": "B",
+          "text": "awf"
+        },
+        {
+          "id": "C",
+          "text": "afw"
+        },
+        {
+          "id": "D",
+          "text": "afw"
+        }
+      ],
+      "correctOptionId": "B",
+      "solutionExplanation": "awf",
+      "constraints": [
+        "awf"
+      ],
+      "tags": [
+        "awf"
+      ],
+      "published": true,
+      "createdBy": "bd80fe62-f048-4d03-95a9-5424568a1e49"
+    },
+    {
+      "id": "5876cceb-a8f8-4534-a059-c391c43ee886",
+      "createdAt": "2026-04-22T23:40:05.652Z",
+      "title": "hh",
+      "slug": "hh",
+      "difficulty": "Medium",
+      "category": "hh",
+      "description": "gf",
+      "options": [
+        {
+          "id": "A",
+          "text": "h"
+        },
+        {
+          "id": "B",
+          "text": "jfg"
+        },
+        {
+          "id": "C",
+          "text": "gj"
+        },
+        {
+          "id": "D",
+          "text": "fh"
+        }
+      ],
+      "correctOptionId": "B",
+      "solutionExplanation": "fg",
+      "constraints": [
+        "fg"
+      ],
+      "tags": [
+        "h"
+      ],
+      "published": true,
+      "createdBy": "bd80fe62-f048-4d03-95a9-5424568a1e49"
+    },
+    {
+      "id": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
+      "title": "Big O of Binary Search",
+      "slug": "big-o-of-binary-search",
+      "difficulty": "Easy",
+      "category": "Algorithms",
+      "description": "When binary search is performed on a sorted array of n elements, what is the time complexity in the worst case?",
+      "options": [
+        {
+          "id": "A",
+          "text": "O(n)"
+        },
+        {
+          "id": "B",
+          "text": "O(log n)"
+        },
+        {
+          "id": "C",
+          "text": "O(n log n)"
+        },
+        {
+          "id": "D",
+          "text": "O(1)"
+        }
+      ],
+      "correctOptionId": "B",
+      "solutionExplanation": "Binary search halves the search space after each comparison, so the number of steps grows logarithmically with input size.",
+      "constraints": [
+        "The array is already sorted.",
+        "Only one value is being searched at a time."
+      ],
+      "tags": [
+        "algorithms",
+        "complexity",
+        "binary-search"
+      ],
+      "published": true,
+      "createdAt": "2026-04-22T23:19:31.501Z",
+      "createdBy": "bd80fe62-f048-4d03-95a9-5424568a1e49"
+    },
+    {
+      "id": "a899d8f8-00fe-4a48-ac77-c39ed8f5a2e3",
+      "title": "SQL Clause for Filtering Groups",
+      "slug": "sql-clause-for-filtering-groups",
+      "difficulty": "Medium",
+      "category": "Databases",
+      "description": "A query uses GROUP BY and should return only those groups whose count is greater than 3. Which SQL clause should be used for that condition?",
+      "options": [
+        {
+          "id": "A",
+          "text": "WHERE"
+        },
+        {
+          "id": "B",
+          "text": "ORDER BY"
+        },
+        {
+          "id": "C",
+          "text": "HAVING"
+        },
+        {
+          "id": "D",
+          "text": "LIMIT"
+        }
+      ],
+      "correctOptionId": "C",
+      "solutionExplanation": "HAVING filters grouped rows after aggregation. WHERE filters raw rows before GROUP BY is applied.",
+      "constraints": [
+        "Assume standard SQL syntax.",
+        "The condition is applied after grouping."
+      ],
+      "tags": [
+        "sql",
+        "group-by",
+        "having"
+      ],
+      "published": true,
+      "createdAt": "2026-04-22T23:19:31.501Z",
+      "createdBy": "bd80fe62-f048-4d03-95a9-5424568a1e49"
+    },
+    {
+      "id": "f000cb7f-1a95-42b1-81ec-1fce8149c36f",
+      "title": "HTTP Status for Missing Resource",
+      "slug": "http-status-for-missing-resource",
+      "difficulty": "Easy",
+      "category": "Web",
+      "description": "A browser requests a route that does not exist on the server. Which HTTP status code is the most appropriate response?",
+      "options": [
+        {
+          "id": "A",
+          "text": "200 OK"
+        },
+        {
+          "id": "B",
+          "text": "301 Moved Permanently"
+        },
+        {
+          "id": "C",
+          "text": "404 Not Found"
+        },
+        {
+          "id": "D",
+          "text": "500 Internal Server Error"
+        }
+      ],
+      "correctOptionId": "C",
+      "solutionExplanation": "404 Not Found is returned when the requested resource does not exist. A 500 would imply the server crashed while handling a valid request.",
+      "constraints": [
+        "The resource truly does not exist.",
+        "No redirect is configured for the requested route."
+      ],
+      "tags": [
+        "http",
+        "web",
+        "backend"
+      ],
+      "published": true,
+      "createdAt": "2026-04-22T23:19:31.501Z",
+      "createdBy": "bd80fe62-f048-4d03-95a9-5424568a1e49"
+    }
+  ],
+  "submissions": [
+    {
+      "id": "1c713d68-ebe3-4bcc-8cb9-add822bafe18",
+      "submittedAt": "2026-04-23T00:05:53.256Z",
+      "problemId": "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "B",
+      "selectedOptionText": "awf",
+      "correctOptionId": "B",
+      "correctOptionText": "awf",
+      "solutionExplanation": "awf",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "a65677f7-8157-4306-a3e0-11339743132f",
+      "submittedAt": "2026-04-23T00:05:50.923Z",
+      "problemId": "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "C",
+      "selectedOptionText": "afw",
+      "correctOptionId": "B",
+      "correctOptionText": "awf",
+      "solutionExplanation": "awf",
+      "isCorrect": false,
+      "status": "Incorrect"
+    },
+    {
+      "id": "1f12cdb9-49e0-4817-ab14-b1ddf51d276a",
+      "submittedAt": "2026-04-23T00:04:41.552Z",
+      "problemId": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "B",
+      "selectedOptionText": "O(log n)",
+      "correctOptionId": "B",
+      "correctOptionText": "O(log n)",
+      "solutionExplanation": "Binary search halves the search space after each comparison, so the number of steps grows logarithmically with input size.",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "4db0c683-b5b8-49a2-b266-c5adc2398f7f",
+      "submittedAt": "2026-04-23T00:04:24.298Z",
+      "problemId": "5876cceb-a8f8-4534-a059-c391c43ee886",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "B",
+      "selectedOptionText": "jfg",
+      "correctOptionId": "B",
+      "correctOptionText": "jfg",
+      "solutionExplanation": "fg",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "bb38295c-3d02-4e8f-af7e-a284a1b3e628",
+      "submittedAt": "2026-04-23T00:04:19.541Z",
+      "problemId": "5876cceb-a8f8-4534-a059-c391c43ee886",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "C",
+      "selectedOptionText": "gj",
+      "correctOptionId": "B",
+      "correctOptionText": "jfg",
+      "solutionExplanation": "fg",
+      "isCorrect": false,
+      "status": "Incorrect"
+    },
+    {
+      "id": "76c151c6-1b3e-4f17-a3aa-d06e597dfc52",
+      "submittedAt": "2026-04-23T00:03:10.805Z",
+      "problemId": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "B",
+      "selectedOptionText": "O(log n)",
+      "correctOptionId": "B",
+      "correctOptionText": "O(log n)",
+      "solutionExplanation": "Binary search halves the search space after each comparison, so the number of steps grows logarithmically with input size.",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "7932a9dc-249b-4ce1-93f9-11b78f1557e1",
+      "submittedAt": "2026-04-23T00:03:01.082Z",
+      "problemId": "5876cceb-a8f8-4534-a059-c391c43ee886",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "C",
+      "selectedOptionText": "gj",
+      "correctOptionId": "B",
+      "correctOptionText": "jfg",
+      "solutionExplanation": "fg",
+      "isCorrect": false,
+      "status": "Incorrect"
+    },
+    {
+      "id": "c8db8ae4-9290-4293-981b-843b0c0a4da3",
+      "submittedAt": "2026-04-23T00:02:51.876Z",
+      "problemId": "5876cceb-a8f8-4534-a059-c391c43ee886",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "C",
+      "selectedOptionText": "gj",
+      "correctOptionId": "B",
+      "correctOptionText": "jfg",
+      "solutionExplanation": "fg",
+      "isCorrect": false,
+      "status": "Incorrect"
+    },
+    {
+      "id": "a0971d1e-3789-4200-9127-2c4addcc038d",
+      "submittedAt": "2026-04-23T00:02:43.071Z",
+      "problemId": "5876cceb-a8f8-4534-a059-c391c43ee886",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "C",
+      "selectedOptionText": "gj",
+      "correctOptionId": "B",
+      "correctOptionText": "jfg",
+      "solutionExplanation": "fg",
+      "isCorrect": false,
+      "status": "Incorrect"
+    },
+    {
+      "id": "d9b25cf6-368a-4901-9d85-35e36e13d8b9",
+      "submittedAt": "2026-04-22T23:22:03.311Z",
+      "problemId": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "B",
+      "selectedOptionText": "O(log n)",
+      "correctOptionId": "B",
+      "correctOptionText": "O(log n)",
+      "solutionExplanation": "Binary search halves the search space after each comparison, so the number of steps grows logarithmically with input size.",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "93b43283-6380-46f3-ae3b-8aa2c4eba101",
+      "submittedAt": "2026-04-22T23:21:59.879Z",
+      "problemId": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "C",
+      "selectedOptionText": "O(n log n)",
+      "correctOptionId": "B",
+      "correctOptionText": "O(log n)",
+      "solutionExplanation": "Binary search halves the search space after each comparison, so the number of steps grows logarithmically with input size.",
+      "isCorrect": false,
+      "status": "Incorrect"
+    },
+    {
+      "id": "50548e67-98ee-4ba0-b5c7-ab4b96cbc728",
+      "submittedAt": "2026-04-22T23:21:43.109Z",
+      "problemId": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "selectedOptionId": "A",
+      "selectedOptionText": "O(n)",
+      "correctOptionId": "B",
+      "correctOptionText": "O(log n)",
+      "solutionExplanation": "Binary search halves the search space after each comparison, so the number of steps grows logarithmically with input size.",
+      "isCorrect": false,
+      "status": "Incorrect"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "8b0c8f77-0929-49eb-97a8-bf666e07dff4",
+      "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
+      "expiresAt": "2026-04-30T00:02:31.793Z"
+    }
+  ]
+}

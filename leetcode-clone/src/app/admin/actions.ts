@@ -1,0 +1,132 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import { requireAuth } from "@/lib/auth";
+import { createProblem, updateProblemBySlug } from "@/lib/db";
+import { parseCommaList, parseLineList, slugify } from "@/lib/utils";
+import type { Difficulty } from "@/lib/types";
+
+export type QuestionFormState = {
+  error?: string;
+};
+
+type ParsedQuestionForm = {
+  title: string;
+  slug: string;
+  difficulty: Difficulty;
+  category: string;
+  description: string;
+  options: Array<{ id: string; text: string }>;
+  correctOptionId: string;
+  solutionExplanation: string;
+  constraints: string[];
+  tags: string[];
+  published: boolean;
+};
+
+type ParseQuestionFormResult =
+  | { ok: false; error: string }
+  | { ok: true; data: ParsedQuestionForm };
+
+function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
+  const title = String(formData.get("title") ?? "").trim();
+  const difficulty = String(formData.get("difficulty") ?? "Easy") as Difficulty;
+  const category = String(formData.get("category") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const constraintsRaw = String(formData.get("constraints") ?? "");
+  const tagsRaw = String(formData.get("tags") ?? "");
+  const optionA = String(formData.get("optionA") ?? "").trim();
+  const optionB = String(formData.get("optionB") ?? "").trim();
+  const optionC = String(formData.get("optionC") ?? "").trim();
+  const optionD = String(formData.get("optionD") ?? "").trim();
+  const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
+  const solutionExplanation = String(formData.get("solutionExplanation") ?? "").trim();
+  const published = String(formData.get("published") ?? "") === "on";
+
+  if (
+    !title ||
+    !category ||
+    !description ||
+    !optionA ||
+    !optionB ||
+    !optionC ||
+    !optionD ||
+    !correctOptionId ||
+    !solutionExplanation
+  ) {
+    return { ok: false, error: "Please fill in all required question fields." };
+  }
+
+  return {
+    ok: true,
+    data: {
+      title,
+      slug: slugify(title),
+      difficulty,
+      category,
+      description,
+      options: [
+        { id: "A", text: optionA },
+        { id: "B", text: optionB },
+        { id: "C", text: optionC },
+        { id: "D", text: optionD },
+      ],
+      correctOptionId,
+      solutionExplanation,
+      constraints: parseLineList(constraintsRaw),
+      tags: parseCommaList(tagsRaw),
+      published,
+    },
+  };
+}
+
+export async function createProblemAction(
+  _previousState: QuestionFormState,
+  formData: FormData,
+): Promise<QuestionFormState> {
+  const user = await requireAuth("admin");
+  const parsed = parseQuestionForm(formData);
+
+  if (!parsed.ok) {
+    return { error: parsed.error };
+  }
+
+  await createProblem({
+    ...parsed.data,
+    createdBy: user.id,
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/problems");
+  redirect("/admin?created=1");
+}
+
+export async function updateProblemAction(
+  currentSlug: string,
+  _previousState: QuestionFormState,
+  formData: FormData,
+): Promise<QuestionFormState> {
+  await requireAuth("admin");
+  const parsed = parseQuestionForm(formData);
+
+  if (!parsed.ok) {
+    return { error: parsed.error };
+  }
+
+  const updated = await updateProblemBySlug(currentSlug, parsed.data);
+
+  if (!updated) {
+    return { error: "Question not found." };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/problems");
+  revalidatePath(`/admin/questions/${currentSlug}/edit`);
+  revalidatePath(`/problems/${currentSlug}`);
+  revalidatePath(`/problems/${updated.slug}`);
+  redirect(`/admin/questions/${updated.slug}/edit?updated=1`);
+}
