@@ -5,11 +5,15 @@ import { requireAuth } from "@/lib/auth";
 import { getUserById, getSubmissionsForUser, getAllProblems } from "@/lib/db";
 import { formatDate, formatPercentage } from "@/lib/utils";
 
-type Props = { params: { id: string } };
+type Props = {
+  params: Promise<{ id: string }>
+};
 
 export default async function AdminUserDetail({ params }: Props) {
+  const { id } = await params;
   const user = await requireAuth("admin");
-  const target = await getUserById(params.id);
+  const target = await getUserById(id);
+  
   if (!target) {
     return (
       <AppShell
@@ -35,10 +39,9 @@ export default async function AdminUserDetail({ params }: Props) {
   const totalSubmissions = submissions.length;
   const solvedProblemIds = new Set(submissions.filter((s) => s.isCorrect).map((s) => s.problemId));
   const solvedCount = solvedProblemIds.size;
-
   const problemById = new Map(problems.map((p) => [p.id, p]));
-
   const topicsMap = new Map<string, number>();
+
   for (const pid of solvedProblemIds) {
     const prob = problemById.get(pid);
     const cat = prob?.category ?? "Uncategorized";
@@ -57,7 +60,11 @@ export default async function AdminUserDetail({ params }: Props) {
         { href: "/admin", label: "Questions" },
         { href: "/admin/users", label: "Users", active: true },
       ]}
-      actions={<Link href="/admin/users" className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white">Back</Link>}
+      actions={
+        <Link href="/admin/users" className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white">
+          Back
+        </Link>
+      }
     >
       <div className="grid gap-6">
         <div className="grid grid-cols-3 gap-6">
@@ -74,7 +81,6 @@ export default async function AdminUserDetail({ params }: Props) {
             <p className="mt-3 text-3xl font-black text-white">{topics.length}</p>
           </div>
         </div>
-
         <section className="rounded-[20px] border border-white/10 bg-white/5 p-6">
           <h3 className="text-lg font-semibold text-white">Topics breakdown</h3>
           <div className="mt-4 grid gap-3">
@@ -90,7 +96,6 @@ export default async function AdminUserDetail({ params }: Props) {
             )}
           </div>
         </section>
-
         <section className="rounded-[20px] border border-white/10 bg-white/5 p-6">
           <h3 className="text-lg font-semibold text-white">Recent submissions</h3>
           <div className="mt-4 grid gap-3">
