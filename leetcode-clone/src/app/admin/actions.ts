@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
 import { createProblem, updateProblemBySlug } from "@/lib/db";
+import { updateUserBlockedStatus } from "@/lib/db";
 import { parseCommaList, parseLineList, slugify } from "@/lib/utils";
 import type { Difficulty } from "@/lib/types";
 
@@ -80,6 +81,26 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
       published,
     },
   };
+}
+
+export async function toggleUserBlockAction(
+  _previousState: unknown,
+  formData: FormData,
+) {
+  const user = await requireAuth("admin");
+
+  const userId = String(formData.get("userId") ?? "").trim();
+  const block = String(formData.get("block") ?? "0") === "1";
+
+  if (!userId) {
+    return { error: "Missing user id." } as { error?: string };
+  }
+
+  await updateUserBlockedStatus(userId, block);
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/users");
+  redirect("/admin/users");
 }
 
 export async function createProblemAction(

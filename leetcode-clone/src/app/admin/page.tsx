@@ -6,19 +6,12 @@ import { requireAuth } from "@/lib/auth";
 import { getAllProblems, getStats } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
-type AdminPageProps = {
-  searchParams: Promise<{ created?: string }>;
-};
-
-export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const [user, problems, stats, resolvedSearchParams] = await Promise.all([
+export default async function AdminPage() {
+  const [user, problems, stats] = await Promise.all([
     requireAuth("admin"),
     getAllProblems(),
     getStats(),
-    searchParams,
   ]);
-
-  const created = resolvedSearchParams.created === "1";
 
   return (
     <AppShell
@@ -38,116 +31,80 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         { href: "/admin", label: "Questions", active: true },
         { href: "/admin/users", label: "Users" },
         { href: "/problems", label: "Student portal" },
+        { href: "/admin/add", label: "Add question" },
       ]}
     >
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid gap-6">
         <section className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm text-slate-500">Published questions</p>
-              <p className="mt-2 text-4xl font-black text-slate-950">
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-sm">
+              <p className="text-sm text-slate-300">Published questions</p>
+              <p className="mt-2 text-4xl font-black text-white">
                 {stats.totalProblems}
               </p>
             </div>
-            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm text-slate-500">Submissions recorded</p>
-              <p className="mt-2 text-4xl font-black text-slate-950">
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-sm">
+              <p className="text-sm text-slate-300">Submissions recorded</p>
+              <p className="mt-2 text-4xl font-black text-white">
                 {stats.totalSubmissions}
               </p>
             </div>
-            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm text-slate-500">Registered students</p>
-              <p className="mt-2 text-4xl font-black text-slate-950">
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-sm">
+              <p className="text-sm text-slate-300">Registered students</p>
+              <p className="mt-2 text-4xl font-black text-white">
                 {stats.totalUsers}
               </p>
             </div>
-            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm text-slate-500">Admin accounts</p>
-              <p className="mt-2 text-4xl font-black text-slate-950">
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-sm">
+              <p className="text-sm text-slate-300">Admin accounts</p>
+              <p className="mt-2 text-4xl font-black text-white">
                 {stats.totalAdmins}
               </p>
             </div>
           </div>
 
-          <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Existing catalog
-                </p>
-                <h2 className="mt-2 text-2xl font-black text-slate-950">
-                  Current questions
-                </h2>
-              </div>
-              <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                {problems.length} total
-              </span>
+          <div className="rounded-[20px] border border-white/8 bg-white/4 p-0 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-[140px_1fr_120px_120px] gap-4 border-b border-white/10 px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
+              <span>Created</span>
+              <span>Problem</span>
+              <span>Status</span>
+              <span>Actions</span>
             </div>
 
-            <div className="mt-5 space-y-4">
-              {problems.map((problem) => (
+            <div>
+              {problems.map((problem, idx) => (
                 <div
                   key={problem.id}
-                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
+                  className={`grid grid-cols-[140px_1fr_120px_120px] gap-4 items-center px-6 py-4 ${
+                    idx % 2 === 0 ? "bg-transparent" : "bg-white/2"
+                  } border-b border-white/6`}
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-950">
-                        {problem.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {problem.category} - {problem.difficulty} - Created{" "}
-                        {formatDate(problem.createdAt)}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          problem.published
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}
-                      >
-                        {problem.published ? "Published" : "Draft"}
-                      </span>
-                      <Link
-                        href={`/admin/questions/${problem.slug}/edit`}
-                        className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:bg-white"
-                      >
-                        Edit
-                      </Link>
+                  <div className="text-sm text-slate-300">{formatDate(problem.createdAt)}</div>
+                  <div>
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">{problem.title}</h3>
+                        <p className="mt-1 text-xs text-slate-300">{problem.category} • <span className="text-amber-300">{problem.difficulty}</span></p>
+                      </div>
                     </div>
                   </div>
-                  <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-600">
-                    {problem.description}
-                  </p>
+                  <div>
+                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${problem.published ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {problem.published ? 'Published' : 'Draft'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-end gap-3">
+                    <Link
+                      href={`/admin/questions/${problem.slug}/edit`}
+                      className="rounded-full border border-white/10 px-3 py-1.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/6"
+                    >
+                      Edit
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-        </section>
-
-        <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">
-              Create question
-            </p>
-            <h2 className="mt-2 text-2xl font-black text-slate-950">
-              Add a new MCQ
-            </h2>
-            <p className="mt-2 text-sm leading-7 text-slate-500">
-              Questions you create here become the source of truth for students.
-            </p>
-          </div>
-
-          {created ? (
-            <p className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              Question created successfully and added to the question bank.
-            </p>
-          ) : null}
-
-          <CreateProblemForm />
         </section>
       </div>
     </AppShell>

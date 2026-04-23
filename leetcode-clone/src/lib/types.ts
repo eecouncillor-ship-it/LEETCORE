@@ -13,6 +13,7 @@ export type UserRecord = {
   email: string;
   passwordHash: string;
   role: Role;
+  isBlocked?: boolean;
   createdAt: string;
 };
 
@@ -55,10 +56,17 @@ export type SessionRecord = {
   expiresAt: string;
 };
 
+export type PasswordResetRecord = {
+  token: string;
+  userId: string;
+  expiresAt: string;
+};
+
 export type DatabaseShape = {
   schemaVersion: number;
   users: UserRecord[];
   problems: ProblemRecord[];
   submissions: SubmissionRecord[];
   sessions: SessionRecord[];
+  passwordResets?: PasswordResetRecord[];
 };

@@ -41,7 +41,7 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
       ]}
     >
       <div className="grid gap-7 xl:grid-cols-[1.08fr_0.92fr]">
-        <section className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
             <span
               className={`text-sm font-semibold ${getDifficultyTextClass(
@@ -58,26 +58,26 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
             </span>
           </div>
 
-          <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-900">
+          <h1 className="mt-5 text-3xl font-black tracking-tight text-white">
             {problem.title}
           </h1>
 
           <div className="mt-8">
-            <h2 className="text-xl font-bold text-slate-900">Description</h2>
-            <p className="mt-3 whitespace-pre-wrap text-base leading-8 text-slate-700">
+            <h2 className="text-xl font-bold text-white">Description</h2>
+            <p className="mt-3 whitespace-pre-wrap text-base leading-8 text-slate-300">
               {problem.description}
             </p>
           </div>
 
           <div className="mt-8">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-white">
               Constraints and Notes
             </h2>
             <ul className="mt-4 space-y-3">
               {problem.constraints.map((constraint) => (
                 <li
                   key={constraint}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300"
                 >
                   {constraint}
                 </li>
@@ -87,23 +87,23 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
         </section>
 
         <section className="space-y-6">
-          <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
             <SubmissionForm slug={problem.slug} options={problem.options} />
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900">
               Your attempts
             </h2>
             <div className="mt-5 space-y-4">
               {filteredSubmissions.length > 0 ? (
                 filteredSubmissions.map((submission) => (
-                  <div
-                    key={submission.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  >
+                    <div
+                      key={submission.id}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                    >
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-base font-semibold text-slate-900">
+                      <p className="text-base font-semibold text-white">
                         You chose {submission.selectedOptionId}
                       </p>
                       <span
@@ -116,11 +116,11 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
                         {submission.status}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p className="mt-2 text-sm text-slate-300">
                       Submitted {formatDate(submission.submittedAt)}
                     </p>
-                    <p className="mt-2 text-sm leading-7 text-slate-700">
-                      Correct answer: {submission.correctOptionId} -{" "}
+                    <p className="mt-2 text-sm leading-7 text-slate-300">
+                      Correct answer: {submission.correctOptionId} - {" "}
                       {submission.correctOptionText}
                     </p>
                   </div>

@@ -16,10 +16,9 @@ export function StudentShell({
   navItems,
 }: StudentShellProps) {
   const initial = userName.trim().charAt(0).toUpperCase() || "U";
-
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#08111f_0%,_#0f172a_8%,_#e2e8f0_8%,_#f8fafc_100%)] text-slate-900">
-      <header className="border-b border-slate-800 bg-[#08111f] text-slate-100">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.12),_transparent_22%),linear-gradient(180deg,_#020617_0%,_#08111f_35%,_#0f172a_100%)] text-slate-100">
+      <header className="border-b border-white/10 bg-white/5 text-slate-100">
         <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-4 sm:px-8">
           <div className="flex items-center gap-8">
             <Link href="/problems" className="flex items-center gap-3">
@@ -27,7 +26,7 @@ export function StudentShell({
                 &lt;/&gt;
               </div>
               <span className="text-2xl font-black tracking-tight text-white">
-                CodeQuiz
+                LEETCORE
               </span>
             </Link>
 
@@ -54,13 +53,13 @@ export function StudentShell({
               <div className="flex size-9 items-center justify-center rounded-full bg-sky-500 text-sm font-bold text-white">
                 {initial}
               </div>
-              <span className="text-sm font-medium text-slate-200">{userName}</span>
+              <span className="text-sm font-medium text-white">{userName}</span>
             </div>
 
             <form action={signOut}>
               <button
                 type="submit"
-                className="text-sm font-medium text-slate-300 transition hover:text-white"
+                className="text-sm font-medium text-white transition hover:text-slate-100/90"
               >
                 Logout
               </button>

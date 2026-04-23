@@ -30,6 +30,10 @@ export async function signIn(email: string, password: string) {
     return null;
   }
 
+  if ((user as any).isBlocked) {
+    return null;
+  }
+
   const session = await createSession(user.id);
   const cookieStore = await cookies();
 

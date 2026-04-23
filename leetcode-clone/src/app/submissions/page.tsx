@@ -26,17 +26,17 @@ export default async function SubmissionsPage() {
       ]}
     >
       <div className="grid gap-7 xl:grid-cols-[1.72fr_0.54fr]">
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-7 py-6">
-            <h1 className="text-2xl font-black tracking-tight text-slate-900">
+        <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-sm">
+          <div className="border-b border-white/10 px-7 py-6">
+            <h1 className="text-2xl font-black tracking-tight text-white">
               Submissions
             </h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-300">
               Review every attempt, your selected answer, and the correct answer.
             </p>
           </div>
 
-          <div className="grid grid-cols-[1.65fr_140px_140px_150px_220px] gap-4 border-b border-slate-200 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
+          <div className="grid grid-cols-[1.65fr_140px_140px_150px_220px] gap-4 border-b border-white/10 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300">
             <span>Question</span>
             <span>Picked</span>
             <span>Correct</span>
@@ -47,22 +47,22 @@ export default async function SubmissionsPage() {
           {submissions.map((submission) => (
             <div
               key={submission.id}
-              className="grid grid-cols-[1.65fr_140px_140px_150px_220px] items-center gap-4 border-b border-slate-100 px-7 py-6"
+              className="grid grid-cols-[1.65fr_140px_140px_150px_220px] items-center gap-4 border-b border-white/10 px-7 py-6"
             >
               <div>
-                <p className="text-base font-semibold text-slate-900">
+                <p className="text-base font-semibold text-white">
                   {problemTitleById.get(submission.problemId) ?? "Question"}
                 </p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-300">
                   {submission.selectedOptionText}
                 </p>
               </div>
 
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-slate-200">
                 {submission.selectedOptionId}
               </span>
 
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-slate-200">
                 {submission.correctOptionId}
               </span>
 
@@ -76,16 +76,16 @@ export default async function SubmissionsPage() {
                 {submission.status}
               </span>
 
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-slate-300">
                 {formatDate(submission.submittedAt)}
               </span>
             </div>
           ))}
 
           {submissions.length === 0 ? (
-            <div className="px-7 py-10 text-sm text-slate-500">
+            <div className="px-7 py-10 text-sm text-slate-300">
               No submissions yet. Open the{" "}
-              <Link href="/problems" className="font-semibold text-sky-600">
+              <Link href="/problems" className="font-semibold text-sky-300">
                 Problems
               </Link>{" "}
               tab and answer your first question.

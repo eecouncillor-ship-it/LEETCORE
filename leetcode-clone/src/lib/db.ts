@@ -141,6 +141,7 @@ function createSeedData(): DatabaseShape {
     problems: buildSeedProblems(adminId, now),
     submissions: [],
     sessions: [],
+    passwordResets: [],
   };
 }
 
@@ -206,12 +207,21 @@ function normalizeDatabase(raw: unknown): DatabaseShape {
       ? (candidate.submissions as SubmissionRecord[])
       : [];
 
+  const passwordResets = Array.isArray(candidate.passwordResets)
+    ? (candidate.passwordResets as any[])
+    : [];
+  const registrationVerifications = Array.isArray((candidate as any).registrationVerifications)
+    ? ((candidate as any).registrationVerifications as any[])
+    : [];
+
   return {
     schemaVersion: databaseSchemaVersion,
     users,
     problems,
     submissions,
     sessions,
+      passwordResets,
+      registrationVerifications,
   };
 }
 
@@ -264,6 +274,25 @@ export async function getUserByEmail(email: string) {
 export async function getUserById(id: string) {
   const db = await readDatabase();
   return db.users.find((user) => user.id === id);
+}
+
+export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
+  const db = await readDatabase();
+  const targetIndex = db.users.findIndex((user) => user.id === id);
+
+  if (targetIndex === -1) {
+    return null;
+  }
+
+  const user = db.users[targetIndex];
+  const updatedUser = {
+    ...user,
+    isBlocked,
+  };
+
+  db.users[targetIndex] = updatedUser;
+  await writeDatabase(db);
+  return updatedUser;
 }
 
 export async function getPublishedProblems() {
@@ -367,6 +396,82 @@ export async function getSession(token: string) {
   return db.sessions.find((session) => session.token === token);
 }
 
+export async function createPasswordResetTokenByEmail(email: string) {
+  const db = await readDatabase();
+  const user = db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+
+  if (!user) return null;
+
+  const token = randomUUID();
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60).toISOString(); // 1 hour
+
+  const reset = { token, userId: user.id, expiresAt };
+
+  db.passwordResets = (db.passwordResets || []).filter(
+    (r) => new Date(r.expiresAt).getTime() > Date.now(),
+  );
+
+  db.passwordResets.unshift(reset as any);
+  await writeDatabase(db);
+  return reset;
+}
+
+export async function createRegistrationVerification(record: {
+  name: string;
+  email: string;
+  passwordHash: string;
+  token: string;
+  otp: string;
+  expiresAt: string;
+}) {
+  const db = await readDatabase();
+
+  db.registrationVerifications = (db.registrationVerifications || []).filter(
+    (r) => new Date(r.expiresAt).getTime() > Date.now(),
+  );
+
+  db.registrationVerifications.unshift(record as any);
+  await writeDatabase(db);
+  return record;
+}
+
+export async function getRegistrationVerificationByToken(token: string) {
+  const db = await readDatabase();
+  return (db.registrationVerifications || []).find((r) => r.token === token) as
+    | (Record<string, any>)
+    | undefined;
+}
+
+export async function consumeRegistrationVerification(token: string) {
+  const db = await readDatabase();
+  const rec = (db.registrationVerifications || []).find((r) => r.token === token);
+  if (!rec) return null;
+  db.registrationVerifications = (db.registrationVerifications || []).filter((r) => r.token !== token);
+  await writeDatabase(db);
+  return rec;
+}
+
+export async function getPasswordReset(token: string) {
+  const db = await readDatabase();
+  return (db.passwordResets || []).find((r) => r.token === token);
+}
+
+export async function consumePasswordResetToken(token: string) {
+  const db = await readDatabase();
+  db.passwordResets = (db.passwordResets || []).filter((r) => r.token !== token);
+  await writeDatabase(db);
+}
+
+export async function updateUserPassword(userId: string, password: string) {
+  const db = await readDatabase();
+  const idx = db.users.findIndex((u) => u.id === userId);
+  if (idx === -1) return null;
+  const updated = { ...db.users[idx], passwordHash: hashSeedPassword(password) };
+  db.users[idx] = updated;
+  await writeDatabase(db);
+  return updated;
+}
+
 export async function deleteSession(token: string) {
   const db = await readDatabase();
   db.sessions = db.sessions.filter((session) => session.token !== token);
@@ -418,4 +523,32 @@ export async function getStats() {
     totalUsers,
     totalAdmins,
   };
+}
+
+export async function createUser(user: {
+  name: string;
+  email: string;
+  password?: string;
+  passwordHash?: string;
+  role?: "admin" | "user";
+}) {
+  const db = await readDatabase();
+
+  const existing = db.users.find((u) => u.email.toLowerCase() === user.email.toLowerCase());
+  if (existing) {
+    return null;
+  }
+
+  const newUser = {
+    id: randomUUID(),
+    name: user.name,
+    email: user.email,
+    passwordHash: user.passwordHash ?? hashSeedPassword(user.password ?? ""),
+    role: user.role ?? "user",
+    createdAt: new Date().toISOString(),
+  };
+
+  db.users.unshift(newUser);
+  await writeDatabase(db);
+  return newUser;
 }

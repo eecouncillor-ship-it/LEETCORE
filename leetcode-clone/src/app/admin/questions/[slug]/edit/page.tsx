@@ -43,17 +43,18 @@ export default async function EditQuestionPage({
         { href: "/admin", label: "Questions", active: true },
         { href: "/admin/users", label: "Users" },
         { href: "/problems", label: "Student portal" },
+        { href: "/admin/add", label: "Add question" },
       ]}
     >
-      <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-sm">
         <div className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-400">
             Edit question
           </p>
-          <h2 className="mt-2 text-2xl font-black text-slate-950">
+          <h2 className="mt-2 text-2xl font-black text-white">
             Update MCQ details
           </h2>
-          <p className="mt-2 text-sm leading-7 text-slate-500">
+          <p className="mt-2 text-sm leading-7 text-slate-300">
             Editing updates the existing question record and keeps it visible in
             the same admin question bank.
           </p>

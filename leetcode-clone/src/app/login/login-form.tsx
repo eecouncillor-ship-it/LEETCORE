@@ -59,6 +59,9 @@ export function LoginForm() {
       ) : null}
 
       <SubmitButton />
+          <div className="mt-2 text-sm text-slate-300">
+            <a href="/forgot" className="underline">Forgot password?</a>
+          </div>
     </form>
   );
 }
