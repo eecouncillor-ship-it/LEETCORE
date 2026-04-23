@@ -2,10 +2,13 @@ import { ResetForm } from "../reset-form";
 import { getPasswordReset } from "@/lib/db";
 import { notFound } from "next/navigation";
 
-type ResetPageProps = { params: { token: string } };
+type ResetPageProps = {
+  params: Promise<{ token: string }>
+};
 
 export default async function ResetPage({ params }: ResetPageProps) {
-  const reset = await getPasswordReset(params.token);
+  const { token } = await params;
+  const reset = await getPasswordReset(token);
   if (!reset || new Date(reset.expiresAt).getTime() < Date.now()) {
     notFound();
   }
@@ -17,7 +20,7 @@ export default async function ResetPage({ params }: ResetPageProps) {
         <div className="rounded-[20px] border border-white/10 bg-white/5 p-6">
           <p className="mb-4 text-sm text-slate-300">Enter a new password for your account.</p>
           {/* @ts-ignore server -> client prop passing is fine for simple token string */}
-          <ResetForm token={params.token} />
+          <ResetForm token={token} />
         </div>
       </section>
     </main>
