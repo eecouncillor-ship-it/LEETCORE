@@ -19,6 +19,18 @@ const databasePath = path.join(dataDirectory, "db.json");
 const databaseSchemaVersion = 2;
 const BLOB_KEY = 'codearena-database.json';
 
+function getBlobToken() {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+
+  if (!token) {
+    throw new Error(
+      'Missing BLOB_READ_WRITE_TOKEN environment variable for Vercel Blob',
+    );
+  }
+
+  return token;
+}
+
 function hashSeedPassword(password: string) {
   return scryptSync(password, "codearena-seed-salt", 64).toString("hex");
 }
@@ -247,12 +259,13 @@ async function ensureDatabase() {
 
   // In Vercel/production, check if blob exists
   try {
-    await head(BLOB_KEY);
+    await head(BLOB_KEY, { token: getBlobToken() });
   } catch {
     // Blob doesn't exist, create it
     await put(BLOB_KEY, JSON.stringify(createSeedData(), null, 2), {
       access: 'public',
       allowOverwrite: true,
+      token: getBlobToken(),
     });
   }
 }
@@ -266,6 +279,7 @@ async function writeDatabase(data: DatabaseShape) {
   await put(BLOB_KEY, JSON.stringify(data, null, 2), {
     access: 'public',
     allowOverwrite: true,
+    token: getBlobToken(),
   });
 }
 
@@ -294,9 +308,12 @@ async function readDatabase() {
   // In Vercel, read from blob
   try {
     // Get blob metadata
-    await head(BLOB_KEY);
+    await head(BLOB_KEY, { token: getBlobToken() });
 
-    const blobResponse = await get(BLOB_KEY, { access: 'public' });
+    const blobResponse = await get(BLOB_KEY, {
+      access: 'public',
+      token: getBlobToken(),
+    });
 
     if (!blobResponse || blobResponse.statusCode !== 200 || !blobResponse.stream) {
       console.error('Blob read failed or returned no content');
