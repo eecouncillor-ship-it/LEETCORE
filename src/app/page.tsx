@@ -6,6 +6,8 @@ import AnimatedLanding from "@/components/animated-landing";
 import { getCurrentUser } from "@/lib/auth";
 import { getPublishedProblems, getStats } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const [user, stats, problems] = await Promise.all([
     getCurrentUser(),
