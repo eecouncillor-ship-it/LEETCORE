@@ -12,7 +12,7 @@ export async function loginAction(
   _previousState: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
