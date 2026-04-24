@@ -210,8 +210,11 @@ function normalizeDatabase(raw: unknown): DatabaseShape {
   const passwordResets = Array.isArray(candidate.passwordResets)
     ? (candidate.passwordResets as any[])
     : [];
-  const registrationVerifications = Array.isArray((candidate as any).registrationVerifications)
-    ? ((candidate as any).registrationVerifications as any[])
+  const mockSessions = Array.isArray((candidate as any).mockSessions)
+    ? ((candidate as any).mockSessions as any[])
+    : [];
+  const mockResults = Array.isArray((candidate as any).mockResults)
+    ? ((candidate as any).mockResults as any[])
     : [];
 
   return {
@@ -220,8 +223,9 @@ function normalizeDatabase(raw: unknown): DatabaseShape {
     problems,
     submissions,
     sessions,
-      passwordResets,
-      registrationVerifications,
+    passwordResets,
+    mockSessions,
+    mockResults,
   };
 }
 
@@ -312,6 +316,11 @@ export async function getAllProblems() {
 export async function getProblemBySlug(slug: string) {
   const db = await readDatabase();
   return db.problems.find((problem) => problem.slug === slug);
+}
+
+export async function getProblemById(id: string) {
+  const db = await readDatabase();
+  return db.problems.find((p) => p.id === id);
 }
 
 export async function createProblem(problem: {
@@ -416,40 +425,6 @@ export async function createPasswordResetTokenByEmail(email: string) {
   return reset;
 }
 
-export async function createRegistrationVerification(record: {
-  name: string;
-  email: string;
-  passwordHash: string;
-  token: string;
-  otp: string;
-  expiresAt: string;
-}) {
-  const db = await readDatabase();
-
-  db.registrationVerifications = (db.registrationVerifications || []).filter(
-    (r) => new Date(r.expiresAt).getTime() > Date.now(),
-  );
-
-  db.registrationVerifications.unshift(record as any);
-  await writeDatabase(db);
-  return record;
-}
-
-export async function getRegistrationVerificationByToken(token: string) {
-  const db = await readDatabase();
-  return (db.registrationVerifications || []).find((r) => r.token === token) as
-    | (Record<string, any>)
-    | undefined;
-}
-
-export async function consumeRegistrationVerification(token: string) {
-  const db = await readDatabase();
-  const rec = (db.registrationVerifications || []).find((r) => r.token === token);
-  if (!rec) return null;
-  db.registrationVerifications = (db.registrationVerifications || []).filter((r) => r.token !== token);
-  await writeDatabase(db);
-  return rec;
-}
 
 export async function getPasswordReset(token: string) {
   const db = await readDatabase();
@@ -551,4 +526,51 @@ export async function createUser(user: {
   db.users.unshift(newUser);
   await writeDatabase(db);
   return newUser;
+}
+
+export async function createMockSession(userId: string, problemIds: string[], durationMinutes: number) {
+  const db = await readDatabase();
+  const now = new Date();
+  const startedAt = now.toISOString();
+  const expiresAt = new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString();
+  const session = {
+    id: randomUUID(),
+    userId,
+    problemIds,
+    startedAt,
+    expiresAt,
+    createdAt: startedAt,
+  } as any;
+
+  db.mockSessions = (db.mockSessions || []).filter((s) => new Date(s.expiresAt).getTime() > Date.now());
+  db.mockSessions.unshift(session);
+  await writeDatabase(db);
+  return session;
+}
+
+export async function getMockSessionById(id: string) {
+  const db = await readDatabase();
+  return (db.mockSessions || []).find((s) => s.id === id) as any | undefined;
+}
+
+export async function createMockResult(userId: string, sessionId: string, total: number, correct: number) {
+  const db = await readDatabase();
+  const rec = {
+    id: randomUUID(),
+    userId,
+    sessionId,
+    total,
+    correct,
+    createdAt: new Date().toISOString(),
+  } as any;
+
+  db.mockResults = (db.mockResults || []).filter((r) => true);
+  db.mockResults.unshift(rec);
+  await writeDatabase(db);
+  return rec;
+}
+
+export async function getMockResultsForUser(userId: string) {
+  const db = await readDatabase();
+  return (db.mockResults || []).filter((r) => r.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

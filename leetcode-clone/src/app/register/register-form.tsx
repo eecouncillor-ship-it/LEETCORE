@@ -77,16 +77,7 @@ export function RegisterForm() {
         <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{state.error}</p>
       ) : null}
 
-      {/** If the server returned a token+otp for demo, show link to verification page */}
-      {(state as any).token ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          Registration started. Use the verification page to finish sign up.
-          <div className="mt-2">
-            <a href={`/register/verify?token=${(state as any).token}`} className="font-semibold text-emerald-700 underline">Open verification</a>
-          </div>
-          <div className="mt-2 text-xs text-slate-600">Demo OTP: <strong>{(state as any).otp}</strong></div>
-        </div>
-      ) : null}
+      {/* no OTP flow: registration completes immediately and redirects */}
 
       <SubmitButton />
     </form>

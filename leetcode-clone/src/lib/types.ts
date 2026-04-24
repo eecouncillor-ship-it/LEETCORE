@@ -26,6 +26,9 @@ export type ProblemRecord = {
   description: string;
   options: QuestionOption[];
   correctOptionId: string;
+  kind?: "mcq" | "fib";
+  answer?: string; // for fill-in-the-blank
+  photos?: Record<string, string>; // optional base64 data URIs for description/options
   solutionExplanation: string;
   constraints: string[];
   tags: string[];
@@ -69,4 +72,24 @@ export type DatabaseShape = {
   submissions: SubmissionRecord[];
   sessions: SessionRecord[];
   passwordResets?: PasswordResetRecord[];
+  mockSessions?: MockSession[];
+  mockResults?: MockResult[];
+};
+
+export type MockSession = {
+  id: string;
+  userId: string;
+  problemIds: string[];
+  startedAt: string;
+  expiresAt: string;
+  createdAt: string;
+};
+
+export type MockResult = {
+  id: string;
+  userId: string;
+  sessionId: string;
+  total: number;
+  correct: number;
+  createdAt: string;
 };

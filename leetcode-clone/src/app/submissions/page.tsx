@@ -23,6 +23,7 @@ export default async function SubmissionsPage() {
       navItems={[
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions", active: true },
+        { href: "/mock-test", label: "Mock Test" },
       ]}
     >
       <div className="grid gap-7 xl:grid-cols-[1.72fr_0.54fr]">

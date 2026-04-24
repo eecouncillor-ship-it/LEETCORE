@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -42,6 +43,7 @@ export function CreateProblemForm({
 
   const [state, formAction] = useActionState(action, initialState);
   const optionMap = new Map(problem?.options.map((option) => [option.id, option.text]) ?? []);
+  const [kind, setKind] = React.useState<"mcq" | "fib">((problem?.kind as any) ?? "mcq");
 
   return (
     <form action={formAction} className="grid gap-5">
@@ -112,6 +114,21 @@ export function CreateProblemForm({
           className="w-full rounded-3xl border border-white/10 bg-white/5 px-4 py-4 text-sm leading-7 text-slate-100 outline-none transition focus:border-orange-400"
           placeholder="Write the full multiple-choice question students should see..."
         />
+        <div className="mt-3">
+          <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (description)</label>
+          <input name="photoDescription" type="file" accept="image/*" className="text-sm text-slate-200" />
+        </div>
+      </div>
+
+      <div className="flex gap-4 items-center">
+        <label className="flex items-center gap-2 text-sm text-slate-200">
+          <input type="radio" name="kind" value="mcq" checked={kind === "mcq"} onChange={() => setKind("mcq")} />
+          MCQ
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-200">
+          <input type="radio" name="kind" value="fib" checked={kind === "fib"} onChange={() => setKind("fib")} />
+          Fill in the blank
+        </label>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
@@ -121,11 +138,15 @@ export function CreateProblemForm({
           </label>
           <input
             name="optionA"
-            required
+            required={kind === "mcq"}
             defaultValue={optionMap.get("A") ?? ""}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
             placeholder="O(n)"
           />
+          <div className="mt-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option A)</label>
+            <input name="photoOptionA" type="file" accept="image/*" className="text-sm text-slate-200" />
+          </div>
         </div>
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-200">
@@ -133,57 +154,78 @@ export function CreateProblemForm({
           </label>
           <input
             name="optionB"
-            required
+            required={kind === "mcq"}
             defaultValue={optionMap.get("B") ?? ""}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
             placeholder="O(log n)"
           />
+          <div className="mt-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option B)</label>
+            <input name="photoOptionB" type="file" accept="image/*" className="text-sm text-slate-200" />
+          </div>
         </div>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-200">
-            Option C
-          </label>
-          <input
-            name="optionC"
-            required
-            defaultValue={optionMap.get("C") ?? ""}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-            placeholder="O(n log n)"
-          />
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-200">
-            Option D
-          </label>
-          <input
-            name="optionD"
-            required
-            defaultValue={optionMap.get("D") ?? ""}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-            placeholder="O(1)"
-          />
-        </div>
+        {kind === "mcq" ? (
+          <>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-200">Option C</label>
+              <input
+                name="optionC"
+                required
+                defaultValue={optionMap.get("C") ?? ""}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+                placeholder="O(n log n)"
+              />
+              <div className="mt-2">
+                <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option C)</label>
+                <input name="photoOptionC" type="file" accept="image/*" className="text-sm text-slate-200" />
+              </div>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-200">Option D</label>
+              <input
+                name="optionD"
+                required
+                defaultValue={optionMap.get("D") ?? ""}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+                placeholder="O(1)"
+              />
+              <div className="mt-2">
+                <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option D)</label>
+                <input name="photoOptionD" type="file" accept="image/*" className="text-sm text-slate-200" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-200">Answer</label>
+            <input name="fibAnswer" required={kind === "fib"} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400" defaultValue={(problem as any)?.answer ?? ""} />
+            <div className="mt-2">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (answer)</label>
+              <input name="photoFib" type="file" accept="image/*" className="text-sm text-slate-200" />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-5 md:grid-cols-[220px_1fr]">
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-200">
-            Correct option
-          </label>
-          <select
-            name="correctOptionId"
-            defaultValue={problem?.correctOptionId ?? "A"}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-          >
-            <option value="A">Option A</option>
-            <option value="B">Option B</option>
-            <option value="C">Option C</option>
-            <option value="D">Option D</option>
-          </select>
-        </div>
+        {kind === "mcq" ? (
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-200">Correct option</label>
+            <select
+              name="correctOptionId"
+              defaultValue={problem?.correctOptionId ?? "A"}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+            >
+              <option value="A">Option A</option>
+              <option value="B">Option B</option>
+              <option value="C">Option C</option>
+              <option value="D">Option D</option>
+            </select>
+          </div>
+        ) : null}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-200">
             Solution explanation
@@ -200,9 +242,7 @@ export function CreateProblemForm({
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-semibold text-slate-700">
-          Constraints or notes
-        </label>
+        <label className="mb-2 block text-sm font-semibold text-slate-700">Constraints or notes</label>
         <textarea
           name="constraints"
           rows={5}

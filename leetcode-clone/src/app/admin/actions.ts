@@ -21,6 +21,8 @@ type ParsedQuestionForm = {
   description: string;
   options: Array<{ id: string; text: string }>;
   correctOptionId: string;
+  kind?: "mcq" | "fib";
+  answer?: string;
   solutionExplanation: string;
   constraints: string[];
   tags: string[];
@@ -43,21 +45,23 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   const optionC = String(formData.get("optionC") ?? "").trim();
   const optionD = String(formData.get("optionD") ?? "").trim();
   const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
+  const kind = String(formData.get("kind") ?? "mcq") as "mcq" | "fib";
+  const fibAnswer = String(formData.get("fibAnswer") ?? "").trim();
   const solutionExplanation = String(formData.get("solutionExplanation") ?? "").trim();
   const published = String(formData.get("published") ?? "") === "on";
 
-  if (
-    !title ||
-    !category ||
-    !description ||
-    !optionA ||
-    !optionB ||
-    !optionC ||
-    !optionD ||
-    !correctOptionId ||
-    !solutionExplanation
-  ) {
+  if (!title || !category || !description || !solutionExplanation) {
     return { ok: false, error: "Please fill in all required question fields." };
+  }
+
+  if (kind === "mcq") {
+    if (!optionA || !optionB || !optionC || !optionD || !correctOptionId) {
+      return { ok: false, error: "Please provide all MCQ options and select the correct one." };
+    }
+  } else if (kind === "fib") {
+    if (!fibAnswer) {
+      return { ok: false, error: "Please provide the answer for fill-in-the-blank questions." };
+    }
   }
 
   return {
@@ -75,6 +79,8 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
         { id: "D", text: optionD },
       ],
       correctOptionId,
+      kind,
+      answer: fibAnswer || undefined,
       solutionExplanation,
       constraints: parseLineList(constraintsRaw),
       tags: parseCommaList(tagsRaw),
@@ -114,8 +120,42 @@ export async function createProblemAction(
     return { error: parsed.error };
   }
 
+  // handle optional image uploads (description and option images)
+  const photos: Record<string, string> = {};
+
+  async function fileToDataUri(f: File | null) {
+    if (!f) return undefined;
+    try {
+      const buffer = Buffer.from(await f.arrayBuffer());
+      return `data:${f.type};base64,${buffer.toString("base64")}`;
+    } catch (e) {
+      return undefined;
+    }
+  }
+
+  const descFile = (formData.get("photoDescription") as File) ?? null;
+  const optAFile = (formData.get("photoOptionA") as File) ?? null;
+  const optBFile = (formData.get("photoOptionB") as File) ?? null;
+  const optCFile = (formData.get("photoOptionC") as File) ?? null;
+  const optDFile = (formData.get("photoOptionD") as File) ?? null;
+  const fibPhotoFile = (formData.get("photoFib") as File) ?? null;
+
+  const descData = await fileToDataUri(descFile);
+  if (descData) photos.description = descData;
+  const aData = await fileToDataUri(optAFile);
+  if (aData) photos.optionA = aData;
+  const bData = await fileToDataUri(optBFile);
+  if (bData) photos.optionB = bData;
+  const cData = await fileToDataUri(optCFile);
+  if (cData) photos.optionC = cData;
+  const dData = await fileToDataUri(optDFile);
+  if (dData) photos.optionD = dData;
+  const fibData = await fileToDataUri(fibPhotoFile);
+  if (fibData) photos.fib = fibData;
+
   await createProblem({
     ...parsed.data,
+    photos: Object.keys(photos).length ? photos : undefined,
     createdBy: user.id,
   });
 

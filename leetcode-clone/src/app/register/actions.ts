@@ -4,9 +4,6 @@ import { redirect } from "next/navigation";
 
 import { createUser } from "@/lib/db";
 import { signIn as signInWithSession } from "@/lib/auth";
-import { createRegistrationVerification } from "@/lib/db";
-import { randomUUID } from "crypto";
-import { scryptSync } from "crypto";
 
 export type RegisterState = {
   error?: string;
@@ -34,22 +31,13 @@ export async function registerAction(
     return { error: "Email must be an @smail.iitm.ac.in address." };
   }
 
-  // create registration verification and send OTP (demo: show token)
-  // check existing user
-  const existing = await (await import("@/lib/db")).getUserByEmail(email);
-  if (existing) {
+  // Attempt to create user directly
+  const created = await createUser({ name, email, password });
+  if (!created) {
     return { error: "An account with this email already exists." };
   }
 
-  const token = randomUUID();
-  const otp = String(Math.floor(100000 + Math.random() * 900000));
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 15).toISOString(); // 15 minutes
-
-  // hash password using same approach as seed (scrypt)
-  const passwordHash = scryptSync(password, "codearena-seed-salt", 64).toString("hex");
-
-  await createRegistrationVerification({ name, email, passwordHash, token, otp, expiresAt });
-
-  // For demo purposes we return token+otp in state so it can be shown to the user. In a real app, send via email.
-  return { error: undefined, token, otp } as unknown as RegisterState & { token?: string; otp?: string };
+  // Sign in the newly created user and redirect to problems
+  await signInWithSession(email, password);
+  redirect("/problems");
 }

@@ -13,6 +13,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
+      suppressHydrationWarning
       className="w-full rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-400"
       disabled={pending}
     >
