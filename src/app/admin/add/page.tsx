@@ -5,6 +5,8 @@ import { AppShell } from "@/components/shell";
 import { requireAuth } from "@/lib/auth";
 import { getStats } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminAddPage() {
   const [user, stats] = await Promise.all([requireAuth("admin"), getStats()]);
 

@@ -5,6 +5,8 @@ import { requireAuth } from "@/lib/auth";
 import { getUserById, getSubmissionsForUser, getAllProblems } from "@/lib/db";
 import { formatDate, formatPercentage } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 type Props = {
   params: Promise<{ id: string }>
 };

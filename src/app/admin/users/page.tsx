@@ -5,6 +5,8 @@ import { getStudentUsers, getSubmissionsForUser, getStats, getAllProblems } from
 import { formatDate, formatPercentage } from "@/lib/utils";
 import { toggleUserBlockAction } from "@/app/admin/actions";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminUsersPage() {
   const user = await requireAuth("admin");
   const [students, stats] = await Promise.all([getStudentUsers(), getStats()]);

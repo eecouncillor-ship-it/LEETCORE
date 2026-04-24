@@ -6,6 +6,8 @@ import { requireAuth } from "@/lib/auth";
 import { getAllProblems, getStats } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPage() {
   const [user, problems, stats] = await Promise.all([
     requireAuth("admin"),

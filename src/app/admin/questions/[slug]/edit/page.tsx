@@ -6,6 +6,8 @@ import { AppShell } from "@/components/shell";
 import { requireAuth } from "@/lib/auth";
 import { getProblemBySlug } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 type EditQuestionPageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ updated?: string }>;
