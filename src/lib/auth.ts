@@ -24,6 +24,7 @@ export function verifyPassword(password: string, passwordHash: string) {
 }
 
 export async function signIn(email: string, password: string) {
+  "use server";
   const user = await getUserByEmail(email);
 
   if (!user || !verifyPassword(password, user.passwordHash)) {
@@ -49,38 +50,45 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signOut() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(sessionCookieName)?.value;
+  "use server";
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(sessionCookieName)?.value;
 
-  if (token) {
-    await deleteSession(token);
+    if (token) {
+      await deleteSession(token);
+      cookieStore.delete(sessionCookieName);
+    }
+  } catch (error) {
+    console.error('Error signing out:', error);
   }
-
-  cookieStore.delete(sessionCookieName);
 }
 
 export async function getCurrentUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(sessionCookieName)?.value;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(sessionCookieName)?.value;
 
-  if (!token) {
+    if (!token) {
+      return null;
+    }
+
+    const session = await getSession(token);
+
+    if (!session) {
+      return null;
+    }
+
+    if (new Date(session.expiresAt).getTime() < Date.now()) {
+      await deleteSession(session.token);
+      return null;
+    }
+
+    return getUserById(session.userId);
+  } catch (error) {
+    console.error('Error getting current user:', error);
     return null;
   }
-
-  const session = await getSession(token);
-
-  if (!session) {
-    cookieStore.delete(sessionCookieName);
-    return null;
-  }
-
-  if (new Date(session.expiresAt).getTime() < Date.now()) {
-    await deleteSession(session.token);
-    cookieStore.delete(sessionCookieName);
-    return null;
-  }
-
-  return getUserById(session.userId);
 }
 
 export async function requireAuth(role?: Role) {
