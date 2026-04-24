@@ -293,19 +293,25 @@ async function readDatabase() {
 
   // In Vercel, read from blob
   try {
-    const blobResponse = await get(BLOB_KEY);
+    // Get blob metadata
+    await head(BLOB_KEY);
 
-    if (!blobResponse) {
-      console.error('Blob read returned no response');
+    const blobResponse = await get(BLOB_KEY, {
+      access: 'public',
+      useCache: false,
+    });
+
+    if (!blobResponse || blobResponse.statusCode !== 200 || !blobResponse.stream) {
+      console.error('Blob read failed or returned no content');
       const normalized = createSeedData();
       await writeDatabase(normalized);
       return normalized;
     }
 
-    const text = await blobResponse.text();
+    const text = await new Response(blobResponse.stream).text();
 
-    if (!text || text.trim().length === 0) {
-      console.error('Blob returned empty content');
+    if (!text || text.trim().startsWith('<') || !text.trim().startsWith('{')) {
+      console.error('Invalid blob content received');
       const normalized = createSeedData();
       await writeDatabase(normalized);
       return normalized;
