@@ -271,15 +271,22 @@ async function readDatabase() {
   await ensureDatabase();
 
   if (!process.env.VERCEL) {
-    const file = await readFile(databasePath, "utf8");
-    const raw = JSON.parse(file) as unknown;
-    const normalized = normalizeDatabase(raw);
+    try {
+      const file = await readFile(databasePath, "utf8");
+      const raw = JSON.parse(file) as unknown;
+      const normalized = normalizeDatabase(raw);
 
-    if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
-      await writeDatabase(normalized);
+      if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
+        await writeDatabase(normalized);
+      }
+
+      return normalized;
+    } catch (error) {
+      console.error('Error reading local database:', error);
+      const seedData = createSeedData();
+      await writeDatabase(seedData);
+      return seedData;
     }
-
-    return normalized;
   }
 
   // In Vercel, read from blob
@@ -296,9 +303,14 @@ async function readDatabase() {
 
     return normalized;
   } catch (error) {
+    console.error('Error reading blob database:', error);
     // If blob doesn't exist or can't be read, create new database
     const normalized = createSeedData();
-    await writeDatabase(normalized);
+    try {
+      await writeDatabase(normalized);
+    } catch (writeError) {
+      console.error('Error writing database:', writeError);
+    }
     return normalized;
   }
 }
@@ -346,7 +358,10 @@ export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
 }
 
 export async function getPublishedProblems() {
-  const db = await readDatabase() as DatabaseShape;
+  const db = await readDatabase();
+  if (!db || !db.problems) {
+    return [];
+  }
   return db.problems
     .filter((problem) => problem.published)
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
@@ -536,12 +551,20 @@ export async function getSubmissionsForProblem(problemId: string) {
 }
 
 export async function getStats() {
-  const db = await readDatabase() as DatabaseShape;
-  const totalUsers = db.users.filter((user) => user.role === "user").length;
-  const totalAdmins = db.users.filter((user) => user.role === "admin").length;
+  const db = await readDatabase();
+  if (!db) {
+    return {
+      totalProblems: 0,
+      totalSubmissions: 0,
+      totalUsers: 0,
+      totalAdmins: 0,
+    };
+  }
+  const totalUsers = (db.users || []).filter((user) => user.role === "user").length;
+  const totalAdmins = (db.users || []).filter((user) => user.role === "admin").length;
   return {
-    totalProblems: db.problems.filter((problem) => problem.published).length,
-    totalSubmissions: db.submissions.length,
+    totalProblems: (db.problems || []).filter((problem) => problem.published).length,
+    totalSubmissions: (db.submissions || []).length,
     totalUsers,
     totalAdmins,
   };
