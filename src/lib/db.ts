@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { randomUUID, scryptSync } from "node:crypto";
 import path from "node:path";
+import { put, head, del } from '@vercel/blob';
 
 import type {
   DatabaseShape,
@@ -16,6 +17,7 @@ import type {
 const dataDirectory = path.join(process.cwd(), "data");
 const databasePath = path.join(dataDirectory, "db.json");
 const databaseSchemaVersion = 2;
+const BLOB_KEY = 'codearena-database.json';
 
 function hashSeedPassword(password: string) {
   return scryptSync(password, "codearena-seed-salt", 64).toString("hex");
@@ -230,32 +232,91 @@ function normalizeDatabase(raw: unknown): DatabaseShape {
 }
 
 async function ensureDatabase() {
-  await mkdir(dataDirectory, { recursive: true });
+  // In development/local environment, use local file
+  if (!process.env.VERCEL) {
+    await mkdir(dataDirectory, { recursive: true });
+    if (!existsSync(databasePath)) {
+      await writeFile(
+        databasePath,
+        JSON.stringify(createSeedData(), null, 2),
+        "utf8",
+      );
+    }
+    return;
+  }
 
-  if (!existsSync(databasePath)) {
-    await writeFile(
-      databasePath,
-      JSON.stringify(createSeedData(), null, 2),
-      "utf8",
-    );
+  // In Vercel/production, check if blob exists
+  try {
+    await head(BLOB_KEY);
+  } catch {
+    // Blob doesn't exist, create it
+    await put(BLOB_KEY, JSON.stringify(createSeedData(), null, 2), {
+      access: 'public',
+    });
   }
 }
 
 async function writeDatabase(data: DatabaseShape) {
-  await writeFile(databasePath, JSON.stringify(data, null, 2), "utf8");
+  if (!process.env.VERCEL) {
+    await writeFile(databasePath, JSON.stringify(data, null, 2), "utf8");
+    return;
+  }
+
+  await put(BLOB_KEY, JSON.stringify(data, null, 2), {
+    access: 'public',
+  });
 }
 
 async function readDatabase() {
   await ensureDatabase();
-  const file = await readFile(databasePath, "utf8");
-  const raw = JSON.parse(file) as unknown;
-  const normalized = normalizeDatabase(raw);
 
-  if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
-    await writeDatabase(normalized);
+  if (!process.env.VERCEL) {
+    const file = await readFile(databasePath, "utf8");
+    const raw = JSON.parse(file) as unknown;
+    const normalized = normalizeDatabase(raw);
+
+    if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
+      await writeDatabase(normalized);
+    }
+
+    return normalized;
   }
 
-  return normalized;
+async function readDatabase() {
+  await ensureDatabase();
+
+  if (!process.env.VERCEL) {
+    const file = await readFile(databasePath, "utf8");
+    const raw = JSON.parse(file) as unknown;
+    const normalized = normalizeDatabase(raw);
+
+    if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
+      await writeDatabase(normalized);
+    }
+
+    return normalized;
+  }
+
+  // In Vercel, read from blob
+  try {
+    const blob = await head(BLOB_KEY);
+    const response = await fetch(blob.url);
+    const file = await response.text();
+    const raw = JSON.parse(file) as unknown;
+    const normalized = normalizeDatabase(raw);
+
+    if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
+      await writeDatabase(normalized);
+    }
+
+    return normalized;
+  } catch (error) {
+    // If blob doesn't exist or can't be read, create new database
+    const normalized = createSeedData();
+    await writeDatabase(normalized);
+    return normalized;
+  }
+}
 }
 
 export async function getUsers() {
