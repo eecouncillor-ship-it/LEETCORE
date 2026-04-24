@@ -252,6 +252,7 @@ async function ensureDatabase() {
     // Blob doesn't exist, create it
     await put(BLOB_KEY, JSON.stringify(createSeedData(), null, 2), {
       access: 'public',
+      allowOverwrite: true,
     });
   }
 }
@@ -264,6 +265,7 @@ async function writeDatabase(data: DatabaseShape) {
 
   await put(BLOB_KEY, JSON.stringify(data, null, 2), {
     access: 'public',
+    allowOverwrite: true,
   });
 }
 
