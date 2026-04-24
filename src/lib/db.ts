@@ -282,21 +282,6 @@ async function readDatabase() {
     return normalized;
   }
 
-async function readDatabase() {
-  await ensureDatabase();
-
-  if (!process.env.VERCEL) {
-    const file = await readFile(databasePath, "utf8");
-    const raw = JSON.parse(file) as unknown;
-    const normalized = normalizeDatabase(raw);
-
-    if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
-      await writeDatabase(normalized);
-    }
-
-    return normalized;
-  }
-
   // In Vercel, read from blob
   try {
     const blob = await head(BLOB_KEY);
@@ -316,7 +301,6 @@ async function readDatabase() {
     await writeDatabase(normalized);
     return normalized;
   }
-}
 }
 
 export async function getUsers() {

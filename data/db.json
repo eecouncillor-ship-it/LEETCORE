@@ -730,11 +730,6 @@
       "token": "a2c3ed0b-cc1c-48e1-be56-50cc087991ab",
       "userId": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
       "expiresAt": "2026-04-30T07:29:30.060Z"
-    },
-    {
-      "token": "70beeac2-2bfe-4a49-9fd9-70f07f387dfb",
-      "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
-      "expiresAt": "2026-05-01T06:49:35.340Z"
     }
   ],
   "passwordResets": [
@@ -746,18 +741,18 @@
   ],
   "mockSessions": [
     {
-      "id": "b6ba2f85-ab28-4c75-85ee-547770c7b4d3",
+      "id": "7e147ea1-f4b9-4fdd-80cc-7e362d56c52f",
       "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
       "problemIds": [
-        "f000cb7f-1a95-42b1-81ec-1fce8149c36f",
-        "a899d8f8-00fe-4a48-ac77-c39ed8f5a2e3",
-        "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
         "5876cceb-a8f8-4534-a059-c391c43ee886",
-        "6d2276fb-1a6f-42d3-bc9c-168e71081b0b"
+        "f000cb7f-1a95-42b1-81ec-1fce8149c36f",
+        "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
+        "a899d8f8-00fe-4a48-ac77-c39ed8f5a2e3",
+        "a24d4d0a-fb8d-44a7-9d0a-9d7f90bf9053"
       ],
-      "startedAt": "2026-04-24T06:49:46.501Z",
-      "expiresAt": "2026-04-24T06:59:46.501Z",
-      "createdAt": "2026-04-24T06:49:46.501Z"
+      "startedAt": "2026-04-24T09:34:09.173Z",
+      "expiresAt": "2026-04-24T09:44:09.173Z",
+      "createdAt": "2026-04-24T09:34:09.173Z"
     }
   ],
   "mockResults": [
