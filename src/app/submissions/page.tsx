@@ -3,6 +3,8 @@ import Link from "next/link";
 import { StudentProgressSidebar } from "@/components/student-progress-sidebar";
 import { StudentShell } from "@/components/student-shell";
 import { requireAuth } from "@/lib/auth";
+
+export const dynamic = 'force-dynamic';
 import { getPublishedProblems, getSubmissionsForUser } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
