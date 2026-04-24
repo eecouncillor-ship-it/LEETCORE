@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/auth";
 import { getPublishedProblems, getSubmissionsForUser } from "@/lib/db";
 import { getMockResultsForUser } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export default async function MockTestPage() {
   const user = await requireAuth();
   const [problems, submissions, results] = await Promise.all([getPublishedProblems(), getSubmissionsForUser(user.id), getMockResultsForUser(user.id)]);
