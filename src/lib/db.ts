@@ -293,10 +293,31 @@ async function readDatabase() {
 
   // In Vercel, read from blob
   try {
-    const blob = await head(BLOB_KEY);
-    const response = await fetch(blob.url);
-    const file = await response.text();
-    const raw = JSON.parse(file) as unknown;
+    // Get blob metadata
+    const blobMetadata = await head(BLOB_KEY);
+    
+    // Fetch the blob content directly
+    const response = await fetch(blobMetadata.url);
+    
+    // Check if response is successful
+    if (!response.ok) {
+      console.error(`Blob fetch failed with status ${response.status}: ${response.statusText}`);
+      const normalized = createSeedData();
+      await writeDatabase(normalized);
+      return normalized;
+    }
+
+    const text = await response.text();
+    
+    // Validate we got JSON, not an error page
+    if (!text || text.trim().startsWith('<') || text.trim().startsWith('{') === false) {
+      console.error('Invalid blob content received');
+      const normalized = createSeedData();
+      await writeDatabase(normalized);
+      return normalized;
+    }
+
+    const raw = JSON.parse(text) as unknown;
     const normalized = normalizeDatabase(raw);
 
     if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
