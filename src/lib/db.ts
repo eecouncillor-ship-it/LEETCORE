@@ -320,29 +320,30 @@ async function readDatabase() {
 }
 
 export async function getUsers() {
-  const db = await readDatabase();
-  return db.users;
+  const db = await readDatabase() as DatabaseShape;
+  return db!.users;
 }
 
 export async function getStudentUsers() {
-  const db = await readDatabase();
-  return db.users
+  const db = await readDatabase() as DatabaseShape;
+  return db!
+    .users
     .filter((user) => user.role === "user")
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
 export async function getUserByEmail(email: string) {
-  const db = await readDatabase();
-  return db.users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+  const db = await readDatabase() as DatabaseShape;
+  return db!.users.find((user) => user.email.toLowerCase() === email.toLowerCase());
 }
 
 export async function getUserById(id: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.users.find((user) => user.id === id);
 }
 
 export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const targetIndex = db.users.findIndex((user) => user.id === id);
 
   if (targetIndex === -1) {
@@ -361,26 +362,26 @@ export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
 }
 
 export async function getPublishedProblems() {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.problems
     .filter((problem) => problem.published)
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
 export async function getAllProblems() {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.problems.sort((left, right) =>
     right.createdAt.localeCompare(left.createdAt),
   );
 }
 
 export async function getProblemBySlug(slug: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.problems.find((problem) => problem.slug === slug);
 }
 
 export async function getProblemById(id: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.problems.find((p) => p.id === id);
 }
 
@@ -397,8 +398,9 @@ export async function createProblem(problem: {
   tags: string[];
   published: boolean;
   createdBy: string;
+  photos?: Record<string, string>;
 }) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
 
   const newProblem: ProblemRecord = {
     id: randomUUID(),
@@ -427,7 +429,7 @@ export async function updateProblemBySlug(
     published: boolean;
   },
 ) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const targetIndex = db.problems.findIndex((problem) => problem.slug === slug);
 
   if (targetIndex === -1) {
@@ -446,7 +448,7 @@ export async function updateProblemBySlug(
 }
 
 export async function createSession(userId: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const session: SessionRecord = {
     token: randomUUID(),
     userId,
@@ -462,12 +464,12 @@ export async function createSession(userId: string) {
 }
 
 export async function getSession(token: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.sessions.find((session) => session.token === token);
 }
 
 export async function createPasswordResetTokenByEmail(email: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const user = db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
 
   if (!user) return null;
@@ -488,18 +490,18 @@ export async function createPasswordResetTokenByEmail(email: string) {
 
 
 export async function getPasswordReset(token: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return (db.passwordResets || []).find((r) => r.token === token);
 }
 
 export async function consumePasswordResetToken(token: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   db.passwordResets = (db.passwordResets || []).filter((r) => r.token !== token);
   await writeDatabase(db);
 }
 
 export async function updateUserPassword(userId: string, password: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const idx = db.users.findIndex((u) => u.id === userId);
   if (idx === -1) return null;
   const updated = { ...db.users[idx], passwordHash: hashSeedPassword(password) };
@@ -509,7 +511,7 @@ export async function updateUserPassword(userId: string, password: string) {
 }
 
 export async function deleteSession(token: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   db.sessions = db.sessions.filter((session) => session.token !== token);
   await writeDatabase(db);
 }
@@ -525,7 +527,7 @@ export async function createSubmission(submission: {
   isCorrect: boolean;
   status: SubmissionRecord["status"];
 }) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const newSubmission: SubmissionRecord = {
     id: randomUUID(),
     submittedAt: new Date().toISOString(),
@@ -538,19 +540,19 @@ export async function createSubmission(submission: {
 }
 
 export async function getSubmissionsForUser(userId: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.submissions
     .filter((submission) => submission.userId === userId)
     .sort((left, right) => right.submittedAt.localeCompare(left.submittedAt));
 }
 
 export async function getSubmissionsForProblem(problemId: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return db.submissions.filter((submission) => submission.problemId === problemId);
 }
 
 export async function getStats() {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const totalUsers = db.users.filter((user) => user.role === "user").length;
   const totalAdmins = db.users.filter((user) => user.role === "admin").length;
   return {
@@ -568,7 +570,7 @@ export async function createUser(user: {
   passwordHash?: string;
   role?: "admin" | "user";
 }) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
 
   const existing = db.users.find((u) => u.email.toLowerCase() === user.email.toLowerCase());
   if (existing) {
@@ -590,7 +592,7 @@ export async function createUser(user: {
 }
 
 export async function createMockSession(userId: string, problemIds: string[], durationMinutes: number) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const now = new Date();
   const startedAt = now.toISOString();
   const expiresAt = new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString();
@@ -610,12 +612,12 @@ export async function createMockSession(userId: string, problemIds: string[], du
 }
 
 export async function getMockSessionById(id: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return (db.mockSessions || []).find((s) => s.id === id) as any | undefined;
 }
 
 export async function createMockResult(userId: string, sessionId: string, total: number, correct: number) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   const rec = {
     id: randomUUID(),
     userId,
@@ -632,6 +634,6 @@ export async function createMockResult(userId: string, sessionId: string, total:
 }
 
 export async function getMockResultsForUser(userId: string) {
-  const db = await readDatabase();
+  const db = await readDatabase() as DatabaseShape;
   return (db.mockResults || []).filter((r) => r.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

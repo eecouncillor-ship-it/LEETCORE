@@ -6,9 +6,10 @@ import Link from "next/link";
 import ClientTimer from "../timer";
 import { MockSessionForm } from "../session-form";
 
-export default async function MockSessionPage({ params }: { params: { id: string } }) {
+export default async function MockSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireAuth();
-  const session = await getMockSessionById(params.id);
+  const { id } = await params;
+  const session = await getMockSessionById(id);
   if (!session || session.userId !== user.id) {
     return (
       <div className="mx-auto max-w-2xl">

@@ -91,18 +91,17 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
 export async function toggleUserBlockAction(
   formData: FormData,
 ) {
-  const user = await requireAuth("admin");
+  await requireAuth("admin");
   const userId = String(formData.get("userId") ?? "").trim();
   const block = String(formData.get("block") ?? "0") === "1";
 
   if (!userId) {
-    return { error: "Missing user id." } as { error?: string };
+    return;
   }
 
   await updateUserBlockedStatus(userId, block);
   revalidatePath("/admin");
   revalidatePath("/admin/users");
-  redirect("/admin/users");
 }
 
 export async function createProblemAction(
