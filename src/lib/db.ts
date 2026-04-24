@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { randomUUID, scryptSync } from "node:crypto";
 import path from "node:path";
-import { put, head, del } from '@vercel/blob';
+import { put, head, del, get } from '@vercel/blob';
 
 import type {
   DatabaseShape,
@@ -294,23 +294,23 @@ async function readDatabase() {
   // In Vercel, read from blob
   try {
     // Get blob metadata
-    const blobMetadata = await head(BLOB_KEY);
-    
-    // Fetch the blob content directly
-    const response = await fetch(blobMetadata.url);
-    
-    // Check if response is successful
-    if (!response.ok) {
-      console.error(`Blob fetch failed with status ${response.status}: ${response.statusText}`);
+    await head(BLOB_KEY);
+
+    const blobResponse = await get(BLOB_KEY, {
+      access: 'public',
+      useCache: false,
+    });
+
+    if (!blobResponse || blobResponse.statusCode !== 200 || !blobResponse.stream) {
+      console.error('Blob read failed or returned no content');
       const normalized = createSeedData();
       await writeDatabase(normalized);
       return normalized;
     }
 
-    const text = await response.text();
-    
-    // Validate we got JSON, not an error page
-    if (!text || text.trim().startsWith('<') || text.trim().startsWith('{') === false) {
+    const text = await new Response(blobResponse.stream).text();
+
+    if (!text || text.trim().startsWith('<') || !text.trim().startsWith('{')) {
       console.error('Invalid blob content received');
       const normalized = createSeedData();
       await writeDatabase(normalized);
