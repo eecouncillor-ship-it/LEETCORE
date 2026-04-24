@@ -296,10 +296,7 @@ async function readDatabase() {
     // Get blob metadata
     await head(BLOB_KEY);
 
-    const blobResponse = await get(BLOB_KEY, {
-      access: 'public',
-      useCache: false,
-    });
+    const blobResponse = await get(BLOB_KEY);
 
     if (!blobResponse || blobResponse.statusCode !== 200 || !blobResponse.stream) {
       console.error('Blob read failed or returned no content');
