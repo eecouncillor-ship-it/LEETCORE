@@ -273,6 +273,71 @@
   ],
   "submissions": [
     {
+      "id": "9b8c2528-2eb5-4093-9a55-43b92c60d3a0",
+      "submittedAt": "2026-04-24T19:49:25.890Z",
+      "problemId": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
+      "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
+      "selectedOptionId": "B",
+      "selectedOptionText": "O(log n)",
+      "correctOptionId": "B",
+      "correctOptionText": "O(log n)",
+      "solutionExplanation": "Binary search halves the search space after each comparison, so the number of steps grows logarithmically with input size.",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "8dba82b7-656c-4793-a21e-3dadddec655a",
+      "submittedAt": "2026-04-24T19:49:25.824Z",
+      "problemId": "5876cceb-a8f8-4534-a059-c391c43ee886",
+      "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
+      "selectedOptionId": "B",
+      "selectedOptionText": "jfg",
+      "correctOptionId": "B",
+      "correctOptionText": "jfg",
+      "solutionExplanation": "fg",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "14cd27fe-cf78-4553-ab78-ec98f16e223b",
+      "submittedAt": "2026-04-24T19:49:25.321Z",
+      "problemId": "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
+      "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
+      "selectedOptionId": "B",
+      "selectedOptionText": "awf",
+      "correctOptionId": "B",
+      "correctOptionText": "awf",
+      "solutionExplanation": "awf",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "15cb67cd-8c8b-4471-af98-74dcaa898e9e",
+      "submittedAt": "2026-04-24T19:49:25.126Z",
+      "problemId": "a24d4d0a-fb8d-44a7-9d0a-9d7f90bf9053",
+      "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
+      "selectedOptionId": "B",
+      "selectedOptionText": "definitely yes",
+      "correctOptionId": "B",
+      "correctOptionText": "definitely yes",
+      "solutionExplanation": "Check yourself",
+      "isCorrect": true,
+      "status": "Correct"
+    },
+    {
+      "id": "56bf57ca-b687-403c-80cf-2b29339d2b96",
+      "submittedAt": "2026-04-24T19:49:25.092Z",
+      "problemId": "f000cb7f-1a95-42b1-81ec-1fce8149c36f",
+      "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
+      "selectedOptionId": "B",
+      "selectedOptionText": "301 Moved Permanently",
+      "correctOptionId": "C",
+      "correctOptionText": "404 Not Found",
+      "solutionExplanation": "404 Not Found is returned when the requested resource does not exist. A 500 would imply the server crashed while handling a valid request.",
+      "isCorrect": false,
+      "status": "Incorrect"
+    },
+    {
       "id": "dd24b7c8-07a7-4bdf-9244-57be528c899a",
       "submittedAt": "2026-04-24T06:50:01.555Z",
       "problemId": "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
@@ -741,21 +806,29 @@
   ],
   "mockSessions": [
     {
-      "id": "7e147ea1-f4b9-4fdd-80cc-7e362d56c52f",
+      "id": "7dae3e0c-f996-4e6e-aaef-a1c4b23bf79b",
       "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
       "problemIds": [
-        "5876cceb-a8f8-4534-a059-c391c43ee886",
         "f000cb7f-1a95-42b1-81ec-1fce8149c36f",
+        "a24d4d0a-fb8d-44a7-9d0a-9d7f90bf9053",
         "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
-        "a899d8f8-00fe-4a48-ac77-c39ed8f5a2e3",
-        "a24d4d0a-fb8d-44a7-9d0a-9d7f90bf9053"
+        "5876cceb-a8f8-4534-a059-c391c43ee886",
+        "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a"
       ],
-      "startedAt": "2026-04-24T09:34:09.173Z",
-      "expiresAt": "2026-04-24T09:44:09.173Z",
-      "createdAt": "2026-04-24T09:34:09.173Z"
+      "startedAt": "2026-04-24T19:49:12.972Z",
+      "expiresAt": "2026-04-24T19:59:12.972Z",
+      "createdAt": "2026-04-24T19:49:12.972Z"
     }
   ],
   "mockResults": [
+    {
+      "id": "ef8abf31-34d5-42c7-b66a-afb3b69bed8a",
+      "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
+      "sessionId": "7dae3e0c-f996-4e6e-aaef-a1c4b23bf79b",
+      "total": 5,
+      "correct": 4,
+      "createdAt": "2026-04-24T19:49:26.131Z"
+    },
     {
       "id": "45b8598b-cef3-4239-8e28-a461d759dab0",
       "userId": "2e4de801-1cc8-48e7-bb75-b273ed1a2862",
