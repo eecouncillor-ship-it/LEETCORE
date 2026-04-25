@@ -1,8 +1,5 @@
-import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { randomUUID, scryptSync } from "node:crypto";
-import path from "node:path";
-import { put, head, del, get } from '@vercel/blob';
+import { supabase } from "@/lib/supabase";
 
 import type {
   DatabaseShape,
@@ -13,23 +10,6 @@ import type {
   SubmissionRecord,
   UserRecord,
 } from "@/lib/types";
-
-const dataDirectory = path.join(process.cwd(), "data");
-const databasePath = path.join(dataDirectory, "db.json");
-const databaseSchemaVersion = 2;
-const BLOB_KEY = 'codearena-database.json';
-
-function getBlobToken() {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-
-  if (!token) {
-    throw new Error(
-      'Missing BLOB_READ_WRITE_TOKEN environment variable for Vercel Blob',
-    );
-  }
-
-  return token;
-}
 
 function hashSeedPassword(password: string) {
   return scryptSync(password, "codearena-seed-salt", 64).toString("hex");
@@ -127,298 +107,311 @@ function buildSeedProblems(adminId: string, now: string): ProblemRecord[] {
   ];
 }
 
-function createSeedData(): DatabaseShape {
+async function seedDatabase() {
   const adminId = randomUUID();
   const studentId = randomUUID();
   const now = new Date().toISOString();
 
-  return {
-    schemaVersion: databaseSchemaVersion,
-    users: [
+  // Seed users
+  const { error: usersError } = await supabase
+    .from('users')
+    .upsert([
       {
         id: adminId,
         name: "Admin",
         email: "admin@codearena.dev",
-        passwordHash: hashSeedPassword("admin123"),
+        password_hash: hashSeedPassword("admin123"),
         role: "admin",
-        createdAt: now,
+        created_at: now,
       },
       {
         id: studentId,
         name: "Student",
         email: "student@codearena.dev",
-        passwordHash: hashSeedPassword("student123"),
+        password_hash: hashSeedPassword("student123"),
         role: "user",
-        createdAt: now,
+        created_at: now,
       },
-    ],
-    problems: buildSeedProblems(adminId, now),
-    submissions: [],
-    sessions: [],
-    passwordResets: [],
-  };
-}
+    ]);
 
-function normalizeUsers(users: unknown): UserRecord[] {
-  if (!Array.isArray(users) || users.length === 0) {
-    return createSeedData().users;
+  if (usersError) {
+    console.error('Error seeding users:', usersError);
   }
 
-  return users as UserRecord[];
-}
+  // Seed problems
+  const problems = buildSeedProblems(adminId, now);
+  const { error: problemsError } = await supabase
+    .from('problems')
+    .upsert(problems.map(p => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      difficulty: p.difficulty,
+      category: p.category,
+      description: p.description,
+      options: p.options,
+      correct_option_id: p.correctOptionId,
+      solution_explanation: p.solutionExplanation,
+      constraints: p.constraints,
+      tags: p.tags,
+      published: p.published,
+      created_at: p.createdAt,
+      created_by: p.createdBy,
+    })));
 
-function normalizeSessions(sessions: unknown): SessionRecord[] {
-  return Array.isArray(sessions) ? (sessions as SessionRecord[]) : [];
-}
-
-function isMcqProblem(problem: unknown): problem is ProblemRecord {
-  if (!problem || typeof problem !== "object") {
-    return false;
-  }
-
-  const candidate = problem as Partial<ProblemRecord>;
-  return (
-    Array.isArray(candidate.options) &&
-    typeof candidate.correctOptionId === "string" &&
-    typeof candidate.solutionExplanation === "string"
-  );
-}
-
-function isMcqSubmission(submission: unknown): submission is SubmissionRecord {
-  if (!submission || typeof submission !== "object") {
-    return false;
-  }
-
-  const candidate = submission as Partial<SubmissionRecord>;
-  return (
-    typeof candidate.selectedOptionId === "string" &&
-    typeof candidate.correctOptionId === "string" &&
-    typeof candidate.solutionExplanation === "string"
-  );
-}
-
-function normalizeDatabase(raw: unknown): DatabaseShape {
-  if (!raw || typeof raw !== "object") {
-    return createSeedData();
-  }
-
-  const candidate = raw as Partial<DatabaseShape>;
-  const users = normalizeUsers(candidate.users);
-  const sessions = normalizeSessions(candidate.sessions);
-  const adminUser = users.find((user) => user.role === "admin") ?? users[0];
-  const now = new Date().toISOString();
-
-  const problems =
-    Array.isArray(candidate.problems) &&
-    candidate.problems.length > 0 &&
-    candidate.problems.every(isMcqProblem)
-      ? (candidate.problems as ProblemRecord[])
-      : buildSeedProblems(adminUser.id, now);
-
-  const submissions =
-    Array.isArray(candidate.submissions) &&
-    candidate.submissions.every(isMcqSubmission)
-      ? (candidate.submissions as SubmissionRecord[])
-      : [];
-
-  const passwordResets = Array.isArray(candidate.passwordResets)
-    ? (candidate.passwordResets as any[])
-    : [];
-  const mockSessions = Array.isArray((candidate as any).mockSessions)
-    ? ((candidate as any).mockSessions as any[])
-    : [];
-  const mockResults = Array.isArray((candidate as any).mockResults)
-    ? ((candidate as any).mockResults as any[])
-    : [];
-
-  return {
-    schemaVersion: databaseSchemaVersion,
-    users,
-    problems,
-    submissions,
-    sessions,
-    passwordResets,
-    mockSessions,
-    mockResults,
-  };
-}
-
-async function ensureDatabase() {
-  // In development/local environment, use local file
-  if (!process.env.VERCEL) {
-    await mkdir(dataDirectory, { recursive: true });
-    if (!existsSync(databasePath)) {
-      await writeFile(
-        databasePath,
-        JSON.stringify(createSeedData(), null, 2),
-        "utf8",
-      );
-    }
-    return;
-  }
-
-  // In Vercel/production, check if blob exists
-  try {
-    await head(BLOB_KEY, { token: getBlobToken() });
-  } catch {
-    // Blob doesn't exist, create it
-    await put(BLOB_KEY, JSON.stringify(createSeedData(), null, 2), {
-      access: 'public',
-      allowOverwrite: true,
-      token: getBlobToken(),
-    });
-  }
-}
-
-async function writeDatabase(data: DatabaseShape) {
-  if (!process.env.VERCEL) {
-    await writeFile(databasePath, JSON.stringify(data, null, 2), "utf8");
-    return;
-  }
-
-  await put(BLOB_KEY, JSON.stringify(data, null, 2), {
-    access: 'public',
-    allowOverwrite: true,
-    token: getBlobToken(),
-  });
-}
-
-async function readDatabase() {
-  await ensureDatabase();
-
-  if (!process.env.VERCEL) {
-    try {
-      const file = await readFile(databasePath, "utf8");
-      const raw = JSON.parse(file) as unknown;
-      const normalized = normalizeDatabase(raw);
-
-      if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
-        await writeDatabase(normalized);
-      }
-
-      return normalized;
-    } catch (error) {
-      console.error('Error reading local database:', error);
-      const seedData = createSeedData();
-      await writeDatabase(seedData);
-      return seedData;
-    }
-  }
-
-  // In Vercel, read from blob
-  try {
-    // Get blob metadata
-    await head(BLOB_KEY, { token: getBlobToken() });
-
-    const blobResponse = await get(BLOB_KEY, {
-      access: 'public',
-      token: getBlobToken(),
-    });
-
-    if (!blobResponse || blobResponse.statusCode !== 200 || !blobResponse.stream) {
-      console.error('Blob read failed or returned no content');
-      const normalized = createSeedData();
-      await writeDatabase(normalized);
-      return normalized;
-    }
-
-    const text = await new Response(blobResponse.stream).text();
-
-    if (!text || text.trim().startsWith('<') || !text.trim().startsWith('{')) {
-      console.error('Invalid blob content received');
-      const normalized = createSeedData();
-      await writeDatabase(normalized);
-      return normalized;
-    }
-
-    const raw = JSON.parse(text) as unknown;
-    const normalized = normalizeDatabase(raw);
-
-    if ((raw as Partial<DatabaseShape>)?.schemaVersion !== databaseSchemaVersion) {
-      await writeDatabase(normalized);
-    }
-
-    return normalized;
-  } catch (error) {
-    console.error('Error reading blob database:', error);
-    // If blob doesn't exist or can't be read, create new database
-    const normalized = createSeedData();
-    try {
-      await writeDatabase(normalized);
-    } catch (writeError) {
-      console.error('Error writing database:', writeError);
-    }
-    return normalized;
+  if (problemsError) {
+    console.error('Error seeding problems:', problemsError);
   }
 }
 
 export async function getUsers() {
-  const db = await readDatabase() as DatabaseShape;
-  return db!.users;
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+
+  return (data || []).map(user => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    passwordHash: user.password_hash,
+    role: user.role,
+    isBlocked: user.is_blocked,
+    createdAt: user.created_at,
+  }));
 }
 
 export async function getStudentUsers() {
-  const db = await readDatabase() as DatabaseShape;
-  return db!
-    .users
-    .filter((user) => user.role === "user")
-    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('role', 'user')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching student users:', error);
+    return [];
+  }
+
+  return (data || []).map(user => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    passwordHash: user.password_hash,
+    role: user.role,
+    isBlocked: user.is_blocked,
+    createdAt: user.created_at,
+  }));
 }
 
 export async function getUserByEmail(email: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return db!.users.find((user) => user.email.toLowerCase() === email.toLowerCase());
-}
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .single();
 
-export async function getUserById(id: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return db.users.find((user) => user.id === id);
-}
-
-export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
-  const db = await readDatabase() as DatabaseShape;
-  const targetIndex = db.users.findIndex((user) => user.id === id);
-
-  if (targetIndex === -1) {
+  if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+    console.error('Error fetching user by email:', error);
     return null;
   }
 
-  const user = db.users[targetIndex];
-  const updatedUser = {
-    ...user,
-    isBlocked,
-  };
+  if (!data) return null;
 
-  db.users[targetIndex] = updatedUser;
-  await writeDatabase(db);
-  return updatedUser;
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    passwordHash: data.password_hash,
+    role: data.role,
+    isBlocked: data.is_blocked,
+    createdAt: data.created_at,
+  };
+}
+
+export async function getUserById(id: string) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching user by id:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    passwordHash: data.password_hash,
+    role: data.role,
+    isBlocked: data.is_blocked,
+    createdAt: data.created_at,
+  };
+}
+
+export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
+  const { data, error } = await supabase
+    .from('users')
+    .update({ is_blocked: isBlocked })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating user blocked status:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    passwordHash: data.password_hash,
+    role: data.role,
+    isBlocked: data.is_blocked,
+    createdAt: data.created_at,
+  };
 }
 
 export async function getPublishedProblems() {
-  const db = await readDatabase();
-  if (!db || !db.problems) {
+  const { data, error } = await supabase
+    .from('problems')
+    .select('*')
+    .eq('published', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching published problems:', error);
     return [];
   }
-  return db.problems
-    .filter((problem) => problem.published)
-    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+
+  return (data || []).map(problem => ({
+    id: problem.id,
+    title: problem.title,
+    slug: problem.slug,
+    difficulty: problem.difficulty,
+    category: problem.category,
+    description: problem.description,
+    options: problem.options,
+    correctOptionId: problem.correct_option_id,
+    solutionExplanation: problem.solution_explanation,
+    constraints: problem.constraints,
+    tags: problem.tags,
+    published: problem.published,
+    createdAt: problem.created_at,
+    createdBy: problem.created_by,
+    photos: problem.photos,
+  }));
 }
 
 export async function getAllProblems() {
-  const db = await readDatabase() as DatabaseShape;
-  return db.problems.sort((left, right) =>
-    right.createdAt.localeCompare(left.createdAt),
-  );
+  const { data, error } = await supabase
+    .from('problems')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching all problems:', error);
+    return [];
+  }
+
+  return (data || []).map(problem => ({
+    id: problem.id,
+    title: problem.title,
+    slug: problem.slug,
+    difficulty: problem.difficulty,
+    category: problem.category,
+    description: problem.description,
+    options: problem.options,
+    correctOptionId: problem.correct_option_id,
+    solutionExplanation: problem.solution_explanation,
+    constraints: problem.constraints,
+    tags: problem.tags,
+    published: problem.published,
+    createdAt: problem.created_at,
+    createdBy: problem.created_by,
+    photos: problem.photos,
+  }));
 }
 
 export async function getProblemBySlug(slug: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return db.problems.find((problem) => problem.slug === slug);
+  const { data, error } = await supabase
+    .from('problems')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching problem by slug:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    difficulty: data.difficulty,
+    category: data.category,
+    description: data.description,
+    options: data.options,
+    correctOptionId: data.correct_option_id,
+    solutionExplanation: data.solution_explanation,
+    constraints: data.constraints,
+    tags: data.tags,
+    published: data.published,
+    createdAt: data.created_at,
+    createdBy: data.created_by,
+    photos: data.photos,
+  };
 }
 
 export async function getProblemById(id: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return db.problems.find((p) => p.id === id);
+  const { data, error } = await supabase
+    .from('problems')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching problem by id:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    difficulty: data.difficulty,
+    category: data.category,
+    description: data.description,
+    options: data.options,
+    correctOptionId: data.correct_option_id,
+    solutionExplanation: data.solution_explanation,
+    constraints: data.constraints,
+    tags: data.tags,
+    published: data.published,
+    createdAt: data.created_at,
+    createdBy: data.created_by,
+    photos: data.photos,
+  };
 }
 
 export async function createProblem(problem: {
@@ -436,17 +429,52 @@ export async function createProblem(problem: {
   createdBy: string;
   photos?: Record<string, string>;
 }) {
-  const db = await readDatabase() as DatabaseShape;
-
-  const newProblem: ProblemRecord = {
+  const newProblem = {
     id: randomUUID(),
-    createdAt: new Date().toISOString(),
-    ...problem,
+    created_at: new Date().toISOString(),
+    title: problem.title,
+    slug: problem.slug,
+    difficulty: problem.difficulty,
+    category: problem.category,
+    description: problem.description,
+    options: problem.options,
+    correct_option_id: problem.correctOptionId,
+    solution_explanation: problem.solutionExplanation,
+    constraints: problem.constraints,
+    tags: problem.tags,
+    published: problem.published,
+    created_by: problem.createdBy,
+    photos: problem.photos || {},
   };
 
-  db.problems.unshift(newProblem);
-  await writeDatabase(db);
-  return newProblem;
+  const { data, error } = await supabase
+    .from('problems')
+    .insert([newProblem])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating problem:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    difficulty: data.difficulty,
+    category: data.category,
+    description: data.description,
+    options: data.options,
+    correctOptionId: data.correct_option_id,
+    solutionExplanation: data.solution_explanation,
+    constraints: data.constraints,
+    tags: data.tags,
+    published: data.published,
+    createdAt: data.created_at,
+    createdBy: data.created_by,
+    photos: data.photos,
+  };
 }
 
 export async function updateProblemBySlug(
@@ -465,91 +493,200 @@ export async function updateProblemBySlug(
     published: boolean;
   },
 ) {
-  const db = await readDatabase() as DatabaseShape;
-  const targetIndex = db.problems.findIndex((problem) => problem.slug === slug);
+  const { data, error } = await supabase
+    .from('problems')
+    .update({
+      title: updates.title,
+      slug: updates.slug,
+      difficulty: updates.difficulty,
+      category: updates.category,
+      description: updates.description,
+      options: updates.options,
+      correct_option_id: updates.correctOptionId,
+      solution_explanation: updates.solutionExplanation,
+      constraints: updates.constraints,
+      tags: updates.tags,
+      published: updates.published,
+    })
+    .eq('slug', slug)
+    .select()
+    .single();
 
-  if (targetIndex === -1) {
+  if (error) {
+    console.error('Error updating problem:', error);
     return null;
   }
 
-  const current = db.problems[targetIndex];
-  const updatedProblem: ProblemRecord = {
-    ...current,
-    ...updates,
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    difficulty: data.difficulty,
+    category: data.category,
+    description: data.description,
+    options: data.options,
+    correctOptionId: data.correct_option_id,
+    solutionExplanation: data.solution_explanation,
+    constraints: data.constraints,
+    tags: data.tags,
+    published: data.published,
+    createdAt: data.created_at,
+    createdBy: data.created_by,
+    photos: data.photos,
   };
-
-  db.problems[targetIndex] = updatedProblem;
-  await writeDatabase(db);
-  return updatedProblem;
 }
 
 export async function createSession(userId: string) {
-  const db = await readDatabase() as DatabaseShape;
-  const session: SessionRecord = {
+  const session = {
     token: randomUUID(),
-    userId,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+    user_id: userId,
+    expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 7 days
   };
 
-  db.sessions = db.sessions
-    .filter((item) => new Date(item.expiresAt).getTime() > Date.now())
-    .concat(session);
+  const { data, error } = await supabase
+    .from('sessions')
+    .insert([session])
+    .select()
+    .single();
 
-  await writeDatabase(db);
-  return session;
+  if (error) {
+    console.error('Error creating session:', error);
+    return null;
+  }
+
+  return {
+    token: data.token,
+    userId: data.user_id,
+    expiresAt: data.expires_at,
+  };
 }
 
 export async function getSession(token: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return db.sessions.find((session) => session.token === token);
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('token', token)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching session:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    token: data.token,
+    userId: data.user_id,
+    expiresAt: data.expires_at,
+  };
 }
 
 export async function createPasswordResetTokenByEmail(email: string) {
-  const db = await readDatabase() as DatabaseShape;
-  const user = db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  // First get the user
+  const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', email.toLowerCase())
+    .single();
 
-  if (!user) return null;
+  if (userError || !user) {
+    return null;
+  }
 
   const token = randomUUID();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60).toISOString(); // 1 hour
+  const expires_at = new Date(Date.now() + 1000 * 60 * 60).toISOString(); // 1 hour
 
-  const reset = { token, userId: user.id, expiresAt };
+  const { data, error } = await supabase
+    .from('password_resets')
+    .insert([{
+      token,
+      user_id: user.id,
+      expires_at,
+    }])
+    .select()
+    .single();
 
-  db.passwordResets = (db.passwordResets || []).filter(
-    (r) => new Date(r.expiresAt).getTime() > Date.now(),
-  );
+  if (error) {
+    console.error('Error creating password reset token:', error);
+    return null;
+  }
 
-  db.passwordResets.unshift(reset as any);
-  await writeDatabase(db);
-  return reset;
+  return {
+    token: data.token,
+    userId: data.user_id,
+    expiresAt: data.expires_at,
+  };
 }
 
 
 export async function getPasswordReset(token: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return (db.passwordResets || []).find((r) => r.token === token);
+  const { data, error } = await supabase
+    .from('password_resets')
+    .select('*')
+    .eq('token', token)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching password reset:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    token: data.token,
+    userId: data.user_id,
+    expiresAt: data.expires_at,
+  };
 }
 
 export async function consumePasswordResetToken(token: string) {
-  const db = await readDatabase() as DatabaseShape;
-  db.passwordResets = (db.passwordResets || []).filter((r) => r.token !== token);
-  await writeDatabase(db);
+  const { error } = await supabase
+    .from('password_resets')
+    .delete()
+    .eq('token', token);
+
+  if (error) {
+    console.error('Error consuming password reset token:', error);
+  }
 }
 
 export async function updateUserPassword(userId: string, password: string) {
-  const db = await readDatabase() as DatabaseShape;
-  const idx = db.users.findIndex((u) => u.id === userId);
-  if (idx === -1) return null;
-  const updated = { ...db.users[idx], passwordHash: hashSeedPassword(password) };
-  db.users[idx] = updated;
-  await writeDatabase(db);
-  return updated;
+  const { data, error } = await supabase
+    .from('users')
+    .update({ password_hash: hashSeedPassword(password) })
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating user password:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    passwordHash: data.password_hash,
+    role: data.role,
+    isBlocked: data.is_blocked,
+    createdAt: data.created_at,
+  };
 }
 
 export async function deleteSession(token: string) {
-  const db = await readDatabase() as DatabaseShape;
-  db.sessions = db.sessions.filter((session) => session.token !== token);
-  await writeDatabase(db);
+  const { error } = await supabase
+    .from('sessions')
+    .delete()
+    .eq('token', token);
+
+  if (error) {
+    console.error('Error deleting session:', error);
+  }
 }
 
 export async function createSubmission(submission: {
@@ -563,47 +700,114 @@ export async function createSubmission(submission: {
   isCorrect: boolean;
   status: SubmissionRecord["status"];
 }) {
-  const db = await readDatabase() as DatabaseShape;
-  const newSubmission: SubmissionRecord = {
+  const newSubmission = {
     id: randomUUID(),
-    submittedAt: new Date().toISOString(),
-    ...submission,
+    submitted_at: new Date().toISOString(),
+    problem_id: submission.problemId,
+    user_id: submission.userId,
+    selected_option_id: submission.selectedOptionId,
+    selected_option_text: submission.selectedOptionText,
+    correct_option_id: submission.correctOptionId,
+    correct_option_text: submission.correctOptionText,
+    solution_explanation: submission.solutionExplanation,
+    is_correct: submission.isCorrect,
+    status: submission.status,
   };
 
-  db.submissions.unshift(newSubmission);
-  await writeDatabase(db);
-  return newSubmission;
+  const { data, error } = await supabase
+    .from('submissions')
+    .insert([newSubmission])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating submission:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    submittedAt: data.submitted_at,
+    problemId: data.problem_id,
+    userId: data.user_id,
+    selectedOptionId: data.selected_option_id,
+    selectedOptionText: data.selected_option_text,
+    correctOptionId: data.correct_option_id,
+    correctOptionText: data.correct_option_text,
+    solutionExplanation: data.solution_explanation,
+    isCorrect: data.is_correct,
+    status: data.status,
+  };
 }
 
 export async function getSubmissionsForUser(userId: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return db.submissions
-    .filter((submission) => submission.userId === userId)
-    .sort((left, right) => right.submittedAt.localeCompare(left.submittedAt));
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('submitted_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching submissions for user:', error);
+    return [];
+  }
+
+  return (data || []).map(submission => ({
+    id: submission.id,
+    submittedAt: submission.submitted_at,
+    problemId: submission.problem_id,
+    userId: submission.user_id,
+    selectedOptionId: submission.selected_option_id,
+    selectedOptionText: submission.selected_option_text,
+    correctOptionId: submission.correct_option_id,
+    correctOptionText: submission.correct_option_text,
+    solutionExplanation: submission.solution_explanation,
+    isCorrect: submission.is_correct,
+    status: submission.status,
+  }));
 }
 
 export async function getSubmissionsForProblem(problemId: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return db.submissions.filter((submission) => submission.problemId === problemId);
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*')
+    .eq('problem_id', problemId)
+    .order('submitted_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching submissions for problem:', error);
+    return [];
+  }
+
+  return (data || []).map(submission => ({
+    id: submission.id,
+    submittedAt: submission.submitted_at,
+    problemId: submission.problem_id,
+    userId: submission.user_id,
+    selectedOptionId: submission.selected_option_id,
+    selectedOptionText: submission.selected_option_text,
+    correctOptionId: submission.correct_option_id,
+    correctOptionText: submission.correct_option_text,
+    solutionExplanation: submission.solution_explanation,
+    isCorrect: submission.is_correct,
+    status: submission.status,
+  }));
 }
 
 export async function getStats() {
-  const db = await readDatabase();
-  if (!db) {
-    return {
-      totalProblems: 0,
-      totalSubmissions: 0,
-      totalUsers: 0,
-      totalAdmins: 0,
-    };
-  }
-  const totalUsers = (db.users || []).filter((user) => user.role === "user").length;
-  const totalAdmins = (db.users || []).filter((user) => user.role === "admin").length;
+  // Get counts in parallel
+  const [problemsResult, submissionsResult, usersResult, adminsResult] = await Promise.all([
+    supabase.from('problems').select('id', { count: 'exact', head: true }).eq('published', true),
+    supabase.from('submissions').select('id', { count: 'exact', head: true }),
+    supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'user'),
+    supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'admin'),
+  ]);
+
   return {
-    totalProblems: (db.problems || []).filter((problem) => problem.published).length,
-    totalSubmissions: (db.submissions || []).length,
-    totalUsers,
-    totalAdmins,
+    totalProblems: problemsResult.count || 0,
+    totalSubmissions: submissionsResult.count || 0,
+    totalUsers: usersResult.count || 0,
+    totalAdmins: adminsResult.count || 0,
   };
 }
 
@@ -614,9 +818,13 @@ export async function createUser(user: {
   passwordHash?: string;
   role?: "admin" | "user";
 }) {
-  const db = await readDatabase() as DatabaseShape;
+  // Check if user already exists
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', user.email.toLowerCase())
+    .single();
 
-  const existing = db.users.find((u) => u.email.toLowerCase() === user.email.toLowerCase());
   if (existing) {
     return null;
   }
@@ -625,59 +833,141 @@ export async function createUser(user: {
     id: randomUUID(),
     name: user.name,
     email: user.email,
-    passwordHash: user.passwordHash ?? hashSeedPassword(user.password ?? ""),
+    password_hash: user.passwordHash ?? hashSeedPassword(user.password ?? ""),
     role: user.role ?? "user",
-    createdAt: new Date().toISOString(),
+    created_at: new Date().toISOString(),
   };
 
-  db.users.unshift(newUser);
-  await writeDatabase(db);
-  return newUser;
+  const { data, error } = await supabase
+    .from('users')
+    .insert([newUser])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating user:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    passwordHash: data.password_hash,
+    role: data.role,
+    isBlocked: data.is_blocked,
+    createdAt: data.created_at,
+  };
 }
 
 export async function createMockSession(userId: string, problemIds: string[], durationMinutes: number) {
-  const db = await readDatabase() as DatabaseShape;
   const now = new Date();
-  const startedAt = now.toISOString();
-  const expiresAt = new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString();
+  const started_at = now.toISOString();
+  const expires_at = new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString();
+
   const session = {
     id: randomUUID(),
-    userId,
-    problemIds,
-    startedAt,
-    expiresAt,
-    createdAt: startedAt,
-  } as any;
+    user_id: userId,
+    problem_ids: problemIds,
+    started_at,
+    expires_at,
+    created_at: started_at,
+  };
 
-  db.mockSessions = (db.mockSessions || []).filter((s) => new Date(s.expiresAt).getTime() > Date.now());
-  db.mockSessions.unshift(session);
-  await writeDatabase(db);
-  return session;
+  const { data, error } = await supabase
+    .from('mock_sessions')
+    .insert([session])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating mock session:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    problemIds: data.problem_ids,
+    startedAt: data.started_at,
+    expiresAt: data.expires_at,
+    createdAt: data.created_at,
+  };
 }
 
 export async function getMockSessionById(id: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return (db.mockSessions || []).find((s) => s.id === id) as any | undefined;
+  const { data, error } = await supabase
+    .from('mock_sessions')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching mock session:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    problemIds: data.problem_ids,
+    startedAt: data.started_at,
+    expiresAt: data.expires_at,
+    createdAt: data.created_at,
+  };
 }
 
 export async function createMockResult(userId: string, sessionId: string, total: number, correct: number) {
-  const db = await readDatabase() as DatabaseShape;
-  const rec = {
+  const result = {
     id: randomUUID(),
-    userId,
-    sessionId,
+    user_id: userId,
+    session_id: sessionId,
     total,
     correct,
-    createdAt: new Date().toISOString(),
-  } as any;
+    created_at: new Date().toISOString(),
+  };
 
-  db.mockResults = (db.mockResults || []).filter((r) => true);
-  db.mockResults.unshift(rec);
-  await writeDatabase(db);
-  return rec;
+  const { data, error } = await supabase
+    .from('mock_results')
+    .insert([result])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating mock result:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    sessionId: data.session_id,
+    total: data.total,
+    correct: data.correct,
+    createdAt: data.created_at,
+  };
 }
 
 export async function getMockResultsForUser(userId: string) {
-  const db = await readDatabase() as DatabaseShape;
-  return (db.mockResults || []).filter((r) => r.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const { data, error } = await supabase
+    .from('mock_results')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching mock results for user:', error);
+    return [];
+  }
+
+  return (data || []).map(result => ({
+    id: result.id,
+    userId: result.user_id,
+    sessionId: result.session_id,
+    total: result.total,
+    correct: result.correct,
+    createdAt: result.created_at,
+  }));
 }

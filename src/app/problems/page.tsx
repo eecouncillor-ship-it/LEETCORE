@@ -39,7 +39,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
       search.length === 0 ||
       problem.title.toLowerCase().includes(search) ||
       problem.category.toLowerCase().includes(search) ||
-      problem.tags.some((tag) => tag.toLowerCase().includes(search));
+      problem.tags.some((tag: string) => tag.toLowerCase().includes(search));
 
     const matchesDifficulty =
       difficultyFilter.length === 0 || problem.difficulty === difficultyFilter;

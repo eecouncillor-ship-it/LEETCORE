@@ -10,6 +10,8 @@ import {
 } from "@/lib/db";
 import { formatDate, getDifficultyTextClass } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 type ProblemPageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -74,7 +76,7 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
               Constraints and Notes
             </h2>
             <ul className="mt-4 space-y-3">
-              {problem.constraints.map((constraint) => (
+              {problem.constraints.map((constraint: string) => (
                 <li
                   key={constraint}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300"

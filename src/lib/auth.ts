@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { scryptSync, timingSafeEqual } from "node:crypto";
 
+import { supabase } from "@/lib/supabase";
 import { createSession, deleteSession, getSession, getUserByEmail, getUserById } from "@/lib/db";
 import type { Role } from "@/lib/types";
 
@@ -25,17 +26,27 @@ export function verifyPassword(password: string, passwordHash: string) {
 
 export async function signIn(email: string, password: string) {
   "use server";
-  const user = await getUserByEmail(email);
 
-  if (!user || !verifyPassword(password, user.passwordHash)) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .eq('password_hash', hashPassword(password))
+    .single();
+
+  if (error || !data) {
     return null;
   }
 
-  if ((user as any).isBlocked) {
+  if (data.is_blocked) {
     return null;
   }
 
-  const session = await createSession(user.id);
+  const session = await createSession(data.id);
+  if (!session) {
+    return null;
+  }
+
   const cookieStore = await cookies();
 
   cookieStore.set(sessionCookieName, session.token, {
@@ -46,7 +57,15 @@ export async function signIn(email: string, password: string) {
     expires: new Date(session.expiresAt),
   });
 
-  return user;
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    passwordHash: data.password_hash,
+    role: data.role,
+    isBlocked: data.is_blocked,
+    createdAt: data.created_at,
+  };
 }
 
 export async function signOut() {

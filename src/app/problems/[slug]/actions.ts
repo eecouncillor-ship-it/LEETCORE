@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
 import { createSubmission, getProblemBySlug } from "@/lib/db";
+import type { QuestionOption } from "@/lib/types";
 
 export type SubmissionState = {
   error?: string;
@@ -37,7 +38,7 @@ export async function submitAnswerAction(
   }
 
   const selectedOption = problem.options.find(
-    (option) => option.id === selectedOptionId,
+    (option: QuestionOption) => option.id === selectedOptionId,
   );
 
   if (!selectedOption) {
@@ -45,7 +46,7 @@ export async function submitAnswerAction(
   }
 
   const correctOption = problem.options.find(
-    (option) => option.id === problem.correctOptionId,
+    (option: QuestionOption) => option.id === problem.correctOptionId,
   );
 
   if (!correctOption) {

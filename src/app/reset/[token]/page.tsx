@@ -2,6 +2,8 @@ import { ResetForm } from "../reset-form";
 import { getPasswordReset } from "@/lib/db";
 import { notFound } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 type ResetPageProps = {
   params: Promise<{ token: string }>
 };

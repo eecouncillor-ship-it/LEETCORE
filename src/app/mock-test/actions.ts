@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
 import { getPublishedProblems, createMockSession, getProblemById, createSubmission, createMockResult } from "@/lib/db";
+import type { QuestionOption } from "@/lib/types";
 import { randomUUID } from "node:crypto";
 
 export type MockFormState = { error?: string } | { session: any; problems: any[] };
@@ -55,11 +56,11 @@ export async function submitMockAction(_prev: MockFormState, formData: FormData)
     const prob = await getProblemById(pid);
     if (!prob) continue;
     total += 1;
-    const option = prob.options.find((o) => o.id === picked);
+    const option = prob.options.find((o: QuestionOption) => o.id === picked);
     const isCorrect = picked === prob.correctOptionId;
     if (isCorrect) correct += 1;
 
-    const correctOpt = prob.options.find((o) => o.id === prob.correctOptionId);
+    const correctOpt = prob.options.find((o: QuestionOption) => o.id === prob.correctOptionId);
 
     await createSubmission({
       problemId: prob.id,

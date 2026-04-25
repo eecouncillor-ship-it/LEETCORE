@@ -6,6 +6,8 @@ import Link from "next/link";
 import ClientTimer from "../timer";
 import { MockSessionForm } from "../session-form";
 
+export const dynamic = 'force-dynamic';
+
 export default async function MockSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireAuth();
   const { id } = await params;
