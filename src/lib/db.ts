@@ -819,13 +819,19 @@ export async function createUser(user: {
   role?: "admin" | "user";
 }) {
   // Check if user already exists
-  const { data: existing } = await supabase
+  const { data: existing, error: checkError } = await supabase
     .from('users')
     .select('id')
-    .eq('email', user.email.toLowerCase())
-    .single();
+    .eq('email', user.email.toLowerCase());
 
-  if (existing) {
+  if (checkError) {
+    console.error('Error checking user:', checkError);
+    return null;
+  }
+
+  // If any users exist with this email, return null
+  if (existing && existing.length > 0) {
+    console.log('User already exists with email:', user.email);
     return null;
   }
 
