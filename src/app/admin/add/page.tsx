@@ -15,7 +15,7 @@ export default async function AdminAddPage() {
       heading="Add question"
       subheading="Create a new MCQ for the question bank."
       roleLabel="Admin portal"
-      userName={user.name}
+      userName={user.email}
       actions={
         <Link
           href="/admin"

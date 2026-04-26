@@ -9,48 +9,30 @@ export type QuestionOption = {
 
 export type UserRecord = {
   id: string;
-  name: string;
   email: string;
-  passwordHash: string;
+  password: string;
   role: Role;
-  isBlocked?: boolean;
-  createdAt: string;
 };
 
 export type ProblemRecord = {
   id: string;
   title: string;
-  slug: string;
-  difficulty: Difficulty;
-  category: string;
   description: string;
   options: QuestionOption[];
-  correctOptionId: string;
-  kind?: "mcq" | "fib";
-  answer?: string; // for fill-in-the-blank
-  photos?: Record<string, string>; // optional base64 data URIs for description/options
-  solutionExplanation: string;
-  constraints: string[];
-  tags: string[];
-  published: boolean;
-  createdAt: string;
-  createdBy: string;
+  correct_answer: string;
+  explanation: string;
+  created_at: string;
 };
 
 export type SubmissionStatus = "Correct" | "Incorrect";
 
 export type SubmissionRecord = {
   id: string;
-  problemId: string;
-  userId: string;
-  selectedOptionId: string;
-  selectedOptionText: string;
-  correctOptionId: string;
-  correctOptionText: string;
-  solutionExplanation: string;
-  isCorrect: boolean;
-  status: SubmissionStatus;
-  submittedAt: string;
+  user_email: string;
+  question_id: string;
+  selected_answer: string;
+  is_correct: boolean;
+  submitted_at: string;
 };
 
 export type SessionRecord = {

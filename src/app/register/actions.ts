@@ -18,7 +18,7 @@ export async function registerAction(
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
 
-  if (!name || !email || !password || !confirm) {
+  if (!email || !password || !confirm) {
     return { error: "Please fill all required fields." };
   }
 
@@ -27,7 +27,7 @@ export async function registerAction(
   }
 
   // Attempt to create user directly
-  const created = await createUser({ name, email, password });
+  const created = await createUser({ email, password, role: "user" });
   if (!created) {
     return { error: "An account with this email already exists." };
   }

@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 
-import { SubmissionForm } from "@/app/problems/[slug]/submission-form";
+import { SubmissionForm } from "@/app/problems/[id]/submission-form";
 import { StudentShell } from "@/components/student-shell";
 import { requireAuth } from "@/lib/auth";
 import {
-  getProblemBySlug,
-  getSubmissionsForProblem,
+  getProblemById,
+  getSubmissionsForQuestion,
   getSubmissionsForUser,
 } from "@/lib/db";
 import { formatDate, getDifficultyTextClass } from "@/lib/utils";
@@ -13,30 +13,30 @@ import { formatDate, getDifficultyTextClass } from "@/lib/utils";
 export const dynamic = 'force-dynamic';
 
 type ProblemPageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 };
 
 export default async function ProblemPage({ params }: ProblemPageProps) {
   const user = await requireAuth();
-  const { slug } = await params;
-  const problem = await getProblemBySlug(slug);
+  const { id } = await params;
+  const problem = await getProblemById(id);
 
-  if (!problem || !problem.published) {
+  if (!problem) {
     notFound();
   }
 
   const [userSubmissions, allSubmissions] = await Promise.all([
-    getSubmissionsForUser(user.id),
-    getSubmissionsForProblem(problem.id),
+    getSubmissionsForUser(user.email),
+    getSubmissionsForQuestion(problem.id),
   ]);
 
   const filteredSubmissions = userSubmissions.filter(
-    (submission) => submission.problemId === problem.id,
+    (submission) => submission.question_id === problem.id,
   );
 
   return (
     <StudentShell
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/problems", label: "Problems", active: true },
         { href: "/submissions", label: "Submissions" },
@@ -45,16 +45,6 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
       <div className="grid gap-7 xl:grid-cols-[1.08fr_0.92fr]">
         <section className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
-            <span
-              className={`text-sm font-semibold ${getDifficultyTextClass(
-                problem.difficulty,
-              )}`}
-            >
-              {problem.difficulty}
-            </span>
-            <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-600">
-              {problem.category}
-            </span>
             <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-600">
               {allSubmissions.length} attempts
             </span>
@@ -72,25 +62,12 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
           </div>
 
           <div className="mt-8">
-            <h2 className="text-xl font-bold text-white">
-              Constraints and Notes
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {problem.constraints.map((constraint: string) => (
-                <li
-                  key={constraint}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300"
-                >
-                  {constraint}
-                </li>
-              ))}
-            </ul>
           </div>
         </section>
 
         <section className="space-y-6">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
-            <SubmissionForm slug={problem.slug} options={problem.options} />
+            <SubmissionForm slug={problem.id} options={problem.options} />
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
@@ -106,24 +83,20 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
                     >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <p className="text-base font-semibold text-white">
-                        You chose {submission.selectedOptionId}
+                        You chose {submission.selected_answer}
                       </p>
                       <span
                         className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                          submission.isCorrect
+                          submission.is_correct
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-amber-100 text-amber-700"
                         }`}
                       >
-                        {submission.status}
+                        {submission.is_correct ? 'Correct' : 'Incorrect'}
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-slate-300">
-                      Submitted {formatDate(submission.submittedAt)}
-                    </p>
-                    <p className="mt-2 text-sm leading-7 text-slate-300">
-                      Correct answer: {submission.correctOptionId} - {" "}
-                      {submission.correctOptionText}
+                      Submitted {formatDate(submission.submitted_at)}
                     </p>
                   </div>
                 ))

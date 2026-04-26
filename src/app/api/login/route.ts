@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       .from("users")
       .select("*")
       .eq("email", email.toLowerCase())
-      .eq("password_hash", hashPassword(password))
+      .eq("password", hashPassword(password))
       .single();
 
     if (error || !data) {

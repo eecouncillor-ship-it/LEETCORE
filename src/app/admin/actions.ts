@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
-import { createProblem, updateProblemBySlug } from "@/lib/db";
+import { createProblem, updateProblemById } from "@/lib/db";
 import { updateUserBlockedStatus } from "@/lib/db";
 import { parseCommaList, parseLineList, slugify } from "@/lib/utils";
 import type { Difficulty } from "@/lib/types";
@@ -14,18 +14,10 @@ export type QuestionFormState = {
 
 type ParsedQuestionForm = {
   title: string;
-  slug: string;
-  difficulty: Difficulty;
-  category: string;
   description: string;
   options: Array<{ id: string; text: string }>;
   correctOptionId: string;
-  kind?: "mcq" | "fib";
-  answer?: string;
   solutionExplanation: string;
-  constraints: string[];
-  tags: string[];
-  published: boolean;
 };
 
 type ParseQuestionFormResult =
@@ -34,42 +26,26 @@ type ParseQuestionFormResult =
 
 function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   const title = String(formData.get("title") ?? "").trim();
-  const difficulty = String(formData.get("difficulty") ?? "Easy") as Difficulty;
-  const category = String(formData.get("category") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const constraintsRaw = String(formData.get("constraints") ?? "");
-  const tagsRaw = String(formData.get("tags") ?? "");
   const optionA = String(formData.get("optionA") ?? "").trim();
   const optionB = String(formData.get("optionB") ?? "").trim();
   const optionC = String(formData.get("optionC") ?? "").trim();
   const optionD = String(formData.get("optionD") ?? "").trim();
   const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
-  const kind = String(formData.get("kind") ?? "mcq") as "mcq" | "fib";
-  const fibAnswer = String(formData.get("fibAnswer") ?? "").trim();
   const solutionExplanation = String(formData.get("solutionExplanation") ?? "").trim();
-  const published = String(formData.get("published") ?? "") === "on";
 
-  if (!title || !category || !description || !solutionExplanation) {
+  if (!title || !description || !solutionExplanation) {
     return { ok: false, error: "Please fill in all required question fields." };
   }
 
-  if (kind === "mcq") {
-    if (!optionA || !optionB || !optionC || !optionD || !correctOptionId) {
-      return { ok: false, error: "Please provide all MCQ options and select the correct one." };
-    }
-  } else if (kind === "fib") {
-    if (!fibAnswer) {
-      return { ok: false, error: "Please provide the answer for fill-in-the-blank questions." };
-    }
+  if (!optionA || !optionB || !optionC || !optionD || !correctOptionId) {
+    return { ok: false, error: "Please provide all MCQ options and select the correct one." };
   }
 
   return {
     ok: true,
     data: {
       title,
-      slug: slugify(title),
-      difficulty,
-      category,
       description,
       options: [
         { id: "A", text: optionA },
@@ -78,12 +54,7 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
         { id: "D", text: optionD },
       ],
       correctOptionId,
-      kind,
-      answer: fibAnswer || undefined,
       solutionExplanation,
-      constraints: parseLineList(constraintsRaw),
-      tags: parseCommaList(tagsRaw),
-      published,
     },
   };
 }
@@ -149,9 +120,11 @@ export async function createProblemAction(
   if (fibData) photos.fib = fibData;
 
   await createProblem({
-    ...parsed.data,
-    photos: Object.keys(photos).length ? photos : undefined,
-    createdBy: user.id,
+    title: parsed.data.title,
+    description: parsed.data.description,
+    options: parsed.data.options,
+    correct_answer: parsed.data.correctOptionId,
+    explanation: parsed.data.solutionExplanation,
   });
 
   revalidatePath("/");
@@ -172,7 +145,13 @@ export async function updateProblemAction(
     return { error: parsed.error };
   }
 
-  const updated = await updateProblemBySlug(currentSlug, parsed.data);
+  const updated = await updateProblemById(currentSlug, {
+    title: parsed.data.title,
+    description: parsed.data.description,
+    options: parsed.data.options,
+    correct_answer: parsed.data.correctOptionId,
+    explanation: parsed.data.solutionExplanation,
+  });
 
   if (!updated) {
     return { error: "Question not found." };
@@ -183,6 +162,5 @@ export async function updateProblemAction(
   revalidatePath("/problems");
   revalidatePath(`/admin/questions/${currentSlug}/edit`);
   revalidatePath(`/problems/${currentSlug}`);
-  revalidatePath(`/problems/${updated.slug}`);
-  redirect(`/admin/questions/${updated.slug}/edit?updated=1`);
+  redirect(`/admin/questions/${updated.id}/edit?updated=1`);
 }

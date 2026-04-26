@@ -13,7 +13,7 @@ export default async function MockTestPage() {
 
   return (
     <StudentShell
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions" },

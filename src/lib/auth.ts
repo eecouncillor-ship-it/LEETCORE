@@ -31,14 +31,14 @@ export async function signIn(email: string, password: string) {
     .from('users')
     .select('*')
     .eq('email', email.toLowerCase())
-    .eq('password_hash', hashPassword(password))
     .single();
 
   if (error || !data) {
     return null;
   }
 
-  if (data.is_blocked) {
+  // Verify the password against the stored hash
+  if (!verifyPassword(password, data.password)) {
     return null;
   }
 

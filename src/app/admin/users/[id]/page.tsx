@@ -22,7 +22,7 @@ export default async function AdminUserDetail({ params }: Props) {
         heading="User not found"
         subheading=""
         roleLabel="Admin"
-        userName={user.name}
+        userName={user.email}
         navItems={[
           { href: "/admin", label: "Questions" },
           { href: "/admin/users", label: "Users", active: true },
@@ -39,14 +39,14 @@ export default async function AdminUserDetail({ params }: Props) {
   ]);
 
   const totalSubmissions = submissions.length;
-  const solvedProblemIds = new Set(submissions.filter((s) => s.isCorrect).map((s) => s.problemId));
+  const solvedProblemIds = new Set(submissions.filter((s) => s.is_correct).map((s) => s.question_id));
   const solvedCount = solvedProblemIds.size;
   const problemById = new Map(problems.map((p) => [p.id, p]));
   const topicsMap = new Map<string, number>();
 
   for (const pid of solvedProblemIds) {
     const prob = problemById.get(pid);
-    const cat = prob?.category ?? "Uncategorized";
+    const cat = "MCQ";
     topicsMap.set(cat, (topicsMap.get(cat) ?? 0) + 1);
   }
 
@@ -54,10 +54,10 @@ export default async function AdminUserDetail({ params }: Props) {
 
   return (
     <AppShell
-      heading={`${target.name}`}
+      heading={`${target.email}`}
       subheading={`Performance summary for this user`}
       roleLabel="Admin"
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/admin", label: "Questions" },
         { href: "/admin/users", label: "Users", active: true },
@@ -102,15 +102,15 @@ export default async function AdminUserDetail({ params }: Props) {
           <h3 className="text-lg font-semibold text-white">Recent submissions</h3>
           <div className="mt-4 grid gap-3">
             {submissions.slice(0, 12).map((s) => {
-              const prob = problemById.get(s.problemId);
+              const prob = problemById.get(s.question_id);
               return (
                 <div key={s.id} className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-semibold text-white">{prob?.title ?? 'Unknown problem'}</div>
-                    <div className="text-xs text-slate-300">{formatDate(s.submittedAt)}</div>
+                    <div className="text-xs text-slate-300">{formatDate(s.submitted_at)}</div>
                   </div>
-                  <div className={`text-sm font-semibold ${s.isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {s.isCorrect ? 'Correct' : 'Incorrect'}
+                  <div className={`text-sm font-semibold ${s.is_correct ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {s.is_correct ? 'Correct' : 'Incorrect'}
                   </div>
                 </div>
               );

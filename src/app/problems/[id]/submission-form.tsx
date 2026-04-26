@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import {
   submitAnswerAction,
   type SubmissionState,
-} from "@/app/problems/[slug]/actions";
+} from "@/app/problems/[id]/actions";
 
 const initialState: SubmissionState = {};
 

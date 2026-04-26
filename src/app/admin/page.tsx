@@ -20,7 +20,7 @@ export default async function AdminPage() {
       heading="Admin control center"
       subheading="Manage the MCQ question bank, track platform usage, and review student accounts from one place."
       roleLabel="Admin portal"
-      userName={user.name}
+      userName={user.email}
       actions={
         <Link
           href="/problems"
@@ -81,23 +81,18 @@ export default async function AdminPage() {
                     idx % 2 === 0 ? "bg-transparent" : "bg-white/2"
                   } border-b border-white/6`}
                 >
-                  <div className="text-sm text-slate-300">{formatDate(problem.createdAt)}</div>
+                  <div className="text-sm text-slate-300">{formatDate(problem.created_at)}</div>
                   <div>
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <h3 className="text-sm font-semibold text-white">{problem.title}</h3>
-                        <p className="mt-1 text-xs text-slate-300">{problem.category} • <span className="text-amber-300">{problem.difficulty}</span></p>
+                        <p className="mt-1 text-xs text-slate-300">MCQ Question</p>
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${problem.published ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                      {problem.published ? 'Published' : 'Draft'}
-                    </span>
-                  </div>
                   <div className="flex items-center justify-end gap-3">
                     <Link
-                      href={`/admin/questions/${problem.slug}/edit`}
+                      href={`/admin/questions/${problem.id}/edit`}
                       className="rounded-full border border-white/10 px-3 py-1.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/6"
                     >
                       Edit

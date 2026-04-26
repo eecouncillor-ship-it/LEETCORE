@@ -4,12 +4,12 @@ import { notFound } from "next/navigation";
 import { CreateProblemForm } from "@/app/admin/create-problem-form";
 import { AppShell } from "@/components/shell";
 import { requireAuth } from "@/lib/auth";
-import { getProblemBySlug } from "@/lib/db";
+import { getProblemById } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
 type EditQuestionPageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ updated?: string }>;
 };
 
@@ -18,8 +18,8 @@ export default async function EditQuestionPage({
   searchParams,
 }: EditQuestionPageProps) {
   const user = await requireAuth("admin");
-  const [{ slug }, resolvedSearchParams] = await Promise.all([params, searchParams]);
-  const problem = await getProblemBySlug(slug);
+  const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const problem = await getProblemById(id);
 
   if (!problem) {
     notFound();
@@ -32,7 +32,7 @@ export default async function EditQuestionPage({
       heading={`Edit: ${problem.title}`}
       subheading="Update an existing question, change its answer options, or edit its explanation without recreating it from scratch."
       roleLabel="Admin portal"
-      userName={user.name}
+      userName={user.email}
       actions={
         <Link
           href="/admin"

@@ -25,7 +25,7 @@ export default async function MockSessionPage({ params }: { params: Promise<{ id
 
   return (
     <StudentShell
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions" },

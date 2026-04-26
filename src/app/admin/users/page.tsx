@@ -19,11 +19,11 @@ export default async function AdminUsersPage() {
       const submissions = await getSubmissionsForUser(student.id);
       const solvedCount = new Set(
         submissions
-          .filter((submission) => submission.isCorrect)
-          .map((submission) => submission.problemId),
+          .filter((submission) => submission.is_correct)
+          .map((submission) => submission.question_id),
       ).size;
 
-      const correctCount = submissions.filter((s) => s.isCorrect).length;
+      const correctCount = submissions.filter((s) => s.is_correct).length;
       const accuracy = submissions.length === 0 ? 0 : (correctCount / submissions.length) * 100;
 
       return {
@@ -33,7 +33,7 @@ export default async function AdminUsersPage() {
         correctCount,
         accuracy,
         submissions,
-        solvedProblemIds: Array.from(new Set(submissions.filter((s) => s.isCorrect).map((s) => s.problemId))),
+        solvedProblemIds: Array.from(new Set(submissions.filter((s) => s.is_correct).map((s) => s.question_id))),
       };
     }),
   );
@@ -43,7 +43,7 @@ export default async function AdminUsersPage() {
       heading="Student accounts"
       subheading="Review all registered student accounts, when they joined, and how active they are on the platform."
       roleLabel="Admin portal"
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/admin", label: "Questions" },
         { href: "/admin/users", label: "Users", active: true },
@@ -86,27 +86,24 @@ export default async function AdminUsersPage() {
 
           {studentsWithStats.map((student) => (
             <details key={student.id} className="group border-b border-white/10">
-              <summary className="list-none grid grid-cols-[1.2fr_1.2fr_100px_100px_100px_160px_120px] gap-4 px-6 py-5 items-center cursor-pointer">
+              <summary className="list-none grid grid-cols-[1.2fr_1.2fr_100px_100px_100px_120px] gap-4 px-6 py-5 items-center cursor-pointer">
                 <div>
-                  <div className="font-semibold text-white">{student.name}</div>
+                  <div className="font-semibold text-white">{student.email}</div>
                   <p className="mt-1 text-sm text-slate-300">Student account</p>
                 </div>
                 <div className="text-sm text-slate-200">{student.email}</div>
                 <div className="text-sm font-semibold text-emerald-400">{student.solvedCount}</div>
                 <div className="text-sm text-slate-200">{student.submissionCount}</div>
                 <div className="text-sm text-slate-200">{formatPercentage(student.accuracy)}</div>
-                <div className="text-sm text-slate-300">{formatDate(student.createdAt)}</div>
                 <div>
                   <form action={toggleUserBlockAction}>
                     <input type="hidden" name="userId" value={student.id} />
-                    <input type="hidden" name="block" value={student.isBlocked ? "0" : "1"} />
+                    <input type="hidden" name="block" value="0" />
                     <button
                       type="submit"
-                      className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
-                        student.isBlocked ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
-                      }`}
+                      className={`rounded-full px-3 py-2 text-sm font-semibold transition bg-rose-500 text-white`}
                     >
-                      {student.isBlocked ? "Unblock" : "Block"}
+                      Block
                     </button>
                   </form>
                 </div>
@@ -133,8 +130,8 @@ export default async function AdminUsersPage() {
                   <div className="mt-3 grid gap-2">
                     {student.submissions.slice(0, 8).map((s) => (
                       <div key={s.id} className="flex items-center justify-between text-sm text-slate-200">
-                        <div>{(problemById.get(s.problemId) || { title: 'Unknown' }).title}</div>
-                        <div className={`font-semibold ${s.isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>{s.isCorrect ? 'Correct' : 'Incorrect'}</div>
+                        <div>{(problemById.get(s.question_id) || { title: 'Unknown' }).title}</div>
+                        <div className={`font-semibold ${s.is_correct ? 'text-emerald-400' : 'text-rose-400'}`}>{s.is_correct ? 'Correct' : 'Incorrect'}</div>
                       </div>
                     ))}
                     {student.submissions.length === 0 ? <div className="text-sm text-slate-300">No submissions yet.</div> : null}

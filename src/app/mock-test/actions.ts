@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
-import { getPublishedProblems, createMockSession, getProblemById, createSubmission, createMockResult } from "@/lib/db";
+import { getAllProblems, createMockSession, getProblemById, createSubmission, createMockResult } from "@/lib/db";
 import type { QuestionOption } from "@/lib/types";
 import { randomUUID } from "node:crypto";
 
@@ -15,8 +15,8 @@ export async function createMockAction(_prev: MockFormState, formData: FormData)
   const count = Number(formData.get("count") ?? 5) || 5;
   const duration = Number(formData.get("duration") ?? 10) || 10;
 
-  const problems = await getPublishedProblems();
-  const pool = category ? problems.filter((p) => p.category === category) : problems;
+  const problems = await getAllProblems();
+  const pool = problems;
 
   if (pool.length === 0) {
     return { error: "No problems available for the selected topic." };
@@ -29,7 +29,7 @@ export async function createMockAction(_prev: MockFormState, formData: FormData)
 
   const session = await createMockSession(user.id, ids, duration);
   // return session and selected problems so client can render the test inline
-  const selectedMinimal = selected.map((p) => ({ id: p.id, title: p.title, description: p.description, options: p.options, correctOptionId: p.correctOptionId, solutionExplanation: p.solutionExplanation }));
+  const selectedMinimal = selected.map((p) => ({ id: p.id, title: p.title, description: p.description, options: p.options, correct_answer: p.correct_answer, explanation: p.explanation }));
 
   return { session, problems: selectedMinimal } as unknown as { session: any; problems: any[] };
 }
@@ -57,21 +57,16 @@ export async function submitMockAction(_prev: MockFormState, formData: FormData)
     if (!prob) continue;
     total += 1;
     const option = prob.options.find((o: QuestionOption) => o.id === picked);
-    const isCorrect = picked === prob.correctOptionId;
+    const isCorrect = picked === prob.correct_answer;
     if (isCorrect) correct += 1;
 
-    const correctOpt = prob.options.find((o: QuestionOption) => o.id === prob.correctOptionId);
+    const correctOpt = prob.options.find((o: QuestionOption) => o.id === prob.correct_answer);
 
     await createSubmission({
-      problemId: prob.id,
-      userId: user.id,
-      selectedOptionId: picked,
-      selectedOptionText: option?.text ?? "",
-      correctOptionId: prob.correctOptionId,
-      correctOptionText: correctOpt?.text ?? "",
-      solutionExplanation: prob.solutionExplanation,
-      isCorrect,
-      status: isCorrect ? "Correct" : "Incorrect",
+      user_email: user.email,
+      question_id: prob.id,
+      selected_answer: picked,
+      is_correct: isCorrect,
     });
   }
 

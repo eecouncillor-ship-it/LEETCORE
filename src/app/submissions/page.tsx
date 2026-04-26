@@ -21,7 +21,7 @@ export default async function SubmissionsPage() {
 
   return (
     <StudentShell
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions", active: true },
@@ -54,33 +54,33 @@ export default async function SubmissionsPage() {
             >
               <div>
                 <p className="text-base font-semibold text-white">
-                  {problemTitleById.get(submission.problemId) ?? "Question"}
+                  {problemTitleById.get(submission.question_id) ?? "Question"}
                 </p>
                 <p className="mt-1 text-sm text-slate-300">
-                  {submission.selectedOptionText}
+                  Selected: {submission.selected_answer}
                 </p>
               </div>
 
               <span className="text-sm text-slate-200">
-                {submission.selectedOptionId}
+                {submission.is_correct ? 'Correct' : 'Incorrect'}
               </span>
 
               <span className="text-sm text-slate-200">
-                {submission.correctOptionId}
+                {formatDate(submission.submitted_at)}
               </span>
 
               <span
                 className={`justify-self-start rounded-full px-4 py-2 text-base font-semibold ${
-                  submission.isCorrect
+                  submission.is_correct
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-amber-100 text-amber-700"
                 }`}
               >
-                {submission.status}
+                {submission.is_correct ? 'Correct' : 'Incorrect'}
               </span>
 
               <span className="text-sm text-slate-300">
-                {formatDate(submission.submittedAt)}
+                {formatDate(submission.submitted_at)}
               </span>
             </div>
           ))}

@@ -5,7 +5,7 @@ import { StudentShell } from "@/components/student-shell";
 import { requireAuth } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
-import { getPublishedProblems, getSubmissionsForUser } from "@/lib/db";
+import { getAllProblems, getSubmissionsForUser } from "@/lib/db";
 import { formatPercentage, getDifficultyTextClass } from "@/lib/utils";
 
 type ProblemsPageProps = {
@@ -15,47 +15,36 @@ type ProblemsPageProps = {
 function getSolvedProblemIds(userSubmissions: Awaited<ReturnType<typeof getSubmissionsForUser>>) {
   return new Set(
     userSubmissions
-      .filter((submission) => submission.isCorrect)
-      .map((submission) => submission.problemId),
+      .filter((submission) => submission.is_correct)
+      .map((submission) => submission.question_id),
   );
 }
 
 export default async function ProblemsPage({ searchParams }: ProblemsPageProps) {
   const user = await requireAuth();
   const [problems, submissions, resolvedSearchParams] = await Promise.all([
-    getPublishedProblems(),
-    getSubmissionsForUser(user.id),
+    getAllProblems(),
+    getSubmissionsForUser(user.email),
     searchParams,
   ]);
 
   const search = (resolvedSearchParams.q ?? "").trim().toLowerCase();
-  const difficultyFilter = (resolvedSearchParams.difficulty ?? "").trim();
-  const categoryFilter = (resolvedSearchParams.category ?? "").trim();
   const solvedProblemIds = getSolvedProblemIds(submissions);
-  const categories = Array.from(new Set(problems.map((problem) => problem.category))).sort();
 
   const filteredProblems = problems.filter((problem) => {
     const matchesSearch =
       search.length === 0 ||
-      problem.title.toLowerCase().includes(search) ||
-      problem.category.toLowerCase().includes(search) ||
-      problem.tags.some((tag: string) => tag.toLowerCase().includes(search));
+      problem.title.toLowerCase().includes(search);
 
-    const matchesDifficulty =
-      difficultyFilter.length === 0 || problem.difficulty === difficultyFilter;
-
-    const matchesCategory =
-      categoryFilter.length === 0 || problem.category === categoryFilter;
-
-    return matchesSearch && matchesDifficulty && matchesCategory;
+    return matchesSearch;
   });
 
   const acceptanceByProblem = new Map(
     problems.map((problem) => {
       const attempts = submissions.filter(
-        (submission) => submission.problemId === problem.id,
+        (submission) => submission.question_id === problem.id,
       );
-      const accepted = attempts.filter((submission) => submission.isCorrect).length;
+      const accepted = attempts.filter((submission) => submission.is_correct).length;
       const acceptance = attempts.length === 0 ? 0 : (accepted / attempts.length) * 100;
 
       return [problem.id, acceptance];
@@ -64,7 +53,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
 
   return (
     <StudentShell
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/problems", label: "Problems", active: true },
         { href: "/submissions", label: "Submissions" },
@@ -81,52 +70,10 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
               placeholder="Search questions..."
               className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base text-slate-100 outline-none transition focus:border-sky-500"
             />
-
-            <select
-              name="difficulty"
-              defaultValue={difficultyFilter}
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-base text-slate-100 outline-none transition focus:border-sky-500"
-            >
-              <option value="">All Difficulty</option>
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-
-            <select
-              name="category"
-              defaultValue={categoryFilter}
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-base text-slate-100 outline-none transition focus:border-sky-500"
-            >
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
           </form>
 
           <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-sm">
             <div className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/problems"
-                  className={`rounded-full px-4 py-2 text-sm font-semibold ${categoryFilter === "" ? "bg-white/5 text-white" : "bg-transparent text-slate-300"}`}
-                >
-                  All Topics
-                </Link>
-                {categories.map((cat) => (
-                  <Link
-                    key={cat}
-                    href={`/problems?category=${encodeURIComponent(cat)}`}
-                    className={`rounded-full px-4 py-2 text-sm font-medium ${categoryFilter === cat ? "bg-white/5 text-white" : "bg-transparent text-slate-300"}`}
-                  >
-                    {cat}
-                  </Link>
-                ))}
-              </div>
-
               <div className="flex items-center gap-4 text-sm text-slate-300">
                 <div>{solvedProblemIds.size}/{problems.length} Solved</div>
               </div>
@@ -140,7 +87,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
                 return (
                   <Link
                     key={problem.id}
-                    href={`/problems/${problem.slug}`}
+                    href={`/problems/${problem.id}`}
                     className="group mb-3 flex items-center justify-between gap-4 rounded-full bg-white/2/5 border border-white/6 px-6 py-3 transition hover:bg-white/6 backdrop-blur-sm"
                   >
                     <div className="flex items-start gap-4">
@@ -156,13 +103,11 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
                         <p className="text-base font-semibold text-white">
                           {index + 1}. {problem.title}
                         </p>
-                        <p className="mt-1 text-sm text-slate-400">{problem.tags.join(", ") || "General"}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-6">
                       <div className="text-sm text-slate-200">{formatPercentage(acceptance)}</div>
-                      <div className={`text-sm font-semibold ${getDifficultyTextClass(problem.difficulty)}`}>{problem.difficulty}</div>
                       <div className="text-slate-400">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17a1 1 0 100-2 1 1 0 000 2z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><rect x="3" y="7" width="18" height="11" rx="2" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 7V6a5 5 0 0110 0v1" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       </div>
