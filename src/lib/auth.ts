@@ -47,10 +47,19 @@ export async function signIn(email: string, password: string) {
     return null;
   }
 
+  const cookieStore = await cookies();
+
+  cookieStore.set(sessionCookieName, session.token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(session.expiresAt),
+  });
+
   return {
     id: data.id,
     email: data.email,
-    password: data.password,
     role: data.role,
   };
 }
