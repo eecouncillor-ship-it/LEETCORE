@@ -114,6 +114,11 @@ async function seedDatabase() {
   }
 }
 
+// Call seedDatabase on module load (once per server startup)
+seedDatabase().catch(error => {
+  console.error('Failed to seed database on startup:', error);
+});
+
 export async function getUsers() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     throw new Error('Missing Supabase environment variables');
@@ -633,7 +638,7 @@ export async function getSubmissionsForQuestion(questionId: string) {
 export async function getStats() {
   // Get counts in parallel
   const [problemsResult, submissionsResult, usersResult, adminsResult] = await Promise.all([
-    supabase.from('problems').select('id', { count: 'exact', head: true }).eq('published', true),
+    supabase.from('questions').select('id', { count: 'exact', head: true }),
     supabase.from('submissions').select('id', { count: 'exact', head: true }),
     supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'user'),
     supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'admin'),

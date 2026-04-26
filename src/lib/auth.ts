@@ -47,24 +47,11 @@ export async function signIn(email: string, password: string) {
     return null;
   }
 
-  const cookieStore = await cookies();
-
-  cookieStore.set(sessionCookieName, session.token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-    path: "/",
-    expires: new Date(session.expiresAt),
-  });
-
   return {
     id: data.id,
-    name: data.name,
     email: data.email,
-    passwordHash: data.password_hash,
+    password: data.password,
     role: data.role,
-    isBlocked: data.is_blocked,
-    createdAt: data.created_at,
   };
 }
 
