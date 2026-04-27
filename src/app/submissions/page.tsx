@@ -12,7 +12,7 @@ export default async function SubmissionsPage() {
   const user = await requireAuth();
   const [problems, submissions] = await Promise.all([
     getPublishedProblems(),
-    getSubmissionsForUser(user.id),
+    getSubmissionsForUser(user.email),
   ]);
 
   const problemTitleById = new Map(

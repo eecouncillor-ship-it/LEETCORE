@@ -569,7 +569,7 @@ export async function createSubmission(submission: {
   const newSubmission = {
     id: randomUUID(),
     created_at: new Date().toISOString(),
-    user_email: submission.user_email,
+    user_email: submission.user_email.toLowerCase(),
     question_id: submission.question_id,
     selected_answer: submission.selected_answer,
     is_correct: submission.is_correct,
@@ -600,7 +600,7 @@ export async function getSubmissionsForUser(userEmail: string) {
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
-    .eq('user_email', userEmail)
+    .eq('user_email', userEmail.toLowerCase())
     .order('created_at', { ascending: false });
 
   if (error) {

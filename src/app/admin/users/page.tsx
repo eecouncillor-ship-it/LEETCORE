@@ -16,7 +16,7 @@ export default async function AdminUsersPage() {
 
   const studentsWithStats = await Promise.all(
     students.map(async (student) => {
-      const submissions = await getSubmissionsForUser(student.id);
+      const submissions = await getSubmissionsForUser(student.email);
       const solvedCount = new Set(
         submissions
           .filter((submission) => submission.is_correct)

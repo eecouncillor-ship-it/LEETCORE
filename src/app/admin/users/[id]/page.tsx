@@ -34,7 +34,7 @@ export default async function AdminUserDetail({ params }: Props) {
   }
 
   const [submissions, problems] = await Promise.all([
-    getSubmissionsForUser(target.id),
+    getSubmissionsForUser(target.email),
     getAllProblems(),
   ]);
 

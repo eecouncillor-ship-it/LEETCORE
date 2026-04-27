@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function MockTestPage() {
   const user = await requireAuth();
-  const [problems, submissions, results] = await Promise.all([getPublishedProblems(), getSubmissionsForUser(user.id), getMockResultsForUser(user.id)]);
+  const [problems, submissions, results] = await Promise.all([getPublishedProblems(), getSubmissionsForUser(user.email), getMockResultsForUser(user.id)]);
   const categories = Array.from(new Set(problems.map((p: any) => p.category))).sort();
 
   return (
