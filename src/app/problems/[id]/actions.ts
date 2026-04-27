@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
 import { createSubmission, getProblemBySlug } from "@/lib/db";
@@ -34,7 +33,7 @@ export async function submitAnswerAction(
   const problem = await getProblemBySlug(id);
 
   if (!problem) {
-    redirect("/problems");
+    return { error: "Problem not found. Please go back and try again." };
   }
 
   const selectedOption = problem.options.find(
