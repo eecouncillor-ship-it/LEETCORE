@@ -4,6 +4,7 @@ import { SubmissionForm } from "@/app/problems/[id]/submission-form";
 import { StudentShell } from "@/components/student-shell";
 import { requireAuth } from "@/lib/auth";
 import {
+  getAllProblems,
   getProblemBySlug,
   getSubmissionsForQuestion,
   getSubmissionsForUser,
@@ -19,7 +20,10 @@ type ProblemPageProps = {
 export default async function ProblemPage({ params }: ProblemPageProps) {
   const user = await requireAuth();
   const { id } = await params;
-  const problem = await getProblemBySlug(id);
+  const [problem, problems] = await Promise.all([
+    getProblemBySlug(id),
+    getAllProblems(),
+  ]);
 
   if (!problem) {
     notFound();
@@ -29,6 +33,12 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
     getSubmissionsForUser(user.email),
     getSubmissionsForQuestion(problem.id),
   ]);
+
+  const currentIndex = problems.findIndex((item) => item.slug === problem.slug);
+  const nextProblem = currentIndex >= 0 && currentIndex < problems.length - 1
+    ? problems[currentIndex + 1]
+    : null;
+  const nextSlug = nextProblem?.slug ?? null;
 
   const filteredSubmissions = userSubmissions.filter(
     (submission) => submission.question_id === problem.id,
@@ -67,7 +77,7 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
 
         <section className="space-y-6">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
-            <SubmissionForm slug={problem.slug} options={problem.options} />
+            <SubmissionForm slug={problem.slug} options={problem.options} nextSlug={nextSlug} />
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">

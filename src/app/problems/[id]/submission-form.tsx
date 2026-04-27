@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -27,9 +28,11 @@ function SubmitButton() {
 export function SubmissionForm({
   slug,
   options,
+  nextSlug,
 }: {
   slug: string;
   options: Array<{ id: string; text: string }>;
+  nextSlug: string | null;
 }) {
   const submitWithSlug = submitAnswerAction.bind(null, slug);
   const [state, formAction] = useActionState(submitWithSlug, initialState);
@@ -76,34 +79,54 @@ export function SubmissionForm({
       ) : null}
 
       {state.result ? (
-        <div
-          className={`rounded-[28px] border px-5 py-5 ${
-            state.result.isCorrect
-              ? "border-emerald-200 bg-emerald-50"
-              : "border-amber-200 bg-amber-50"
-          }`}
-        >
-          <p
-            className={`text-sm font-semibold uppercase tracking-[0.18em] ${
-              state.result.isCorrect ? "text-emerald-700" : "text-amber-700"
+        <div className="space-y-4">
+          <div
+            className={`rounded-[28px] border px-5 py-5 ${
+              state.result.isCorrect
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-amber-200 bg-amber-50"
             }`}
           >
-            {state.result.isCorrect ? "Correct answer" : "Incorrect answer"}
-          </p>
-          <p className="mt-3 text-sm leading-7 text-slate-800">
-            You selected <span className="font-semibold">{state.result.selectedOptionId}</span>
-            {" - "}
-            {state.result.selectedOptionText}
-          </p>
-          <p className="mt-2 text-sm leading-7 text-slate-800">
-            Correct answer:{" "}
-            <span className="font-semibold">
-              {state.result.correctOptionId} - {state.result.correctOptionText}
-            </span>
-          </p>
-          <p className="mt-3 text-sm leading-7 text-slate-700">
-            {state.result.solutionExplanation}
-          </p>
+            <p
+              className={`text-sm font-semibold uppercase tracking-[0.18em] ${
+                state.result.isCorrect ? "text-emerald-700" : "text-amber-700"
+              }`}
+            >
+              {state.result.isCorrect ? "Correct answer" : "Incorrect answer"}
+            </p>
+            <p className="mt-3 text-sm leading-7 text-slate-800">
+              You selected <span className="font-semibold">{state.result.selectedOptionId}</span>
+              {" - "}
+              {state.result.selectedOptionText}
+            </p>
+            <p className="mt-2 text-sm leading-7 text-slate-800">
+              Correct answer:{" "}
+              <span className="font-semibold">
+                {state.result.correctOptionId} - {state.result.correctOptionText}
+              </span>
+            </p>
+            <p className="mt-3 text-sm leading-7 text-slate-700">
+              {state.result.solutionExplanation}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {nextSlug ? (
+              <Link
+                href={`/problems/${nextSlug}`}
+                className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Next question
+              </Link>
+            ) : (
+              <Link
+                href="/problems"
+                className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Back to all questions
+              </Link>
+            )}
+          </div>
         </div>
       ) : null}
     </form>
