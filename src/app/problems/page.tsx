@@ -87,7 +87,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
                 return (
                   <Link
                     key={problem.id}
-                    href={`/problems/${problem.id}`}
+                    href={`/problems/${problem.slug}`}
                     className="group mb-3 flex items-center justify-between gap-4 rounded-full bg-white/2/5 border border-white/6 px-6 py-3 transition hover:bg-white/6 backdrop-blur-sm"
                   >
                     <div className="flex items-start gap-4">

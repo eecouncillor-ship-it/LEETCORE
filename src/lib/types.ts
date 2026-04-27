@@ -16,6 +16,7 @@ export type UserRecord = {
 
 export type ProblemRecord = {
   id: string;
+  slug: string;
   title: string;
   description: string;
   options: QuestionOption[];

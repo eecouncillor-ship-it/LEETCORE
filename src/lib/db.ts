@@ -1,5 +1,6 @@
 import { randomUUID, scryptSync } from "node:crypto";
 import { supabase } from "@/lib/supabase";
+import { slugify } from "@/lib/utils";
 
 import type {
   DatabaseShape,
@@ -28,6 +29,7 @@ function buildSeedQuestions(): ProblemRecord[] {
   return [
     {
       id: randomUUID(),
+      slug: "big-o-of-binary-search",
       title: "Big O of Binary Search",
       description:
         "When binary search is performed on a sorted array of n elements, what is the time complexity in the worst case?",
@@ -44,6 +46,7 @@ function buildSeedQuestions(): ProblemRecord[] {
     },
     {
       id: randomUUID(),
+      slug: "sql-clause-for-filtering-groups",
       title: "SQL Clause for Filtering Groups",
       description:
         "A query uses GROUP BY and should return only those groups whose count is greater than 3. Which SQL clause should be used for that condition?",
@@ -60,6 +63,7 @@ function buildSeedQuestions(): ProblemRecord[] {
     },
     {
       id: randomUUID(),
+      slug: "http-status-for-missing-resource",
       title: "HTTP Status for Missing Resource",
       description:
         "A browser requests a route that does not exist on the server. Which HTTP status code is the most appropriate response?",
@@ -240,6 +244,7 @@ export async function getPublishedProblems() {
 
   return (data || []).map(problem => ({
     id: problem.id,
+    slug: problem.slug,
     title: problem.title,
     description: problem.description,
     options: problem.options,
@@ -262,6 +267,7 @@ export async function getAllProblems() {
 
   return (data || []).map(problem => ({
     id: problem.id,
+    slug: problem.slug,
     title: problem.title,
     description: problem.description,
     options: problem.options,
@@ -269,31 +275,6 @@ export async function getAllProblems() {
     explanation: problem.explanation,
     created_at: problem.created_at,
   }));
-}
-
-export async function getProblemBySlug(slug: string) {
-  const { data, error } = await supabase
-    .from('questions')
-    .select('*')
-    .eq('id', slug)
-    .single();
-
-  if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching problem by slug:', error);
-    return null;
-  }
-
-  if (!data) return null;
-
-  return {
-    id: data.id,
-    title: data.title,
-    description: data.description,
-    options: data.options,
-    correct_answer: data.correct_answer,
-    explanation: data.explanation,
-    created_at: data.created_at,
-  };
 }
 
 export async function getProblemById(id: string) {
@@ -312,6 +293,33 @@ export async function getProblemById(id: string) {
 
   return {
     id: data.id,
+    slug: data.slug,
+    title: data.title,
+    description: data.description,
+    options: data.options,
+    correct_answer: data.correct_answer,
+    explanation: data.explanation,
+    created_at: data.created_at,
+  };
+}
+
+export async function getProblemBySlug(slug: string) {
+  const { data, error } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching problem by slug:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    slug: data.slug,
     title: data.title,
     description: data.description,
     options: data.options,

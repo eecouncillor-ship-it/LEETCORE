@@ -4,7 +4,7 @@ import { SubmissionForm } from "@/app/problems/[id]/submission-form";
 import { StudentShell } from "@/components/student-shell";
 import { requireAuth } from "@/lib/auth";
 import {
-  getProblemById,
+  getProblemBySlug,
   getSubmissionsForQuestion,
   getSubmissionsForUser,
 } from "@/lib/db";
@@ -19,7 +19,7 @@ type ProblemPageProps = {
 export default async function ProblemPage({ params }: ProblemPageProps) {
   const user = await requireAuth();
   const { id } = await params;
-  const problem = await getProblemById(id);
+  const problem = await getProblemBySlug(id);
 
   if (!problem) {
     notFound();
