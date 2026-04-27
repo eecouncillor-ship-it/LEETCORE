@@ -560,7 +560,7 @@ export async function createSubmission(submission: {
 }) {
   const newSubmission = {
     id: randomUUID(),
-    submitted_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
     user_email: submission.user_email,
     question_id: submission.question_id,
     selected_answer: submission.selected_answer,
@@ -584,7 +584,7 @@ export async function createSubmission(submission: {
     question_id: data.question_id,
     selected_answer: data.selected_answer,
     is_correct: data.is_correct,
-    submitted_at: data.submitted_at,
+    created_at: data.created_at,
   };
 }
 
@@ -593,7 +593,7 @@ export async function getSubmissionsForUser(userEmail: string) {
     .from('submissions')
     .select('*')
     .eq('user_email', userEmail)
-    .order('submitted_at', { ascending: false });
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching submissions for user:', error);
@@ -606,7 +606,7 @@ export async function getSubmissionsForUser(userEmail: string) {
     question_id: submission.question_id,
     selected_answer: submission.selected_answer,
     is_correct: submission.is_correct,
-    submitted_at: submission.submitted_at,
+    created_at: submission.created_at,
   }));
 }
 
@@ -615,7 +615,7 @@ export async function getSubmissionsForQuestion(questionId: string) {
     .from('submissions')
     .select('*')
     .eq('question_id', questionId)
-    .order('submitted_at', { ascending: false });
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching submissions for question:', error);
@@ -628,7 +628,7 @@ export async function getSubmissionsForQuestion(questionId: string) {
     question_id: submission.question_id,
     selected_answer: submission.selected_answer,
     is_correct: submission.is_correct,
-    submitted_at: submission.submitted_at,
+    created_at: submission.created_at,
   }));
 }
 

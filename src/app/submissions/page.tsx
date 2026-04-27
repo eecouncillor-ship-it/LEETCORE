@@ -66,7 +66,7 @@ export default async function SubmissionsPage() {
               </span>
 
               <span className="text-sm text-slate-200">
-                {formatDate(submission.submitted_at)}
+                {formatDate(submission.created_at)}
               </span>
 
               <span
@@ -80,7 +80,7 @@ export default async function SubmissionsPage() {
               </span>
 
               <span className="text-sm text-slate-300">
-                {formatDate(submission.submitted_at)}
+                {formatDate(submission.created_at)}
               </span>
             </div>
           ))}

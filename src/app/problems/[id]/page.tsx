@@ -96,7 +96,7 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-slate-300">
-                      Submitted {formatDate(submission.submitted_at)}
+                      Submitted {formatDate(submission.created_at)}
                     </p>
                   </div>
                 ))

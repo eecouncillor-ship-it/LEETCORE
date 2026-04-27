@@ -187,7 +187,7 @@
   "submissions": [
     {
       "id": "9b8c2528-2eb5-4093-9a55-43b92c60d3a0",
-      "submitted_at": "2026-04-24T19:49:25.890Z",
+      "created_at": "2026-04-24T19:49:25.890Z",
       "question_id": "c80aa316-1f98-4e0d-a20e-5c8cb7543f1a",
       "user_email": "rahul24nov2006@gmail.com",
       "selected_answer": "B",
@@ -195,7 +195,7 @@
     },
     {
       "id": "8dba82b7-656c-4793-a21e-3dadddec655a",
-      "submitted_at": "2026-04-24T19:49:25.824Z",
+      "created_at": "2026-04-24T19:49:25.824Z",
       "question_id": "5876cceb-a8f8-4534-a059-c391c43ee886",
       "user_email": "rahul24nov2006@gmail.com",
       "selected_answer": "B",
@@ -203,7 +203,7 @@
     },
     {
       "id": "14cd27fe-cf78-4553-ab78-ec98f16e223b",
-      "submitted_at": "2026-04-24T19:49:25.321Z",
+      "created_at": "2026-04-24T19:49:25.321Z",
       "question_id": "6d2276fb-1a6f-42d3-bc9c-168e71081b0b",
       "user_email": "rahul24nov2006@gmail.com",
       "selected_answer": "B",
@@ -211,7 +211,7 @@
     },
     {
       "id": "15cb67cd-8c8b-4471-af98-74dcaa898e9e",
-      "submitted_at": "2026-04-24T19:49:25.126Z",
+      "created_at": "2026-04-24T19:49:25.126Z",
       "question_id": "a24d4d0a-fb8d-44a7-9d0a-9d7f90bf9053",
       "user_email": "rahul24nov2006@gmail.com",
       "selected_answer": "B",
@@ -219,7 +219,7 @@
     },
     {
       "id": "56bf57ca-b687-403c-80cf-2b29339d2b96",
-      "submitted_at": "2026-04-24T19:49:25.092Z",
+      "created_at": "2026-04-24T19:49:25.092Z",
       "question_id": "f000cb7f-1a95-42b1-81ec-1fce8149c36f",
       "user_email": "rahul24nov2006@gmail.com",
       "selected_answer": "B",

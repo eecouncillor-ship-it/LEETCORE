@@ -107,7 +107,7 @@ export default async function AdminUserDetail({ params }: Props) {
                 <div key={s.id} className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-semibold text-white">{prob?.title ?? 'Unknown problem'}</div>
-                    <div className="text-xs text-slate-300">{formatDate(s.submitted_at)}</div>
+                    <div className="text-xs text-slate-300">{formatDate(s.created_at)}</div>
                   </div>
                   <div className={`text-sm font-semibold ${s.is_correct ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {s.is_correct ? 'Correct' : 'Incorrect'}

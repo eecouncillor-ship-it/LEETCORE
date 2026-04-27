@@ -32,7 +32,7 @@ export type SubmissionRecord = {
   question_id: string;
   selected_answer: string;
   is_correct: boolean;
-  submitted_at: string;
+  created_at: string;
 };
 
 export type SessionRecord = {
