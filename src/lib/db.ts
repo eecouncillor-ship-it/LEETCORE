@@ -114,10 +114,7 @@ async function seedDatabase() {
   }
 }
 
-// Call seedDatabase on module load (once per server startup)
-seedDatabase().catch(error => {
-  console.error('Failed to seed database on startup:', error);
-});
+
 
 export async function getUsers() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
