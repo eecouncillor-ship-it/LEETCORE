@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
-import { createSubmission, getProblemById } from "@/lib/db";
+import { createSubmission, getProblemBySlug } from "@/lib/db";
 import type { QuestionOption } from "@/lib/types";
 
 export type SubmissionState = {
@@ -31,7 +31,7 @@ export async function submitAnswerAction(
     return { error: "Select an option before submitting your answer." };
   }
 
-  const problem = await getProblemById(id);
+  const problem = await getProblemBySlug(id);
 
   if (!problem) {
     redirect("/problems");
