@@ -338,6 +338,7 @@ export async function createProblem(problem: {
 }) {
   const newProblem = {
     id: randomUUID(),
+    slug: slugify(problem.title),
     created_at: new Date().toISOString(),
     title: problem.title,
     description: problem.description,
