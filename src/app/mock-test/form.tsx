@@ -41,6 +41,11 @@ export function MockForm({ categories }: { categories: string[] }) {
     console.log('[FORM]   expires_at exists (should be false):', 'expires_at' in sess);
     console.log('[FORM]   expires_at value (should be undefined):', (sess as any).expires_at);
 
+    // Critical debug: Check if session is already expired
+    console.log('[FORM] Session expiresAt:', sess.expiresAt);
+    console.log('[FORM] Current time:', new Date().toISOString());
+    console.log('[FORM] Is session already expired?', new Date(sess.expiresAt).getTime() <= new Date().getTime());
+
     const submitPending = (submitState as any).pending || false;
 
     return (

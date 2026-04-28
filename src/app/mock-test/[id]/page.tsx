@@ -29,6 +29,11 @@ export default async function MockSessionPage({ params }: { params: Promise<{ id
 
   const problems = await Promise.all(session.problemIds.map((id: string) => getProblemById(id)));
 
+  // Critical debug: Check if session is already expired
+  console.log('[SESSION_PAGE] Session expiresAt:', session.expiresAt);
+  console.log('[SESSION_PAGE] Current time:', new Date().toISOString());
+  console.log('[SESSION_PAGE] Is session already expired?', new Date(session.expiresAt).getTime() <= new Date().getTime());
+
   return (
     <StudentShell
       userName={user.email}
