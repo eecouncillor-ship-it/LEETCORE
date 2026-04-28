@@ -4,25 +4,52 @@ import React from "react";
 
 export default function ClientTimer({ endTime }: { endTime: string }) {
   const [remaining, setRemaining] = React.useState(() => {
-    const end = new Date(endTime);
-    const now = new Date();
-    const ms = end.getTime() - now.getTime();
-    return Math.max(0, Math.floor(ms / 1000));
+    if (!endTime) return 0;
+
+    try {
+      const end = new Date(endTime);
+      const now = new Date();
+
+      // Check if endTime is a valid date
+      if (isNaN(end.getTime())) {
+        console.error('Invalid endTime provided to ClientTimer:', endTime);
+        return 0;
+      }
+
+      const ms = end.getTime() - now.getTime();
+      return Math.max(0, Math.floor(ms / 1000));
+    } catch (error) {
+      console.error('Error parsing endTime in ClientTimer:', error, endTime);
+      return 0;
+    }
   });
 
   React.useEffect(() => {
-    if (remaining <= 0) return;
+    if (remaining <= 0 || !endTime) return;
 
     const id = setInterval(() => {
-      const end = new Date(endTime);
-      const now = new Date();
-      const ms = end.getTime() - now.getTime();
-      const newRemaining = Math.max(0, Math.floor(ms / 1000));
+      try {
+        const end = new Date(endTime);
+        const now = new Date();
 
-      setRemaining(newRemaining);
+        if (isNaN(end.getTime())) {
+          console.error('Invalid endTime during countdown:', endTime);
+          setRemaining(0);
+          return;
+        }
 
-      // Clear interval when time is up
-      if (newRemaining <= 0) {
+        const ms = end.getTime() - now.getTime();
+        const newRemaining = Math.max(0, Math.floor(ms / 1000));
+
+        setRemaining(newRemaining);
+
+        // Clear interval when time is up
+        if (newRemaining <= 0) {
+          clearInterval(id);
+        }
+      } catch (error) {
+        console.error('Error during timer countdown:', error);
+        setRemaining(0);
         clearInterval(id);
       }
     }, 1000);
@@ -34,6 +61,15 @@ export default function ClientTimer({ endTime }: { endTime: string }) {
   const secs = remaining % 60;
 
   const isExpired = remaining <= 0;
+
+  // If endTime is invalid, show error state
+  if (!endTime) {
+    return (
+      <div className="rounded-2xl px-3 py-2 text-sm font-semibold w-max bg-red-500/20 text-red-400 border border-red-500/30">
+        Timer Error: No end time provided
+      </div>
+    );
+  }
 
   return (
     <div className={`rounded-2xl px-3 py-2 text-sm font-semibold w-max ${

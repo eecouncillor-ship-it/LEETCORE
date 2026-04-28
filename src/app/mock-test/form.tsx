@@ -19,6 +19,10 @@ export function MockForm({ categories }: { categories: string[] }) {
     const sess = (state as any).session as any;
     const problems = (state as any).problems as any[];
 
+    // Debug logging
+    console.log('Mock test session:', sess);
+    console.log('Session expiresAt:', sess.expiresAt);
+
     const submitPending = (submitState as any).pending || false;
 
     return (
