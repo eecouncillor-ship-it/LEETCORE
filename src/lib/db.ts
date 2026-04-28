@@ -732,7 +732,7 @@ export async function createMockSession(userId: string, problemIds: string[], du
     return null;
   }
 
-  return {
+  const mappedSession = {
     id: data.id,
     userId: data.user_id,
     problemIds: data.problem_ids,
@@ -740,6 +740,10 @@ export async function createMockSession(userId: string, problemIds: string[], du
     expiresAt: data.expires_at,
     createdAt: data.created_at,
   };
+  console.log('[DB] createMockSession - Raw DB response:', data);
+  console.log('[DB] createMockSession - Mapped session:', mappedSession);
+  console.log('[DB] createMockSession - expiresAt value:', mappedSession.expiresAt);
+  return mappedSession;
 }
 
 export async function getMockSessionById(id: string) {

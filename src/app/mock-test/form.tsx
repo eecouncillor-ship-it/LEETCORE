@@ -20,8 +20,18 @@ export function MockForm({ categories }: { categories: string[] }) {
     const problems = (state as any).problems as any[];
 
     // Debug logging
-    console.log('Mock test session:', sess);
-    console.log('Session expiresAt:', sess.expiresAt);
+    console.log('[FORM] Mock test session object:', sess);
+    console.log('[FORM] Session expiresAt:', sess.expiresAt);
+    console.log('[FORM] Session expires_at (wrong key):', (sess as any).expires_at);
+    console.log('[FORM] All session keys:', Object.keys(sess));
+    console.log('[FORM] Session field types:', {
+      id: typeof sess.id,
+      userId: typeof sess.userId,
+      problemIds: typeof sess.problemIds,
+      startedAt: typeof sess.startedAt,
+      expiresAt: typeof sess.expiresAt,
+      createdAt: typeof sess.createdAt,
+    });
 
     const submitPending = (submitState as any).pending || false;
 
