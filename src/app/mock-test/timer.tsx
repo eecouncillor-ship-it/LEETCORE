@@ -3,10 +3,13 @@
 import React from "react";
 
 export default function ClientTimer({ endTime }: { endTime: string }) {
-  console.log('ClientTimer rendered with endTime:', endTime);
+  console.log('[TIMER] ClientTimer rendered with endTime:', endTime);
 
   const [remaining, setRemaining] = React.useState(() => {
-    if (!endTime) return 0;
+    if (!endTime) {
+      console.log('[TIMER] No endTime provided');
+      return 0;
+    }
 
     try {
       const end = new Date(endTime);
@@ -14,16 +17,21 @@ export default function ClientTimer({ endTime }: { endTime: string }) {
 
       // Check if endTime is a valid date
       if (isNaN(end.getTime())) {
-        console.error('Invalid endTime provided to ClientTimer:', endTime);
+        console.error('[TIMER] Invalid endTime provided to ClientTimer:', endTime);
         return 0;
       }
 
       const ms = end.getTime() - now.getTime();
       const initialRemaining = Math.max(0, Math.floor(ms / 1000));
-      console.log('Initial remaining time:', initialRemaining, 'seconds');
+      console.log('[TIMER] Initial calculation:');
+      console.log('[TIMER]   end time:', end.toISOString());
+      console.log('[TIMER]   now time:', now.toISOString());
+      console.log('[TIMER]   difference (ms):', ms);
+      console.log('[TIMER]   difference (seconds):', initialRemaining);
+      console.log('[TIMER]   difference (minutes):', initialRemaining / 60);
       return initialRemaining;
     } catch (error) {
-      console.error('Error parsing endTime in ClientTimer:', error, endTime);
+      console.error('[TIMER] Error parsing endTime in ClientTimer:', error, endTime);
       return 0;
     }
   });

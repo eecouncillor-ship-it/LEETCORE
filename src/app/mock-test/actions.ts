@@ -15,6 +15,11 @@ export async function createMockAction(_prev: MockFormState, formData: FormData)
   const count = Number(formData.get("count") ?? 5) || 5;
   const duration = Number(formData.get("duration") ?? 10) || 10;
 
+  console.log('[ACTION] Form duration input:', formData.get("duration"));
+  console.log('[ACTION] Parsed duration:', duration);
+  console.log('[ACTION] Duration type:', typeof duration);
+  console.log('[ACTION] Is duration a valid number?', !isNaN(duration) && duration > 0);
+
   const problems = await getAllProblems();
   const pool = problems;
 

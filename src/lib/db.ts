@@ -712,6 +712,18 @@ export async function createMockSession(userId: string, problemIds: string[], du
   const started_at = now.toISOString();
   const expires_at = new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString();
 
+  console.log('[DB] createMockSession called with:');
+  console.log('[DB]   userId:', userId);
+  console.log('[DB]   problemIds count:', problemIds.length);
+  console.log('[DB]   durationMinutes:', durationMinutes);
+  console.log('[DB]   durationMinutes type:', typeof durationMinutes);
+  console.log('[DB]   Is valid duration?', !isNaN(durationMinutes) && durationMinutes > 0);
+  console.log('[DB]   now:', now.toISOString());
+  console.log('[DB]   expires_at:', expires_at);
+  console.log('[DB]   Time difference (ms):', new Date(expires_at).getTime() - now.getTime());
+  console.log('[DB]   Time difference (seconds):', (new Date(expires_at).getTime() - now.getTime()) / 1000);
+  console.log('[DB]   Time difference (minutes):', (new Date(expires_at).getTime() - now.getTime()) / 60000);
+
   const session = {
     id: randomUUID(),
     user_id: userId,
