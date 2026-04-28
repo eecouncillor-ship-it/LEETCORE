@@ -709,15 +709,24 @@ export async function createUser(user: {
 
 export async function createMockSession(userId: string, problemIds: string[], durationMinutes: number) {
   const now = new Date();
+
+  const safeDuration =
+    Number(durationMinutes) > 0
+      ? Number(durationMinutes)
+      : 60;
+
   const started_at = now.toISOString();
-  const expires_at = new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString();
+  const expires_at = new Date(
+    now.getTime() + safeDuration * 60 * 1000
+  ).toISOString();
 
   console.log('[DB] createMockSession called with:');
   console.log('[DB]   userId:', userId);
   console.log('[DB]   problemIds count:', problemIds.length);
   console.log('[DB]   durationMinutes:', durationMinutes);
+  console.log('[DB]   safeDuration:', safeDuration);
   console.log('[DB]   durationMinutes type:', typeof durationMinutes);
-  console.log('[DB]   Is valid duration?', !isNaN(durationMinutes) && durationMinutes > 0);
+  console.log('[DB]   Is valid duration?', !isNaN(Number(durationMinutes)) && Number(durationMinutes) > 0);
   console.log('[DB]   now:', now.toISOString());
   console.log('[DB]   expires_at:', expires_at);
   console.log('[DB]   Time difference (ms):', new Date(expires_at).getTime() - now.getTime());
