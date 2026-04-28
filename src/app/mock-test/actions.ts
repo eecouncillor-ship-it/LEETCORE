@@ -28,6 +28,9 @@ export async function createMockAction(_prev: MockFormState, formData: FormData)
   const ids = selected.map((p) => p.id);
 
   const session = await createMockSession(user.id, ids, duration);
+  if (!session) {
+    return { error: "Failed to create mock session. Please try again." };
+  }
   // return session and selected problems so client can render the test inline
   const selectedMinimal = selected.map((p) => ({ id: p.id, title: p.title, description: p.description, options: p.options, correct_answer: p.correct_answer, explanation: p.explanation }));
 
