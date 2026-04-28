@@ -33,6 +33,14 @@ export function MockForm({ categories }: { categories: string[] }) {
       createdAt: typeof sess.createdAt,
     });
 
+    // Verify field name mapping
+    console.log('[FORM] Field name verification:');
+    console.log('[FORM]   expiresAt exists:', 'expiresAt' in sess);
+    console.log('[FORM]   expiresAt value:', sess.expiresAt);
+    console.log('[FORM]   expiresAt is valid date:', !isNaN(new Date(sess.expiresAt).getTime()));
+    console.log('[FORM]   expires_at exists (should be false):', 'expires_at' in sess);
+    console.log('[FORM]   expires_at value (should be undefined):', (sess as any).expires_at);
+
     const submitPending = (submitState as any).pending || false;
 
     return (

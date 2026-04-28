@@ -12,6 +12,12 @@ export default async function MockSessionPage({ params }: { params: Promise<{ id
   const user = await requireAuth();
   const { id } = await params;
   const session = await getMockSessionById(id);
+
+  console.log('[SESSION_PAGE] Retrieved session for ID:', id);
+  console.log('[SESSION_PAGE] Session object:', session);
+  console.log('[SESSION_PAGE] Session expiresAt:', session?.expiresAt);
+  console.log('[SESSION_PAGE] Session expires_at (wrong key):', session ? (session as any).expires_at : 'N/A');
+
   if (!session || session.userId !== user.id) {
     return (
       <div className="mx-auto max-w-2xl">
