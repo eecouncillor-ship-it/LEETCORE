@@ -6,6 +6,8 @@ import AnimatedLanding from "@/components/animated-landing";
 import { getCurrentUser } from "@/lib/auth";
 import { getPublishedProblems, getStats } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const [user, stats, problems] = await Promise.all([
     getCurrentUser(),
@@ -39,6 +41,7 @@ export default async function Home() {
             </a>
             <Link
               href="/register"
+              prefetch={false}
               className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-sky-400/40 hover:text-white"
             >
               Register

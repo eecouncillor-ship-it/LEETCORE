@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
 import { createSubmission, getProblemBySlug } from "@/lib/db";
+import type { QuestionOption } from "@/lib/types";
 
 export type SubmissionState = {
   error?: string;
@@ -19,7 +19,7 @@ export type SubmissionState = {
 };
 
 export async function submitAnswerAction(
-  slug: string,
+  id: string,
   _previousState: SubmissionState,
   formData: FormData,
 ): Promise<SubmissionState> {
@@ -30,14 +30,14 @@ export async function submitAnswerAction(
     return { error: "Select an option before submitting your answer." };
   }
 
-  const problem = await getProblemBySlug(slug);
+  const problem = await getProblemBySlug(id);
 
-  if (!problem || !problem.published) {
-    redirect("/problems");
+  if (!problem) {
+    return { error: "Problem not found. Please go back and try again." };
   }
 
   const selectedOption = problem.options.find(
-    (option) => option.id === selectedOptionId,
+    (option: QuestionOption) => option.id === selectedOptionId,
   );
 
   if (!selectedOption) {
@@ -45,7 +45,7 @@ export async function submitAnswerAction(
   }
 
   const correctOption = problem.options.find(
-    (option) => option.id === problem.correctOptionId,
+    (option: QuestionOption) => option.id === problem.correct_answer,
   );
 
   if (!correctOption) {
@@ -55,19 +55,14 @@ export async function submitAnswerAction(
   const isCorrect = selectedOption.id === correctOption.id;
 
   await createSubmission({
-    problemId: problem.id,
-    userId: user.id,
-    selectedOptionId: selectedOption.id,
-    selectedOptionText: selectedOption.text,
-    correctOptionId: correctOption.id,
-    correctOptionText: correctOption.text,
-    solutionExplanation: problem.solutionExplanation,
-    isCorrect,
-    status: isCorrect ? "Correct" : "Incorrect",
+    user_email: user.email,
+    question_id: problem.id,
+    selected_answer: selectedOption.id,
+    is_correct: isCorrect,
   });
 
   revalidatePath("/problems");
-  revalidatePath(`/problems/${slug}`);
+  revalidatePath(`/problems/${id}`);
 
   return {
     result: {
@@ -76,7 +71,7 @@ export async function submitAnswerAction(
       selectedOptionText: selectedOption.text,
       correctOptionId: correctOption.id,
       correctOptionText: correctOption.text,
-      solutionExplanation: problem.solutionExplanation,
+      solutionExplanation: problem.explanation,
     },
   };
 }

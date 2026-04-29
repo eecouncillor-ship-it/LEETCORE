@@ -9,8 +9,8 @@ type ProgressSidebarProps = {
 function getSolvedProblemIds(submissions: SubmissionRecord[]) {
   return new Set(
     submissions
-      .filter((submission) => submission.isCorrect)
-      .map((submission) => submission.problemId),
+      .filter((submission) => submission.is_correct)
+      .map((submission) => submission.question_id),
   );
 }
 
@@ -24,12 +24,9 @@ export function StudentProgressSidebar({
   const completion =
     totalCount === 0 ? 0 : Math.round((solvedCount / totalCount) * 100);
 
-  const difficultyBreakdown = ["Easy", "Medium", "Hard"].map((difficulty) => ({
-    difficulty,
-    count: problems.filter((problem) => problem.difficulty === difficulty).length,
-  }));
+  const difficultyBreakdown = [];
 
-  const correctCount = submissions.filter((submission) => submission.isCorrect).length;
+  const correctCount = submissions.filter((submission) => submission.is_correct).length;
   const incorrectCount = submissions.length - correctCount;
 
   return (
@@ -49,20 +46,6 @@ export function StudentProgressSidebar({
           />
         </div>
         <p className="mt-4 text-sm text-slate-300">{completion}% complete</p>
-      </section>
-
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-white">By Difficulty</h2>
-        <div className="mt-6 space-y-4 text-base">
-          {difficultyBreakdown.map((item) => (
-            <div key={item.difficulty} className="flex items-center justify-between">
-              <span className={getDifficultyTextClass(item.difficulty)}>
-                {item.difficulty}
-              </span>
-              <span className="text-slate-300">{item.count}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm">

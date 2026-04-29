@@ -27,17 +27,6 @@ export function RegisterForm() {
   return (
     <form action={formAction} className="space-y-4">
       <div>
-        <label className="mb-2 block text-sm font-semibold text-slate-700">Name</label>
-        <input
-          name="name"
-          type="text"
-          required
-          className="w-full rounded-2xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-emerald-400"
-          placeholder="Your full name"
-        />
-      </div>
-
-      <div>
         <label className="mb-2 block text-sm font-semibold text-slate-700">Email</label>
         <input
           name="email"

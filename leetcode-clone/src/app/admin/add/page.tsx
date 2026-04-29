@@ -5,6 +5,8 @@ import { AppShell } from "@/components/shell";
 import { requireAuth } from "@/lib/auth";
 import { getStats } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminAddPage() {
   const [user, stats] = await Promise.all([requireAuth("admin"), getStats()]);
 
@@ -13,7 +15,7 @@ export default async function AdminAddPage() {
       heading="Add question"
       subheading="Create a new MCQ for the question bank."
       roleLabel="Admin portal"
-      userName={user.name}
+      userName={user.email}
       actions={
         <Link
           href="/admin"

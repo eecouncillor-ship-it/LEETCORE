@@ -6,9 +6,18 @@ import Link from "next/link";
 import ClientTimer from "../timer";
 import { MockSessionForm } from "../session-form";
 
-export default async function MockSessionPage({ params }: { params: { id: string } }) {
+export const dynamic = 'force-dynamic';
+
+export default async function MockSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireAuth();
-  const session = await getMockSessionById(params.id);
+  const { id } = await params;
+  const session = await getMockSessionById(id);
+
+  console.log('[SESSION_PAGE] Retrieved session for ID:', id);
+  console.log('[SESSION_PAGE] Session object:', session);
+  console.log('[SESSION_PAGE] Session expiresAt:', session?.expiresAt);
+  console.log('[SESSION_PAGE] Session expires_at (wrong key):', session ? (session as any).expires_at : 'N/A');
+
   if (!session || session.userId !== user.id) {
     return (
       <div className="mx-auto max-w-2xl">
@@ -20,26 +29,33 @@ export default async function MockSessionPage({ params }: { params: { id: string
 
   const problems = await Promise.all(session.problemIds.map((id: string) => getProblemById(id)));
 
+  // Critical debug: Check if session is already expired
+  console.log('[SESSION_PAGE] Session expiresAt:', session.expiresAt);
+  console.log('[SESSION_PAGE] Current time:', new Date().toISOString());
+  console.log('[SESSION_PAGE] Is session already expired?', new Date(session.expiresAt).getTime() <= new Date().getTime());
+
   return (
     <StudentShell
-      userName={user.name}
+      userName={user.email}
       navItems={[
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions" },
         { href: "/mock-test", label: "Mock Test", active: true },
       ]}
     >
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="h-screen flex flex-col gap-4">
+        <div className="flex items-center justify-between flex-shrink-0">
           <h1 className="text-2xl font-black text-white">Mock Test</h1>
           <div className="text-sm text-slate-300">Ends at: {new Date(session.expiresAt).toLocaleString()}</div>
         </div>
 
-        <div className="mb-4">
+        <div className="flex-shrink-0">
           <ClientTimer endTime={session.expiresAt} />
         </div>
 
-        <MockSessionForm sessionId={session.id} problems={problems.filter(Boolean)} />
+        <div className="flex-1 overflow-hidden">
+          <MockSessionForm sessionId={session.id} problems={problems.filter(Boolean)} />
+        </div>
       </div>
     </StudentShell>
   );

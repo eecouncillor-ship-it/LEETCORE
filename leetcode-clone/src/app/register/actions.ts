@@ -14,11 +14,11 @@ export async function registerAction(
   formData: FormData,
 ): Promise<RegisterState> {
   const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
 
-  if (!name || !email || !password || !confirm) {
+  if (!email || !password || !confirm) {
     return { error: "Please fill all required fields." };
   }
 
@@ -26,13 +26,8 @@ export async function registerAction(
     return { error: "Passwords do not match." };
   }
 
-  // restrict registration to institutional email addresses
-  if (!email.toLowerCase().endsWith("@smail.iitm.ac.in")) {
-    return { error: "Email must be an @smail.iitm.ac.in address." };
-  }
-
   // Attempt to create user directly
-  const created = await createUser({ name, email, password });
+  const created = await createUser({ email, password, role: "user" });
   if (!created) {
     return { error: "An account with this email already exists." };
   }

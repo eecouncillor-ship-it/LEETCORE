@@ -19,6 +19,33 @@ export function MockForm({ categories }: { categories: string[] }) {
     const sess = (state as any).session as any;
     const problems = (state as any).problems as any[];
 
+    // Debug logging
+    console.log('[FORM] Mock test session object:', sess);
+    console.log('[FORM] Session expiresAt:', sess.expiresAt);
+    console.log('[FORM] Session expires_at (wrong key):', (sess as any).expires_at);
+    console.log('[FORM] All session keys:', Object.keys(sess));
+    console.log('[FORM] Session field types:', {
+      id: typeof sess.id,
+      userId: typeof sess.userId,
+      problemIds: typeof sess.problemIds,
+      startedAt: typeof sess.startedAt,
+      expiresAt: typeof sess.expiresAt,
+      createdAt: typeof sess.createdAt,
+    });
+
+    // Verify field name mapping
+    console.log('[FORM] Field name verification:');
+    console.log('[FORM]   expiresAt exists:', 'expiresAt' in sess);
+    console.log('[FORM]   expiresAt value:', sess.expiresAt);
+    console.log('[FORM]   expiresAt is valid date:', !isNaN(new Date(sess.expiresAt).getTime()));
+    console.log('[FORM]   expires_at exists (should be false):', 'expires_at' in sess);
+    console.log('[FORM]   expires_at value (should be undefined):', (sess as any).expires_at);
+
+    // Critical debug: Check if session is already expired
+    console.log('[FORM] Session expiresAt:', sess.expiresAt);
+    console.log('[FORM] Current time:', new Date().toISOString());
+    console.log('[FORM] Is session already expired?', new Date(sess.expiresAt).getTime() <= new Date().getTime());
+
     const submitPending = (submitState as any).pending || false;
 
     return (
@@ -58,7 +85,7 @@ export function MockForm({ categories }: { categories: string[] }) {
     <form action={formAction} className="space-y-4">
       <div>
         <label className="mb-2 block text-sm font-semibold text-slate-200">Topic</label>
-        <select name="category" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100">
+        <select name="topic" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100">
           <option value="">All Topics</option>
           {categories.map((c) => (
             <option key={c} value={c}>{c}</option>

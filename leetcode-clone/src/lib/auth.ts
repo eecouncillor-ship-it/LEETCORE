@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { scryptSync, timingSafeEqual } from "node:crypto";
 
+import { supabase } from "@/lib/supabase";
 import { createSession, deleteSession, getSession, getUserByEmail, getUserById } from "@/lib/db";
 import type { Role } from "@/lib/types";
 
@@ -24,63 +25,85 @@ export function verifyPassword(password: string, passwordHash: string) {
 }
 
 export async function signIn(email: string, password: string) {
-  const user = await getUserByEmail(email);
+  "use server";
 
-  if (!user || !verifyPassword(password, user.passwordHash)) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .single();
+
+  if (error || !data) {
     return null;
   }
 
-  if ((user as any).isBlocked) {
+  // Verify the password against the stored hash
+  if (!verifyPassword(password, data.password)) {
     return null;
   }
 
-  const session = await createSession(user.id);
+  const session = await createSession(data.id);
+  if (!session) {
+    return null;
+  }
+
   const cookieStore = await cookies();
 
   cookieStore.set(sessionCookieName, session.token, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    secure: false,
     path: "/",
     expires: new Date(session.expiresAt),
   });
 
-  return user;
+  return {
+    id: data.id,
+    email: data.email,
+    role: data.role,
+  };
 }
 
 export async function signOut() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(sessionCookieName)?.value;
+  "use server";
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(sessionCookieName)?.value;
 
-  if (token) {
-    await deleteSession(token);
+    if (token) {
+      await deleteSession(token);
+      cookieStore.delete(sessionCookieName);
+    }
+  } catch (error) {
+    console.error('Error signing out:', error);
   }
-
-  cookieStore.delete(sessionCookieName);
 }
 
 export async function getCurrentUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(sessionCookieName)?.value;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(sessionCookieName)?.value;
 
-  if (!token) {
+    if (!token) {
+      return null;
+    }
+
+    const session = await getSession(token);
+
+    if (!session) {
+      return null;
+    }
+
+    if (new Date(session.expiresAt).getTime() < Date.now()) {
+      await deleteSession(session.token);
+      return null;
+    }
+
+    return getUserById(session.userId);
+  } catch (error) {
+    console.error('Error getting current user:', error);
     return null;
   }
-
-  const session = await getSession(token);
-
-  if (!session) {
-    cookieStore.delete(sessionCookieName);
-    return null;
-  }
-
-  if (new Date(session.expiresAt).getTime() < Date.now()) {
-    await deleteSession(session.token);
-    cookieStore.delete(sessionCookieName);
-    return null;
-  }
-
-  return getUserById(session.userId);
 }
 
 export async function requireAuth(role?: Role) {

@@ -38,12 +38,12 @@ export function CreateProblemForm({
 }: QuestionFormProps) {
   const action =
     mode === "edit" && problem
-      ? updateProblemAction.bind(null, problem.slug)
+      ? updateProblemAction.bind(null, problem.id)
       : createProblemAction;
 
   const [state, formAction] = useActionState(action, initialState);
   const optionMap = new Map(problem?.options.map((option) => [option.id, option.text]) ?? []);
-  const [kind, setKind] = React.useState<"mcq" | "fib">((problem?.kind as any) ?? "mcq");
+  const [kind, setKind] = React.useState<"mcq" | "fib">("mcq");
 
   return (
     <form action={formAction} className="grid gap-5">
@@ -60,45 +60,41 @@ export function CreateProblemForm({
             placeholder="Big O of Merge Sort"
           />
         </div>
+
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-200">
-            Category
+            Topic
           </label>
-          <input
-            name="category"
+          <select
+            name="topic"
             required
-            defaultValue={problem?.category ?? ""}
+            defaultValue={(problem as any)?.topic ?? ""}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-            placeholder="Algorithms"
-          />
+          >
+            <option value="">Select Topic</option>
+            <option value="DSA">DSA</option>
+            <option value="SQL">SQL</option>
+            <option value="DBMS">DBMS</option>
+            <option value="OS">OS</option>
+            <option value="CN">CN</option>
+          </select>
         </div>
-      </div>
 
-      <div className="grid gap-5 md:grid-cols-[180px_1fr]">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-200">
             Difficulty
           </label>
           <select
             name="difficulty"
-            defaultValue={problem?.difficulty ?? "Easy"}
+            required
+            defaultValue={(problem as any)?.difficulty ?? ""}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
           >
+            <option value="">Select Difficulty</option>
             <option value="Easy">Easy</option>
             <option value="Medium">Medium</option>
             <option value="Hard">Hard</option>
           </select>
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-200">
-            Tags
-          </label>
-          <input
-            name="tags"
-            defaultValue={problem?.tags.join(", ") ?? ""}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-            placeholder="algorithms, sorting, complexity"
-          />
         </div>
       </div>
 
@@ -216,7 +212,7 @@ export function CreateProblemForm({
             <label className="mb-2 block text-sm font-semibold text-slate-200">Correct option</label>
             <select
               name="correctOptionId"
-              defaultValue={problem?.correctOptionId ?? "A"}
+              defaultValue={problem?.correct_answer ?? "A"}
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
             >
               <option value="A">Option A</option>
@@ -234,33 +230,12 @@ export function CreateProblemForm({
             name="solutionExplanation"
             required
             rows={4}
-            defaultValue={problem?.solutionExplanation ?? ""}
+            defaultValue={problem?.explanation ?? ""}
             className="w-full rounded-3xl border border-white/10 bg-white/5 px-4 py-4 text-sm leading-7 text-slate-100 outline-none transition focus:border-orange-400"
             placeholder="Explain why the correct option is right so students learn immediately after submitting."
           />
         </div>
       </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-slate-700">Constraints or notes</label>
-        <textarea
-          name="constraints"
-          rows={5}
-          defaultValue={problem?.constraints.join("\n") ?? ""}
-          className="w-full rounded-3xl border border-slate-200 px-4 py-4 text-sm outline-none transition focus:border-orange-400"
-          placeholder="One fact per line&#10;Assume standard SQL syntax"
-        />
-      </div>
-
-      <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-        <input
-          type="checkbox"
-          name="published"
-          defaultChecked={problem?.published ?? true}
-          className="size-4"
-        />
-        Publish immediately so students can answer this question
-      </label>
 
       {state.error ? (
         <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">

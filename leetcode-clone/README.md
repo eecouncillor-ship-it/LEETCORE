@@ -5,7 +5,7 @@ CodeArena is a LeetCode-style practice platform with two distinct roles:
 - `admin` can create and publish multiple-choice questions
 - `user` can browse published questions, answer them, and review explanations
 
-This project is built with Next.js App Router and a lightweight file-backed data store, so it can run locally without additional database setup.
+This project is built with Next.js App Router and Supabase for data storage.
 
 ## Demo accounts
 
@@ -19,18 +19,38 @@ This project is built with Next.js App Router and a lightweight file-backed data
 - Student question list and individual answer pages
 - Instant correct/incorrect feedback with the right answer and explanation
 - Submission history per user with selected answer and result
-- Seeded demo data created automatically in `data/db.json`
+- Mock test functionality with timed sessions
+- Seeded demo data created automatically
 
-## Run locally
+## Setup
 
-```bash
-npm install
-cmd /c npm run dev
-```
+1. Create a Supabase project at https://supabase.com
+2. Copy your project URL and anon key to `.env.local`:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+3. Run the SQL schema from `supabase-schema.sql` in your Supabase SQL editor to create the required tables
+4. Install dependencies and run the development server:
+   ```bash
+   npm install
+   npm run dev
+   ```
 
 Then open [http://localhost:3000](http://localhost:3000).
 
+## Database Schema
+
+The application uses the following tables in Supabase:
+- `users` - User accounts
+- `questions` - MCQ questions
+- `sessions` - User sessions
+- `submissions` - Question submissions
+- `password_resets` - Password reset tokens
+- `mock_sessions` - Mock test sessions
+- `mock_results` - Mock test results
+
 ## Notes
 
-- The database is file-backed and stored in `data/db.json`.
-- Existing data from the old coding-question version is automatically upgraded to the new MCQ schema on first load. Incompatible legacy submissions are cleared because their structure no longer matches the new answer format.
+- The database is now Supabase-backed instead of file-backed
+- Demo data is seeded automatically on first run
