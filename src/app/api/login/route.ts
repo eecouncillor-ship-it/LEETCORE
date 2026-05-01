@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { scryptSync, timingSafeEqual } from "node:crypto";
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
 function hashPassword(password: string) {
   return scryptSync(password, "codearena-seed-salt", 64).toString("hex");
 }
