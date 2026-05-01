@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { scryptSync, timingSafeEqual } from "node:crypto";
-import { supabase } from "@/lib/supabase";
+import { getSupabase, ensureSupabaseEnv } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +21,7 @@ function verifyPassword(password: string, passwordHash: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    ensureSupabaseEnv();
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 1: Query user by email only
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from("users")
       .select("*")
       .eq("email", email.toLowerCase())
@@ -64,3 +65,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

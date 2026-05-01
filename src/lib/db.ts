@@ -1,5 +1,5 @@
 import { randomUUID, scryptSync } from "node:crypto";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 
 import type {
@@ -92,7 +92,7 @@ async function seedDatabase() {
   const studentId = randomUUID();
 
   // Seed users
-  const { error: usersError } = await supabase
+  const { error: usersError } = await getSupabase()
     .from('users')
     .upsert([
       {
@@ -115,7 +115,7 @@ async function seedDatabase() {
 
   // Seed questions
   const questions = buildSeedQuestions();
-  const { error: questionsError } = await supabase
+  const { error: questionsError } = await getSupabase()
     .from('questions')
     .upsert(questions);
 
@@ -128,10 +128,10 @@ async function seedDatabase() {
 
 export async function getUsers() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    throw new Error('Missing Supabase environment variables');
+    throw new Error('Missing getSupabase() environment variables');
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .select('*')
     .order('created_at', { ascending: false });
@@ -150,7 +150,7 @@ export async function getUsers() {
 }
 
 export async function getStudentUsers() {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .select('*')
     .eq('role', 'user')
@@ -170,7 +170,7 @@ export async function getStudentUsers() {
 }
 
 export async function getUserByEmail(email: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .select('*')
     .eq('email', email.toLowerCase())
@@ -192,7 +192,7 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function getUserById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .select('*')
     .eq('id', id)
@@ -214,7 +214,7 @@ export async function getUserById(id: string) {
 }
 
 export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .update({ is_blocked: isBlocked })
     .eq('id', id)
@@ -238,7 +238,7 @@ export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {
 }
 
 export async function getPublishedProblems() {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('questions')
     .select('*')
     .order('created_at', { ascending: false });
@@ -263,7 +263,7 @@ export async function getPublishedProblems() {
 }
 
 export async function getAllProblems() {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('questions')
     .select('*')
     .order('created_at', { ascending: false });
@@ -288,7 +288,7 @@ export async function getAllProblems() {
 }
 
 export async function getProblemById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('questions')
     .select('*')
     .eq('id', id)
@@ -316,7 +316,7 @@ export async function getProblemById(id: string) {
 }
 
 export async function getProblemBySlug(slug: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('questions')
     .select('*')
     .eq('slug', slug)
@@ -364,7 +364,7 @@ export async function createProblem(problem: {
     explanation: problem.explanation,
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('questions')
     .insert([newProblem])
     .select()
@@ -401,7 +401,7 @@ export async function updateProblemById(
     explanation: string;
   },
 ) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('questions')
     .update({
       title: updates.title,
@@ -442,7 +442,7 @@ export async function createSession(userId: string) {
     expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 7 days
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('sessions')
     .insert([session])
     .select()
@@ -461,7 +461,7 @@ export async function createSession(userId: string) {
 }
 
 export async function getSession(token: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('sessions')
     .select('*')
     .eq('token', token)
@@ -484,7 +484,7 @@ export async function getSession(token: string) {
 
 export async function createPasswordResetTokenByEmail(email: string) {
   // First get the user
-  const { data: user, error: userError } = await supabase
+  const { data: user, error: userError } = await getSupabase()
     .from('users')
     .select('id')
     .eq('email', email.toLowerCase())
@@ -497,7 +497,7 @@ export async function createPasswordResetTokenByEmail(email: string) {
   const token = randomUUID();
   const expires_at = new Date(Date.now() + 1000 * 60 * 60).toISOString(); // 1 hour
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('password_resets')
     .insert([{
       token,
@@ -521,7 +521,7 @@ export async function createPasswordResetTokenByEmail(email: string) {
 
 
 export async function getPasswordReset(token: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('password_resets')
     .select('*')
     .eq('token', token)
@@ -543,7 +543,7 @@ export async function getPasswordReset(token: string) {
 }
 
 export async function consumePasswordResetToken(token: string) {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('password_resets')
     .delete()
     .eq('token', token);
@@ -554,7 +554,7 @@ export async function consumePasswordResetToken(token: string) {
 }
 
 export async function updateUserPassword(userId: string, password: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .update({ password_hash: hashSeedPassword(password) })
     .eq('id', userId)
@@ -578,7 +578,7 @@ export async function updateUserPassword(userId: string, password: string) {
 }
 
 export async function deleteSession(token: string) {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('sessions')
     .delete()
     .eq('token', token);
@@ -603,7 +603,7 @@ export async function createSubmission(submission: {
     is_correct: submission.is_correct,
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('submissions')
     .insert([newSubmission])
     .select()
@@ -625,7 +625,7 @@ export async function createSubmission(submission: {
 }
 
 export async function getSubmissionsForUser(userEmail: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('submissions')
     .select('*')
     .eq('user_email', userEmail.toLowerCase())
@@ -647,7 +647,7 @@ export async function getSubmissionsForUser(userEmail: string) {
 }
 
 export async function getSubmissionsForQuestion(questionId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('submissions')
     .select('*')
     .eq('question_id', questionId)
@@ -671,10 +671,10 @@ export async function getSubmissionsForQuestion(questionId: string) {
 export async function getStats() {
   // Get counts in parallel
   const [problemsResult, submissionsResult, usersResult, adminsResult] = await Promise.all([
-    supabase.from('questions').select('id', { count: 'exact', head: true }),
-    supabase.from('submissions').select('id', { count: 'exact', head: true }),
-    supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'user'),
-    supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'admin'),
+    getSupabase().from('questions').select('id', { count: 'exact', head: true }),
+    getSupabase().from('submissions').select('id', { count: 'exact', head: true }),
+    getSupabase().from('users').select('id', { count: 'exact', head: true }).eq('role', 'user'),
+    getSupabase().from('users').select('id', { count: 'exact', head: true }).eq('role', 'admin'),
   ]);
 
   return {
@@ -692,7 +692,7 @@ export async function createUser(user: {
   role?: "admin" | "user";
 }) {
   // Check if user already exists
-  const { data: existing, error: checkError } = await supabase
+  const { data: existing, error: checkError } = await getSupabase()
     .from('users')
     .select('id')
     .eq('email', user.email.toLowerCase());
@@ -715,7 +715,7 @@ export async function createUser(user: {
     role: user.role ?? "user",
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .insert([newUser])
     .select()
@@ -769,7 +769,7 @@ export async function createMockSession(userId: string, problemIds: string[], du
     created_at: started_at,
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('mock_sessions')
     .insert([session])
     .select()
@@ -795,7 +795,7 @@ export async function createMockSession(userId: string, problemIds: string[], du
 }
 
 export async function getMockSessionById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('mock_sessions')
     .select('*')
     .eq('id', id)
@@ -828,7 +828,7 @@ export async function createMockResult(userId: string, sessionId: string, total:
     created_at: new Date().toISOString(),
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('mock_results')
     .insert([result])
     .select()
@@ -850,7 +850,7 @@ export async function createMockResult(userId: string, sessionId: string, total:
 }
 
 export async function getMockResultsForUser(userId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('mock_results')
     .select('*')
     .eq('user_id', userId)
@@ -870,3 +870,4 @@ export async function getMockResultsForUser(userId: string) {
     createdAt: result.created_at,
   }));
 }
+

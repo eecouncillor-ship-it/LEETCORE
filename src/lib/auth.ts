@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { scryptSync, timingSafeEqual } from "node:crypto";
 
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { createSession, deleteSession, getSession, getUserByEmail, getUserById } from "@/lib/db";
 import type { Role } from "@/lib/types";
 
@@ -27,7 +27,7 @@ export function verifyPassword(password: string, passwordHash: string) {
 export async function signIn(email: string, password: string) {
   "use server";
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('users')
     .select('*')
     .eq('email', email.toLowerCase())
@@ -119,3 +119,4 @@ export async function requireAuth(role?: Role) {
 
   return user;
 }
+
