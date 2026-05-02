@@ -17,7 +17,9 @@ type ParsedQuestionForm = {
   topic: string;
   difficulty: Difficulty;
   description: string;
-  options: Array<{ id: string; text: string }>;
+  questionImageUrl?: string;
+  options: Array<{ id: string; text: string; image_url?: string }>;
+  optionImageUrls: Record<"A" | "B" | "C" | "D", string | undefined>;
   correctOptionId: string;
   solutionExplanation: string;
 };
@@ -37,6 +39,13 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   const difficulty = String(formData.get("difficulty") ?? "").trim() as Difficulty;
   const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
   const solutionExplanation = String(formData.get("solutionExplanation") ?? "").trim();
+  const questionImageUrl = String(formData.get("questionImageUrl") ?? "").trim() || undefined;
+  const optionImageUrls = {
+    A: String(formData.get("optionAImageUrl") ?? "").trim() || undefined,
+    B: String(formData.get("optionBImageUrl") ?? "").trim() || undefined,
+    C: String(formData.get("optionCImageUrl") ?? "").trim() || undefined,
+    D: String(formData.get("optionDImageUrl") ?? "").trim() || undefined,
+  };
 
   if (!title || !description || !topic || !difficulty || !solutionExplanation) {
     return { ok: false, error: "Please fill in all required question fields." };
@@ -53,12 +62,14 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
       topic,
       difficulty,
       description,
+      questionImageUrl,
       options: [
-        { id: "A", text: optionA },
-        { id: "B", text: optionB },
-        { id: "C", text: optionC },
-        { id: "D", text: optionD },
+        { id: "A", text: optionA, image_url: optionImageUrls.A },
+        { id: "B", text: optionB, image_url: optionImageUrls.B },
+        { id: "C", text: optionC, image_url: optionImageUrls.C },
+        { id: "D", text: optionD, image_url: optionImageUrls.D },
       ],
+      optionImageUrls,
       correctOptionId,
       solutionExplanation,
     },
@@ -92,44 +103,12 @@ export async function createProblemAction(
     return { error: parsed.error };
   }
 
-  // handle optional image uploads (description and option images)
-  const photos: Record<string, string> = {};
-
-  async function fileToDataUri(f: File | null) {
-    if (!f) return undefined;
-    try {
-      const buffer = Buffer.from(await f.arrayBuffer());
-      return `data:${f.type};base64,${buffer.toString("base64")}`;
-    } catch (e) {
-      return undefined;
-    }
-  }
-
-  const descFile = (formData.get("photoDescription") as File) ?? null;
-  const optAFile = (formData.get("photoOptionA") as File) ?? null;
-  const optBFile = (formData.get("photoOptionB") as File) ?? null;
-  const optCFile = (formData.get("photoOptionC") as File) ?? null;
-  const optDFile = (formData.get("photoOptionD") as File) ?? null;
-  const fibPhotoFile = (formData.get("photoFib") as File) ?? null;
-
-  const descData = await fileToDataUri(descFile);
-  if (descData) photos.description = descData;
-  const aData = await fileToDataUri(optAFile);
-  if (aData) photos.optionA = aData;
-  const bData = await fileToDataUri(optBFile);
-  if (bData) photos.optionB = bData;
-  const cData = await fileToDataUri(optCFile);
-  if (cData) photos.optionC = cData;
-  const dData = await fileToDataUri(optDFile);
-  if (dData) photos.optionD = dData;
-  const fibData = await fileToDataUri(fibPhotoFile);
-  if (fibData) photos.fib = fibData;
-
   await createProblem({
     title: parsed.data.title,
     topic: parsed.data.topic,
     difficulty: parsed.data.difficulty,
     description: parsed.data.description,
+    image_url: parsed.data.questionImageUrl,
     options: parsed.data.options,
     correct_answer: parsed.data.correctOptionId,
     explanation: parsed.data.solutionExplanation,
@@ -158,6 +137,7 @@ export async function updateProblemAction(
     topic: parsed.data.topic,
     difficulty: parsed.data.difficulty,
     description: parsed.data.description,
+    image_url: parsed.data.questionImageUrl,
     options: parsed.data.options,
     correct_answer: parsed.data.correctOptionId,
     explanation: parsed.data.solutionExplanation,

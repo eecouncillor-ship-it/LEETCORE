@@ -5,6 +5,7 @@ export type Difficulty = "Easy" | "Medium" | "Hard";
 export type QuestionOption = {
   id: string;
   text: string;
+  image_url?: string;
 };
 
 export type UserRecord = {
@@ -21,6 +22,7 @@ export type ProblemRecord = {
   title: string;
   difficulty: Difficulty;
   description: string;
+  image_url?: string;
   options: QuestionOption[];
   correct_answer: string;
   explanation: string;

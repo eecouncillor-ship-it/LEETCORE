@@ -44,9 +44,67 @@ export function CreateProblemForm({
   const [state, formAction] = useActionState(action, initialState);
   const optionMap = new Map(problem?.options.map((option) => [option.id, option.text]) ?? []);
   const [kind, setKind] = React.useState<"mcq" | "fib">("mcq");
+  const [questionImage, setQuestionImage] = React.useState<string>(problem?.image_url ?? "");
+  const [optionImages, setOptionImages] = React.useState<string[]>([
+    problem?.options?.[0]?.image_url ?? "",
+    problem?.options?.[1]?.image_url ?? "",
+    problem?.options?.[2]?.image_url ?? "",
+    problem?.options?.[3]?.image_url ?? "",
+  ]);
+
+  const uploadFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.url) {
+      throw new Error(data?.error || "Upload failed");
+    }
+
+    return data.url;
+  };
+
+  const handleQuestionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const url = await uploadFile(file);
+      setQuestionImage(url);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleOptionImage = async (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const url = await uploadFile(file);
+      setOptionImages((current) => {
+        const updated = [...current];
+        updated[index] = url;
+        return updated;
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <form action={formAction} className="grid gap-5">
+      <input type="hidden" name="questionImageUrl" value={questionImage} />
+      <input type="hidden" name="optionAImageUrl" value={optionImages[0] ?? ""} />
+      <input type="hidden" name="optionBImageUrl" value={optionImages[1] ?? ""} />
+      <input type="hidden" name="optionCImageUrl" value={optionImages[2] ?? ""} />
+      <input type="hidden" name="optionDImageUrl" value={optionImages[3] ?? ""} />
       <div className="grid gap-5 md:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-200">
@@ -112,7 +170,20 @@ export function CreateProblemForm({
         />
         <div className="mt-3">
           <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (description)</label>
-          <input name="photoDescription" type="file" accept="image/*" className="text-sm text-slate-200" />
+          <input
+            name="photoDescription"
+            type="file"
+            accept="image/*"
+            className="text-sm text-slate-200"
+            onChange={handleQuestionImage}
+          />
+          {questionImage ? (
+            <img
+              src={questionImage}
+              alt="Question image"
+              className="mt-3 max-w-full h-auto rounded-xl"
+            />
+          ) : null}
         </div>
       </div>
 
@@ -141,7 +212,20 @@ export function CreateProblemForm({
           />
           <div className="mt-2">
             <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option A)</label>
-            <input name="photoOptionA" type="file" accept="image/*" className="text-sm text-slate-200" />
+            <input
+              name="photoOptionA"
+              type="file"
+              accept="image/*"
+              className="text-sm text-slate-200"
+              onChange={(e) => handleOptionImage(0, e)}
+            />
+            {optionImages[0] ? (
+              <img
+                src={optionImages[0]}
+                alt="Option A image"
+                className="mt-3 max-w-full h-auto rounded-lg"
+              />
+            ) : null}
           </div>
         </div>
         <div>
@@ -157,7 +241,20 @@ export function CreateProblemForm({
           />
           <div className="mt-2">
             <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option B)</label>
-            <input name="photoOptionB" type="file" accept="image/*" className="text-sm text-slate-200" />
+            <input
+              name="photoOptionB"
+              type="file"
+              accept="image/*"
+              className="text-sm text-slate-200"
+              onChange={(e) => handleOptionImage(1, e)}
+            />
+            {optionImages[1] ? (
+              <img
+                src={optionImages[1]}
+                alt="Option B image"
+                className="mt-3 max-w-full h-auto rounded-lg"
+              />
+            ) : null}
           </div>
         </div>
       </div>
@@ -176,7 +273,20 @@ export function CreateProblemForm({
               />
               <div className="mt-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option C)</label>
-                <input name="photoOptionC" type="file" accept="image/*" className="text-sm text-slate-200" />
+                <input
+                  name="photoOptionC"
+                  type="file"
+                  accept="image/*"
+                  className="text-sm text-slate-200"
+                  onChange={(e) => handleOptionImage(2, e)}
+                />
+                {optionImages[2] ? (
+                  <img
+                    src={optionImages[2]}
+                    alt="Option C image"
+                    className="mt-3 max-w-full h-auto rounded-lg"
+                  />
+                ) : null}
               </div>
             </div>
             <div>
@@ -190,7 +300,20 @@ export function CreateProblemForm({
               />
               <div className="mt-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option D)</label>
-                <input name="photoOptionD" type="file" accept="image/*" className="text-sm text-slate-200" />
+                <input
+                  name="photoOptionD"
+                  type="file"
+                  accept="image/*"
+                  className="text-sm text-slate-200"
+                  onChange={(e) => handleOptionImage(3, e)}
+                />
+                {optionImages[3] ? (
+                  <img
+                    src={optionImages[3]}
+                    alt="Option D image"
+                    className="mt-3 max-w-full h-auto rounded-lg"
+                  />
+                ) : null}
               </div>
             </div>
           </>

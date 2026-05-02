@@ -335,6 +335,8 @@ export async function getProblemBySlug(slug: string) {
     topic: data.topic,
     title: data.title,
     description: data.description,
+    image_url: data.image_url,
+    difficulty: data.difficulty,
     options: data.options,
     correct_answer: data.correct_answer,
     explanation: data.explanation,
@@ -347,6 +349,7 @@ export async function createProblem(problem: {
   topic: string;
   difficulty: ProblemRecord["difficulty"];
   description: string;
+  image_url?: string;
   options: ProblemRecord["options"];
   correct_answer: string;
   explanation: string;
@@ -359,6 +362,7 @@ export async function createProblem(problem: {
     created_at: new Date().toISOString(),
     title: problem.title,
     description: problem.description,
+    image_url: problem.image_url,
     options: problem.options,
     correct_answer: problem.correct_answer,
     explanation: problem.explanation,
@@ -396,6 +400,7 @@ export async function updateProblemById(
     topic: string;
     difficulty: ProblemRecord["difficulty"];
     description: string;
+    image_url?: string;
     options: ProblemRecord["options"];
     correct_answer: string;
     explanation: string;
@@ -408,6 +413,7 @@ export async function updateProblemById(
       topic: updates.topic,
       difficulty: updates.difficulty,
       description: updates.description,
+      image_url: updates.image_url,
       options: updates.options,
       correct_answer: updates.correct_answer,
       explanation: updates.explanation,
