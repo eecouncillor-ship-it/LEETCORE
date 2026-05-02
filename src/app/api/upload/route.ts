@@ -45,8 +45,6 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error: error.message,
-          details: error.details,
-          hint: error.hint,
         },
         { status: 500 }
       );
@@ -63,10 +61,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-
-  const publicUrlData = supabase.storage
-    .from("question-assets")
-    .getPublicUrl(fileName);
-
-  return NextResponse.json({ url: publicUrlData.data.publicUrl });
 }
