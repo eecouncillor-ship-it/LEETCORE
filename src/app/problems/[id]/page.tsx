@@ -65,6 +65,13 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
           </h1>
 
           <div className="mt-8">
+            {problem.image_url ? (
+              <img
+                src={problem.image_url}
+                alt={problem.title}
+                className="mb-6 max-w-full h-auto rounded-xl"
+              />
+            ) : null}
             <h2 className="text-xl font-bold text-white">Description</h2>
             <p className="mt-3 whitespace-pre-wrap text-base leading-8 text-slate-300">
               {problem.description}

@@ -31,7 +31,7 @@ export function SubmissionForm({
   nextSlug,
 }: {
   slug: string;
-  options: Array<{ id: string; text: string }>;
+  options: Array<{ id: string; text: string; image_url?: string }>;
   nextSlug: string | null;
 }) {
   const submitWithSlug = submitAnswerAction.bind(null, slug);
@@ -64,6 +64,13 @@ export function SubmissionForm({
               className="mt-1 size-4"
             />
             <div>
+              {option.image_url ? (
+                <img
+                  src={option.image_url}
+                  alt={`Option ${option.id}`}
+                  className="mb-2 max-w-full h-auto rounded-lg"
+                />
+              ) : null}
               <p className="font-semibold text-slate-950">
                 {option.id}. {option.text}
               </p>
