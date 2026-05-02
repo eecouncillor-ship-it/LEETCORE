@@ -36,21 +36,42 @@ export function CreateProblemForm({
   mode = "create",
   problem,
 }: QuestionFormProps) {
+  type OptionState = {
+    id: string;
+    text: string;
+    image_url?: string;
+  };
+
+  const defaultOptions: OptionState[] = [
+    { id: "A", text: "", image_url: problem?.options?.[0]?.image_url },
+    { id: "B", text: "", image_url: problem?.options?.[1]?.image_url },
+    { id: "C", text: "", image_url: problem?.options?.[2]?.image_url },
+    { id: "D", text: "", image_url: problem?.options?.[3]?.image_url },
+  ];
+
   const action =
     mode === "edit" && problem
       ? updateProblemAction.bind(null, problem.id)
       : createProblemAction;
 
   const [state, formAction] = useActionState(action, initialState);
-  const optionMap = new Map(problem?.options.map((option) => [option.id, option.text]) ?? []);
   const [kind, setKind] = React.useState<"mcq" | "fib">("mcq");
   const [questionImage, setQuestionImage] = React.useState<string>(problem?.image_url ?? "");
-  const [optionImages, setOptionImages] = React.useState<string[]>([
-    problem?.options?.[0]?.image_url ?? "",
-    problem?.options?.[1]?.image_url ?? "",
-    problem?.options?.[2]?.image_url ?? "",
-    problem?.options?.[3]?.image_url ?? "",
-  ]);
+  const [options, setOptions] = React.useState<OptionState[]>(
+    problem?.options?.map((option) => ({
+      id: option.id,
+      text: option.text,
+      image_url: option.image_url ?? undefined,
+    })) ?? defaultOptions
+  );
+
+  const updateOption = (index: number, patch: Partial<OptionState>) => {
+    setOptions((current) => {
+      const next = [...current];
+      next[index] = { ...next[index], ...patch };
+      return next;
+    });
+  };
 
   const uploadFile = async (file: File) => {
     console.log("Uploading file:", file.name);
@@ -93,11 +114,7 @@ export function CreateProblemForm({
     console.log("Uploading option", index, file.name);
     try {
       const url = await uploadFile(file);
-      setOptionImages((current) => {
-        const updated = [...current];
-        updated[index] = url;
-        return updated;
-      });
+      updateOption(index, { image_url: url });
     } catch (error) {
       console.error(`Option ${index} upload failed`, error);
     }
@@ -106,10 +123,7 @@ export function CreateProblemForm({
   return (
     <form action={formAction} className="grid gap-5">
       <input type="hidden" name="questionImageUrl" value={questionImage} />
-      <input type="hidden" name="optionAImageUrl" value={optionImages[0] ?? ""} />
-      <input type="hidden" name="optionBImageUrl" value={optionImages[1] ?? ""} />
-      <input type="hidden" name="optionCImageUrl" value={optionImages[2] ?? ""} />
-      <input type="hidden" name="optionDImageUrl" value={optionImages[3] ?? ""} />
+      <input type="hidden" name="optionsJson" value={JSON.stringify(options)} />
       <div className="grid gap-5 md:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-200">
@@ -210,7 +224,8 @@ export function CreateProblemForm({
           <input
             name="optionA"
             required={kind === "mcq"}
-            defaultValue={optionMap.get("A") ?? ""}
+            value={options[0]?.text ?? ""}
+            onChange={(e) => updateOption(0, { text: e.target.value })}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
             placeholder="O(n)"
           />
@@ -222,9 +237,9 @@ export function CreateProblemForm({
               className="text-sm text-slate-200"
               onChange={(e) => handleOptionImage(0, e)}
             />
-            {optionImages[0] ? (
+            {options[0]?.image_url ? (
               <img
-                src={optionImages[0]}
+                src={options[0].image_url}
                 alt="Option A image"
                 className="mt-3 max-w-full h-auto rounded-lg"
               />
@@ -238,7 +253,8 @@ export function CreateProblemForm({
           <input
             name="optionB"
             required={kind === "mcq"}
-            defaultValue={optionMap.get("B") ?? ""}
+            value={options[1]?.text ?? ""}
+            onChange={(e) => updateOption(1, { text: e.target.value })}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
             placeholder="O(log n)"
           />
@@ -250,9 +266,9 @@ export function CreateProblemForm({
               className="text-sm text-slate-200"
               onChange={(e) => handleOptionImage(1, e)}
             />
-            {optionImages[1] ? (
+            {options[1]?.image_url ? (
               <img
-                src={optionImages[1]}
+                src={options[1].image_url}
                 alt="Option B image"
                 className="mt-3 max-w-full h-auto rounded-lg"
               />
@@ -269,7 +285,8 @@ export function CreateProblemForm({
               <input
                 name="optionC"
                 required
-                defaultValue={optionMap.get("C") ?? ""}
+                value={options[2]?.text ?? ""}
+                onChange={(e) => updateOption(2, { text: e.target.value })}
                 className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
                 placeholder="O(n log n)"
               />
@@ -281,9 +298,9 @@ export function CreateProblemForm({
                   className="text-sm text-slate-200"
                   onChange={(e) => handleOptionImage(2, e)}
                 />
-                {optionImages[2] ? (
+                {options[2]?.image_url ? (
                   <img
-                    src={optionImages[2]}
+                    src={options[2].image_url}
                     alt="Option C image"
                     className="mt-3 max-w-full h-auto rounded-lg"
                   />
@@ -295,7 +312,8 @@ export function CreateProblemForm({
               <input
                 name="optionD"
                 required
-                defaultValue={optionMap.get("D") ?? ""}
+                value={options[3]?.text ?? ""}
+                onChange={(e) => updateOption(3, { text: e.target.value })}
                 className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
                 placeholder="O(1)"
               />
@@ -307,9 +325,9 @@ export function CreateProblemForm({
                   className="text-sm text-slate-200"
                   onChange={(e) => handleOptionImage(3, e)}
                 />
-                {optionImages[3] ? (
+                {options[3]?.image_url ? (
                   <img
-                    src={optionImages[3]}
+                    src={options[3].image_url}
                     alt="Option D image"
                     className="mt-3 max-w-full h-auto rounded-lg"
                   />

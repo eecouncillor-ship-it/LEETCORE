@@ -19,7 +19,6 @@ type ParsedQuestionForm = {
   description: string;
   questionImageUrl?: string;
   options: Array<{ id: string; text: string; image_url?: string }>;
-  optionImageUrls: Record<"A" | "B" | "C" | "D", string | undefined>;
   correctOptionId: string;
   solutionExplanation: string;
 };
@@ -31,28 +30,31 @@ type ParseQuestionFormResult =
 function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const optionA = String(formData.get("optionA") ?? "").trim();
-  const optionB = String(formData.get("optionB") ?? "").trim();
-  const optionC = String(formData.get("optionC") ?? "").trim();
-  const optionD = String(formData.get("optionD") ?? "").trim();
   const topic = String(formData.get("topic") ?? "").trim();
   const difficulty = String(formData.get("difficulty") ?? "").trim() as Difficulty;
   const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
   const solutionExplanation = String(formData.get("solutionExplanation") ?? "").trim();
   const questionImageUrl = String(formData.get("questionImageUrl") ?? "").trim() || undefined;
-  const optionImageUrls = {
-    A: String(formData.get("optionAImageUrl") ?? "").trim() || undefined,
-    B: String(formData.get("optionBImageUrl") ?? "").trim() || undefined,
-    C: String(formData.get("optionCImageUrl") ?? "").trim() || undefined,
-    D: String(formData.get("optionDImageUrl") ?? "").trim() || undefined,
-  };
+  const optionsJson = String(formData.get("optionsJson") ?? "[]").trim();
+
+  let options: Array<{ id: string; text: string; image_url?: string }> = [];
+
+  try {
+    options = JSON.parse(optionsJson);
+  } catch (error) {
+    return { ok: false, error: "Invalid option data." };
+  }
 
   if (!title || !description || !topic || !difficulty || !solutionExplanation) {
     return { ok: false, error: "Please fill in all required question fields." };
   }
 
-  if (!optionA || !optionB || !optionC || !optionD || !correctOptionId) {
-    return { ok: false, error: "Please provide all MCQ options and select the correct one." };
+  if (
+    !Array.isArray(options) ||
+    options.length !== 4 ||
+    options.some((opt) => !opt?.id || !opt?.text)
+  ) {
+    return { ok: false, error: "Please provide all MCQ options." };
   }
 
   return {
@@ -63,13 +65,7 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
       difficulty,
       description,
       questionImageUrl,
-      options: [
-        { id: "A", text: optionA, image_url: optionImageUrls.A },
-        { id: "B", text: optionB, image_url: optionImageUrls.B },
-        { id: "C", text: optionC, image_url: optionImageUrls.C },
-        { id: "D", text: optionD, image_url: optionImageUrls.D },
-      ],
-      optionImageUrls,
+      options,
       correctOptionId,
       solutionExplanation,
     },
