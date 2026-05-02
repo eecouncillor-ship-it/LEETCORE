@@ -21,6 +21,7 @@ export async function POST(req: Request) {
     );
   }
 
+  console.log("Uploading:", file.name);
   const supabase = createClient(supabaseUrl, serviceRoleKey);
   const fileName = `${Date.now()}-${file.name}`;
 

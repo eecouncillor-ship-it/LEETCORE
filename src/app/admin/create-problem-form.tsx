@@ -53,6 +53,8 @@ export function CreateProblemForm({
   ]);
 
   const uploadFile = async (file: File) => {
+    console.log("Uploading file:", file.name);
+
     const formData = new FormData();
     formData.append("file", file);
 
@@ -62,6 +64,7 @@ export function CreateProblemForm({
     });
 
     const data = await res.json();
+    console.log("Upload result:", data);
 
     if (!res.ok || !data.url) {
       throw new Error(data?.error || "Upload failed");
@@ -74,11 +77,12 @@ export function CreateProblemForm({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log("Uploading question image", file.name);
     try {
       const url = await uploadFile(file);
       setQuestionImage(url);
     } catch (error) {
-      console.error(error);
+      console.error("Question image upload failed", error);
     }
   };
 
@@ -86,6 +90,7 @@ export function CreateProblemForm({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log("Uploading option", index, file.name);
     try {
       const url = await uploadFile(file);
       setOptionImages((current) => {
@@ -94,7 +99,7 @@ export function CreateProblemForm({
         return updated;
       });
     } catch (error) {
-      console.error(error);
+      console.error(`Option ${index} upload failed`, error);
     }
   };
 
@@ -171,7 +176,6 @@ export function CreateProblemForm({
         <div className="mt-3">
           <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (description)</label>
           <input
-            name="photoDescription"
             type="file"
             accept="image/*"
             className="text-sm text-slate-200"
@@ -213,7 +217,6 @@ export function CreateProblemForm({
           <div className="mt-2">
             <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option A)</label>
             <input
-              name="photoOptionA"
               type="file"
               accept="image/*"
               className="text-sm text-slate-200"
@@ -242,7 +245,6 @@ export function CreateProblemForm({
           <div className="mt-2">
             <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option B)</label>
             <input
-              name="photoOptionB"
               type="file"
               accept="image/*"
               className="text-sm text-slate-200"
@@ -274,7 +276,6 @@ export function CreateProblemForm({
               <div className="mt-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option C)</label>
                 <input
-                  name="photoOptionC"
                   type="file"
                   accept="image/*"
                   className="text-sm text-slate-200"
@@ -301,7 +302,6 @@ export function CreateProblemForm({
               <div className="mt-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option D)</label>
                 <input
-                  name="photoOptionD"
                   type="file"
                   accept="image/*"
                   className="text-sm text-slate-200"
@@ -323,7 +323,7 @@ export function CreateProblemForm({
             <input name="fibAnswer" required={kind === "fib"} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400" defaultValue={(problem as any)?.answer ?? ""} />
             <div className="mt-2">
               <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (answer)</label>
-              <input name="photoFib" type="file" accept="image/*" className="text-sm text-slate-200" />
+              <input type="file" accept="image/*" className="text-sm text-slate-200" />
             </div>
           </div>
         )}
