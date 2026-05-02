@@ -12,11 +12,15 @@ export async function POST(req: Request) {
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.BLOB_READ_WRITE_TOKEN;
 
   if (!supabaseUrl || !serviceRoleKey) {
     return NextResponse.json(
-      { error: "Missing Supabase upload configuration." },
+      {
+        error:
+          "Missing Supabase upload configuration. Set SUPABASE_SERVICE_ROLE_KEY or BLOB_READ_WRITE_TOKEN.",
+      },
       { status: 500 }
     );
   }
