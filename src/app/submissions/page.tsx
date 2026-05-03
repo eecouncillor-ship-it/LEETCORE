@@ -22,6 +22,7 @@ export default async function SubmissionsPage() {
   return (
     <StudentShell
       userName={user.email}
+      userRole={user.role}
       navItems={[
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions", active: true },

@@ -12,27 +12,21 @@ export async function POST(req: Request) {
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.BLOB_READ_WRITE_TOKEN ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
   if (!supabaseUrl || !serviceRoleKey) {
     return NextResponse.json(
       {
-        error:
-          "Missing Supabase upload configuration. Set SUPABASE_SERVICE_ROLE_KEY, BLOB_READ_WRITE_TOKEN, or NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+        error: blobToken
+          ? "BLOB_READ_WRITE_TOKEN is present, but this route requires the Supabase service role key. Set SUPABASE_SERVICE_ROLE_KEY with the Supabase service role key, not the blob token."
+          : "Missing Supabase upload configuration. Set SUPABASE_SERVICE_ROLE_KEY to the Supabase service role key.",
       },
       { status: 500 }
     );
   }
 
-  const authMode =
-    serviceRoleKey === process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      ? "anon"
-      : "service";
-
-  console.log("Uploading:", file.name, "using auth mode:", authMode);
+  console.log("Uploading:", file.name, "using service role key");
   const supabase = createClient(supabaseUrl, serviceRoleKey);
   const fileName = `${Date.now()}-${file.name}`;
 

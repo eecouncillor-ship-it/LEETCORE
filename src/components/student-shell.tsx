@@ -7,12 +7,14 @@ import { cn } from "@/lib/utils";
 type StudentShellProps = {
   children: ReactNode;
   userName: string;
+  userRole?: "admin" | "user";
   navItems: Array<{ href: string; label: string; active?: boolean }>;
 };
 
 export function StudentShell({
   children,
   userName,
+  userRole,
   navItems,
 }: StudentShellProps) {
   const initial = userName.trim().charAt(0).toUpperCase() || "U";
@@ -45,6 +47,14 @@ export function StudentShell({
                   {item.label}
                 </Link>
               ))}
+              {userRole === "admin" && (
+                <Link
+                  href="/admin"
+                  className="rounded-xl px-4 py-3 text-base font-semibold transition text-orange-400 hover:bg-orange-500/10 hover:text-orange-300"
+                >
+                  Back to Admin
+                </Link>
+              )}
             </nav>
           </div>
 
