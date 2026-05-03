@@ -64,6 +64,8 @@ export function CreateProblemForm({
       image_url: option.image_url ?? undefined,
     })) ?? defaultOptions
   );
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
+  const [uploading, setUploading] = React.useState<boolean>(false);
 
   const updateOption = (index: number, patch: Partial<OptionState>) => {
     setOptions((current) => {
@@ -75,23 +77,33 @@ export function CreateProblemForm({
 
   const uploadFile = async (file: File) => {
     console.log("Uploading file:", file.name);
+    setUploadError(null);
+    setUploading(true);
 
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    console.log("Upload result:", data);
+      const data = await res.json();
+      console.log("Upload result:", data);
 
-    if (!res.ok || !data.url) {
-      throw new Error(data?.error || "Upload failed");
+      if (!res.ok || !data.url) {
+        throw new Error(data?.error || "Upload failed");
+      }
+
+      return data.url;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setUploadError(message);
+      throw error;
+    } finally {
+      setUploading(false);
     }
-
-    return data.url;
   };
 
   const handleQuestionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -378,6 +390,11 @@ export function CreateProblemForm({
         </div>
       </div>
 
+      {uploadError ? (
+        <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          Upload error: {uploadError}
+        </p>
+      ) : null}
       {state.error ? (
         <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {state.error}
