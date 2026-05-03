@@ -47,6 +47,7 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
   return (
     <StudentShell
       userName={user.email}
+      userRole={user.role}
       navItems={[
         { href: "/problems", label: "Problems", active: true },
         { href: "/submissions", label: "Submissions" },
