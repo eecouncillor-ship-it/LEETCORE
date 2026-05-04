@@ -24,11 +24,8 @@ export async function submitAnswerAction(
   formData: FormData,
 ): Promise<SubmissionState> {
   const user = await requireAuth();
+  const answerText = String(formData.get("answerText") ?? "").trim();
   const selectedOptionId = String(formData.get("selectedOptionId") ?? "").trim();
-
-  if (!selectedOptionId) {
-    return { error: "Select an option before submitting your answer." };
-  }
 
   const problem = await getProblemBySlug(id);
 
@@ -36,28 +33,55 @@ export async function submitAnswerAction(
     return { error: "Problem not found. Please go back and try again." };
   }
 
-  const selectedOption = problem.options.find(
-    (option: QuestionOption) => option.id === selectedOptionId,
-  );
+  const isFillInTheBlank = problem.options.length === 1;
+
+  let selectedOption: QuestionOption | undefined;
+  let selectedOptionText = "";
+  let isCorrect = false;
+
+  if (isFillInTheBlank) {
+    if (!answerText) {
+      return { error: "Please enter your answer before submitting." };
+    }
+
+    const correctOption = problem.options[0];
+    selectedOption = correctOption;
+    selectedOptionText = answerText;
+    isCorrect =
+      correctOption.text.trim().toLowerCase() === answerText.trim().toLowerCase();
+  } else {
+    if (!selectedOptionId) {
+      return { error: "Select an option before submitting your answer." };
+    }
+
+    selectedOption = problem.options.find(
+      (option: QuestionOption) => option.id === selectedOptionId,
+    );
+
+    if (!selectedOption) {
+      return { error: "That option is not valid for this question." };
+    }
+
+    const correctOption = problem.options.find(
+      (option: QuestionOption) => option.id === problem.correct_answer,
+    );
+
+    if (!correctOption) {
+      return { error: "This question is missing a valid answer key." };
+    }
+
+    isCorrect = selectedOption.id === correctOption.id;
+    selectedOptionText = selectedOption.text;
+  }
 
   if (!selectedOption) {
-    return { error: "That option is not valid for this question." };
+    return { error: "Unable to process your answer." };
   }
-
-  const correctOption = problem.options.find(
-    (option: QuestionOption) => option.id === problem.correct_answer,
-  );
-
-  if (!correctOption) {
-    return { error: "This question is missing a valid answer key." };
-  }
-
-  const isCorrect = selectedOption.id === correctOption.id;
 
   await createSubmission({
     user_email: user.email,
     question_id: problem.id,
-    selected_answer: selectedOption.id,
+    selected_answer: isFillInTheBlank ? selectedOptionText : selectedOption.id,
     is_correct: isCorrect,
   });
 
@@ -68,9 +92,9 @@ export async function submitAnswerAction(
     result: {
       isCorrect,
       selectedOptionId: selectedOption.id,
-      selectedOptionText: selectedOption.text,
-      correctOptionId: correctOption.id,
-      correctOptionText: correctOption.text,
+      selectedOptionText,
+      correctOptionId: selectedOption.id,
+      correctOptionText: selectedOption.text,
       solutionExplanation: problem.explanation,
     },
   };

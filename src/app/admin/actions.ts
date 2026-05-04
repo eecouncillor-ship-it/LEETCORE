@@ -32,7 +32,9 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   const description = String(formData.get("description") ?? "").trim();
   const topic = String(formData.get("topic") ?? "").trim();
   const difficulty = String(formData.get("difficulty") ?? "").trim() as Difficulty;
+  const kind = (String(formData.get("kind") ?? "mcq").trim() as "mcq" | "fib");
   const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
+  const fibAnswer = String(formData.get("fibAnswer") ?? "").trim();
   const solutionExplanation = String(formData.get("solutionExplanation") ?? "").trim();
   const questionImageUrl = String(formData.get("questionImageUrl") ?? "").trim() || undefined;
   const optionsJson = String(formData.get("optionsJson") ?? "[]").trim();
@@ -49,12 +51,24 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
     return { ok: false, error: "Please fill in all required question fields." };
   }
 
-  if (
-    !Array.isArray(options) ||
-    options.length !== 4 ||
-    options.some((opt) => !opt?.id || !opt?.text)
-  ) {
-    return { ok: false, error: "Please provide all MCQ options." };
+  if (kind === "fib") {
+    if (!fibAnswer) {
+      return { ok: false, error: "Please provide the fill-in-the-blank answer." };
+    }
+
+    options = [{ id: "A", text: fibAnswer }];
+  } else {
+    if (
+      !Array.isArray(options) ||
+      options.length !== 4 ||
+      options.some((opt) => !opt?.id || !opt?.text)
+    ) {
+      return { ok: false, error: "Please provide all MCQ options." };
+    }
+
+    if (!correctOptionId) {
+      return { ok: false, error: "Please select the correct MCQ option." };
+    }
   }
 
   return {
@@ -66,7 +80,7 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
       description,
       questionImageUrl,
       options,
-      correctOptionId,
+      correctOptionId: kind === "fib" ? "A" : correctOptionId,
       solutionExplanation,
     },
   };

@@ -37,6 +37,8 @@ export function SubmissionForm({
   const submitWithSlug = submitAnswerAction.bind(null, slug);
   const [state, formAction] = useActionState(submitWithSlug, initialState);
 
+  const isFillInTheBlank = options.length === 1;
+
   return (
     <form action={formAction} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -45,39 +47,54 @@ export function SubmissionForm({
             Answer panel
           </p>
           <h3 className="mt-2 text-2xl font-black text-slate-950">
-            Select one option
+            {isFillInTheBlank ? "Fill in the blank" : "Select one option"}
           </h3>
         </div>
         <SubmitButton />
       </div>
 
-      <div className="space-y-3">
-        {options.map((option) => (
-          <label
-            key={option.id}
-            className="flex items-start gap-4 rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700 transition hover:border-orange-300 hover:bg-orange-50/50"
-          >
+      {isFillInTheBlank ? (
+        <div className="space-y-3">
+          <label className="block rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700 transition hover:border-orange-300 hover:bg-orange-50/50">
+            <span className="text-sm font-semibold text-slate-700">Your answer</span>
             <input
-              type="radio"
-              name="selectedOptionId"
-              value={option.id}
-              className="mt-1 size-4"
+              type="text"
+              name="answerText"
+              className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-orange-400"
+              placeholder="Type your answer here"
+              autoComplete="off"
             />
-            <div>
-              {option.image_url ? (
-                <img
-                  src={option.image_url}
-                  alt={`Option ${option.id}`}
-                  className="mb-2 max-w-full h-auto rounded-lg"
-                />
-              ) : null}
-              <p className="font-semibold text-slate-950">
-                {option.id}. {option.text}
-              </p>
-            </div>
           </label>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {options.map((option) => (
+            <label
+              key={option.id}
+              className="flex items-start gap-4 rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700 transition hover:border-orange-300 hover:bg-orange-50/50"
+            >
+              <input
+                type="radio"
+                name="selectedOptionId"
+                value={option.id}
+                className="mt-1 size-4"
+              />
+              <div>
+                {option.image_url ? (
+                  <img
+                    src={option.image_url}
+                    alt={`Option ${option.id}`}
+                    className="mb-2 max-w-full h-auto rounded-lg"
+                  />
+                ) : null}
+                <p className="font-semibold text-slate-950">
+                  {option.id}. {option.text}
+                </p>
+              </div>
+            </label>
+          ))}
+        </div>
+      )}
 
       {state.error ? (
         <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">

@@ -55,8 +55,12 @@ export function CreateProblemForm({
       : createProblemAction;
 
   const [state, formAction] = useActionState(action, initialState);
-  const [kind, setKind] = React.useState<"mcq" | "fib">("mcq");
+  const [kind, setKind] = React.useState<"mcq" | "fib">
+    (problem?.options?.length === 1 ? "fib" : "mcq");
   const [questionImage, setQuestionImage] = React.useState<string>(problem?.image_url ?? "");
+  const [fibAnswer, setFibAnswer] = React.useState<string>(
+    problem?.options?.[0]?.text ?? ""
+  );
   const [options, setOptions] = React.useState<OptionState[]>(
     problem?.options?.map((option) => ({
       id: option.id,
@@ -132,10 +136,15 @@ export function CreateProblemForm({
     }
   };
 
+  const optionData =
+    kind === "fib"
+      ? [{ id: "A", text: fibAnswer, image_url: undefined }]
+      : options;
+
   return (
     <form action={formAction} className="grid gap-5">
       <input type="hidden" name="questionImageUrl" value={questionImage} />
-      <input type="hidden" name="optionsJson" value={JSON.stringify(options)} />
+      <input type="hidden" name="optionsJson" value={JSON.stringify(optionData)} />
       <div className="grid gap-5 md:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-200">
@@ -219,79 +228,96 @@ export function CreateProblemForm({
 
       <div className="flex gap-4 items-center">
         <label className="flex items-center gap-2 text-sm text-slate-200">
-          <input type="radio" name="kind" value="mcq" checked={kind === "mcq"} onChange={() => setKind("mcq")} />
+          <input
+            type="radio"
+            name="kind"
+            value="mcq"
+            checked={kind === "mcq"}
+            onChange={() => {
+              setKind("mcq");
+              if (options.length !== 4) {
+                setOptions(defaultOptions);
+              }
+            }}
+          />
           MCQ
         </label>
         <label className="flex items-center gap-2 text-sm text-slate-200">
-          <input type="radio" name="kind" value="fib" checked={kind === "fib"} onChange={() => setKind("fib")} />
+          <input
+            type="radio"
+            name="kind"
+            value="fib"
+            checked={kind === "fib"}
+            onChange={() => setKind("fib")}
+          />
           Fill in the blank
         </label>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-200">
-            Option A
-          </label>
-          <input
-            name="optionA"
-            required={kind === "mcq"}
-            value={options[0]?.text ?? ""}
-            onChange={(e) => updateOption(0, { text: e.target.value })}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-            placeholder="O(n)"
-          />
-          <div className="mt-2">
-            <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option A)</label>
-            <input
-              type="file"
-              accept="image/*"
-              className="text-sm text-slate-200"
-              onChange={(e) => handleOptionImage(0, e)}
-            />
-            {options[0]?.image_url ? (
-              <img
-                src={options[0].image_url}
-                alt="Option A image"
-                className="mt-3 max-w-full h-auto rounded-lg"
+      {kind === "mcq" ? (
+        <>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
+                Option A
+              </label>
+              <input
+                name="optionA"
+                required
+                value={options[0]?.text ?? ""}
+                onChange={(e) => updateOption(0, { text: e.target.value })}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+                placeholder="O(n)"
               />
-            ) : null}
-          </div>
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-200">
-            Option B
-          </label>
-          <input
-            name="optionB"
-            required={kind === "mcq"}
-            value={options[1]?.text ?? ""}
-            onChange={(e) => updateOption(1, { text: e.target.value })}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-            placeholder="O(log n)"
-          />
-          <div className="mt-2">
-            <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option B)</label>
-            <input
-              type="file"
-              accept="image/*"
-              className="text-sm text-slate-200"
-              onChange={(e) => handleOptionImage(1, e)}
-            />
-            {options[1]?.image_url ? (
-              <img
-                src={options[1].image_url}
-                alt="Option B image"
-                className="mt-3 max-w-full h-auto rounded-lg"
+              <div className="mt-2">
+                <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option A)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="text-sm text-slate-200"
+                  onChange={(e) => handleOptionImage(0, e)}
+                />
+                {options[0]?.image_url ? (
+                  <img
+                    src={options[0].image_url}
+                    alt="Option A image"
+                    className="mt-3 max-w-full h-auto rounded-lg"
+                  />
+                ) : null}
+              </div>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
+                Option B
+              </label>
+              <input
+                name="optionB"
+                required
+                value={options[1]?.text ?? ""}
+                onChange={(e) => updateOption(1, { text: e.target.value })}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+                placeholder="O(log n)"
               />
-            ) : null}
+              <div className="mt-2">
+                <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (option B)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="text-sm text-slate-200"
+                  onChange={(e) => handleOptionImage(1, e)}
+                />
+                {options[1]?.image_url ? (
+                  <img
+                    src={options[1].image_url}
+                    alt="Option B image"
+                    className="mt-3 max-w-full h-auto rounded-lg"
+                  />
+                ) : null}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        {kind === "mcq" ? (
-          <>
+          <div className="grid gap-5 lg:grid-cols-2">
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-200">Option C</label>
               <input
@@ -346,18 +372,25 @@ export function CreateProblemForm({
                 ) : null}
               </div>
             </div>
-          </>
-        ) : (
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-200">Answer</label>
-            <input name="fibAnswer" required={kind === "fib"} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400" defaultValue={(problem as any)?.answer ?? ""} />
-            <div className="mt-2">
-              <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (answer)</label>
-              <input type="file" accept="image/*" className="text-sm text-slate-200" />
-            </div>
           </div>
-        )}
-      </div>
+        </>
+      ) : (
+        <div className="grid gap-5">
+          <label className="mb-2 block text-sm font-semibold text-slate-200">Answer</label>
+          <input
+            name="fibAnswer"
+            required
+            value={fibAnswer}
+            onChange={(e) => setFibAnswer(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+            placeholder="Enter the correct answer"
+          />
+          <div className="mt-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (answer)</label>
+            <input type="file" accept="image/*" className="text-sm text-slate-200" />
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-5 md:grid-cols-[220px_1fr]">
         {kind === "mcq" ? (
