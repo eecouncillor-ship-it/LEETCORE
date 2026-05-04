@@ -292,59 +292,91 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
           </section>
         </div>
 
-        <aside className="space-y-5">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
+        <aside className="space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
+            <div className="flex items-end justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  Performance
-                </p>
-                <h2 className="mt-4 text-4xl font-black text-white">{solvedCount}</h2>
-                <p className="mt-2 text-sm text-slate-400">Problems solved</p>
+                <p className="text-xs font-semibold text-slate-500">SOLVED</p>
+                <p className="mt-1 text-2xl font-black text-white">{solvedCount}</p>
               </div>
-              <div className="rounded-3xl bg-slate-950 px-4 py-3 text-sm font-semibold text-sky-300">
-                Beats {beatRate}%
+              <div className="rounded-full bg-sky-500/20 px-2.5 py-1 text-xs font-semibold text-sky-300">
+                {beatRate}%
               </div>
             </div>
+            
+            <div className="mt-4 space-y-2">
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                  <span>Acceptance</span>
+                  <span>{formatPercentage(acceptanceRate)}</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-white/10">
+                  <div
+                    className="h-1.5 rounded-full bg-emerald-400"
+                    style={{ width: `${Math.min(100, Math.round(acceptanceRate))}%` }}
+                  />
+                </div>
+              </div>
 
-            <div className="mt-6 grid gap-4">
-              <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
-                <p className="text-sm text-slate-400">Submissions</p>
-                <p className="mt-2 text-3xl font-black text-white">{submissions.length}</p>
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                  <span>Solved</span>
+                  <span>{problems.length === 0 ? "0%" : formatPercentage((solvedCount / problems.length) * 100)}</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-white/10">
+                  <div
+                    className="h-1.5 rounded-full bg-sky-400"
+                    style={{ width: `${Math.min(100, Math.round((solvedCount / Math.max(1, problems.length)) * 100))}%` }}
+                  />
+                </div>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
-                <p className="text-sm text-slate-400">Acceptance</p>
-                <p className="mt-2 text-3xl font-black text-white">{formatPercentage(acceptanceRate)}</p>
-              </div>
-              <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
-                <p className="text-sm text-slate-400">Solved ratio</p>
-                <p className="mt-2 text-3xl font-black text-white">
-                  {problems.length === 0 ? "0%" : formatPercentage((solvedCount / problems.length) * 100)}
-                </p>
+
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                  <span>Submissions</span>
+                  <span>{submissions.length}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Difficulty mix
-            </p>
-            <div className="mt-5 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
+            <p className="text-xs font-semibold text-slate-500">DIFFICULTY</p>
+            <div className="mt-3 flex h-8 gap-0.5 rounded-lg overflow-hidden bg-slate-950/50">
+              {(["Easy", "Medium", "Hard"] as const).map((difficulty) => {
+                const count = solvedDifficultyCounts[difficulty];
+                const width = problems.length === 0 ? 0 : (count / Math.max(1, problems.length)) * 100;
+                const color =
+                  difficulty === "Easy"
+                    ? "bg-emerald-500"
+                    : difficulty === "Medium"
+                    ? "bg-yellow-500"
+                    : "bg-rose-500";
+
+                return (
+                  <div
+                    key={difficulty}
+                    className={`${color} transition-all`}
+                    style={{ width: `${Math.max(2, width)}%` }}
+                    title={`${difficulty}: ${count}`}
+                  />
+                );
+              })}
+            </div>
+            <div className="mt-3 flex gap-2 text-xs">
               {(["Easy", "Medium", "Hard"] as const).map((difficulty) => {
                 const count = solvedDifficultyCounts[difficulty];
                 const color =
                   difficulty === "Easy"
-                    ? "bg-emerald-500 text-emerald-100"
+                    ? "text-emerald-400"
                     : difficulty === "Medium"
-                    ? "bg-yellow-500 text-yellow-100"
-                    : "bg-rose-500 text-rose-100";
+                    ? "text-yellow-400"
+                    : "text-rose-400";
 
                 return (
-                  <div key={difficulty} className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/20 px-4 py-3">
-                    <span className="text-sm text-slate-300">{difficulty}</span>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${color}`}>
-                      {count}
-                    </span>
+                  <div key={difficulty} className="flex-1">
+                    <span className={`font-semibold ${color}`}>{count}</span>
+                    <p className="text-slate-500 text-xs">{difficulty}</p>
                   </div>
                 );
               })}
