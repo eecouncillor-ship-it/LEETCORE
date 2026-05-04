@@ -299,7 +299,10 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
                 <p className="text-xs font-semibold text-slate-500">SOLVED</p>
                 <p className="mt-1 text-2xl font-black text-white">{solvedCount}</p>
               </div>
-              <div className="rounded-full bg-sky-500/20 px-2.5 py-1 text-xs font-semibold text-sky-300">
+              <div
+                className="rounded-full bg-sky-500/20 px-2.5 py-1 text-xs font-semibold text-sky-300 cursor-help transition hover:bg-sky-500/30"
+                title={`You are better than ${beatRate}% of students`}
+              >
                 {beatRate}%
               </div>
             </div>
