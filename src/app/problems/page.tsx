@@ -49,6 +49,35 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
     return matchesSearch && matchesDifficulty && matchesTopic;
   });
 
+  const acceptanceByProblem = new Map(
+    problems.map((problem) => {
+      const attempts = submissions.filter(
+        (submission) => submission.question_id === problem.id,
+      );
+      const accepted = attempts.filter((submission) => submission.is_correct).length;
+      const acceptance = attempts.length === 0 ? 0 : (accepted / attempts.length) * 100;
+
+      return [problem.id, acceptance];
+    }),
+  );
+
+  const totalAcceptedSubmissions = submissions.filter((submission) => submission.is_correct).length;
+  const acceptanceRate = submissions.length === 0 ? 0 : (totalAcceptedSubmissions / submissions.length) * 100;
+  const solvedCount = solvedProblemIds.size;
+  const solvedProblems = problems.filter((problem) => solvedProblemIds.has(problem.id));
+  const solvedDifficultyCounts = {
+    Easy: solvedProblems.filter((problem) => problem.difficulty === "Easy").length,
+    Medium: solvedProblems.filter((problem) => problem.difficulty === "Medium").length,
+    Hard: solvedProblems.filter((problem) => problem.difficulty === "Hard").length,
+  };
+  const beatRate = Math.min(
+    95,
+    Math.max(
+      55,
+      Math.round(55 + acceptanceRate / 100 * 15 + solvedCount / Math.max(1, problems.length) * 20),
+    ),
+  );
+
   // Sort problems
   const sortedProblems = [...filteredProblems].sort((a, b) => {
     if (sortBy === "acceptance") {
@@ -62,18 +91,6 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
     }
     return 0; // default by number
   });
-
-  const acceptanceByProblem = new Map(
-    problems.map((problem) => {
-      const attempts = submissions.filter(
-        (submission) => submission.question_id === problem.id,
-      );
-      const accepted = attempts.filter((submission) => submission.is_correct).length;
-      const acceptance = attempts.length === 0 ? 0 : (accepted / attempts.length) * 100;
-
-      return [problem.id, acceptance];
-    }),
-  );
 
   // Extract unique topics from problems
   const uniqueTopics = Array.from(new Set(problems.map((p) => p.topic))).sort();
@@ -89,8 +106,9 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
         { href: "/mock-test", label: "Mock Test" },
       ]}
     >
-      <div className="space-y-5 w-full">
-        {/* Topic Tabs */}
+      <div className="grid gap-5 xl:grid-cols-[1.5fr_0.9fr] w-full">
+        <div className="space-y-5">
+          {/* Topic Tabs */}
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {topics.map((topic) => {
               const isActive = topic === "All Topics" 
@@ -272,6 +290,67 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
               )}
             </div>
           </section>
+        </div>
+
+        <aside className="space-y-5">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Performance
+                </p>
+                <h2 className="mt-4 text-4xl font-black text-white">{solvedCount}</h2>
+                <p className="mt-2 text-sm text-slate-400">Problems solved</p>
+              </div>
+              <div className="rounded-3xl bg-slate-950 px-4 py-3 text-sm font-semibold text-sky-300">
+                Beats {beatRate}%
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4">
+              <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
+                <p className="text-sm text-slate-400">Submissions</p>
+                <p className="mt-2 text-3xl font-black text-white">{submissions.length}</p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
+                <p className="text-sm text-slate-400">Acceptance</p>
+                <p className="mt-2 text-3xl font-black text-white">{formatPercentage(acceptanceRate)}</p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
+                <p className="text-sm text-slate-400">Solved ratio</p>
+                <p className="mt-2 text-3xl font-black text-white">
+                  {problems.length === 0 ? "0%" : formatPercentage((solvedCount / problems.length) * 100)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Difficulty mix
+            </p>
+            <div className="mt-5 space-y-3">
+              {(["Easy", "Medium", "Hard"] as const).map((difficulty) => {
+                const count = solvedDifficultyCounts[difficulty];
+                const color =
+                  difficulty === "Easy"
+                    ? "bg-emerald-500 text-emerald-100"
+                    : difficulty === "Medium"
+                    ? "bg-yellow-500 text-yellow-100"
+                    : "bg-rose-500 text-rose-100";
+
+                return (
+                  <div key={difficulty} className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/20 px-4 py-3">
+                    <span className="text-sm text-slate-300">{difficulty}</span>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${color}`}>
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
       </div>
     </StudentShell>
   );
