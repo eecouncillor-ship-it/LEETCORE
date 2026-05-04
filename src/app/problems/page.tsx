@@ -159,19 +159,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
             </button>
           </form>
 
-          <div className="flex items-center justify-between gap-4">
-            <div className="text-sm text-slate-300">{solvedProblemIds.size}/{problems.length} Solved</div>
-            <div className="flex gap-2">
-              <select
-                defaultValue={sortBy}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 outline-none hover:bg-white/10 cursor-pointer"
-              >
-                <option value="number">Sort by Number</option>
-                <option value="acceptance">Sort by Acceptance</option>
-                <option value="difficulty">Sort by Difficulty</option>
-              </select>
-            </div>
-          </div>
+          <div className="text-sm text-slate-300">{solvedProblemIds.size}/{problems.length} Solved</div>
 
           {/* Difficulty Filter Buttons */}
           <div className="flex gap-2 flex-wrap">
