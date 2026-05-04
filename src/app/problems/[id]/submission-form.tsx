@@ -29,15 +29,15 @@ export function SubmissionForm({
   slug,
   options,
   nextSlug,
+  isFillInTheBlank,
 }: {
   slug: string;
   options: Array<{ id: string; text: string; image_url?: string }>;
   nextSlug: string | null;
+  isFillInTheBlank: boolean;
 }) {
   const submitWithSlug = submitAnswerAction.bind(null, slug);
   const [state, formAction] = useActionState(submitWithSlug, initialState);
-
-  const isFillInTheBlank = options.length === 1;
 
   return (
     <form action={formAction} className="space-y-4">
@@ -54,17 +54,22 @@ export function SubmissionForm({
       </div>
 
       {isFillInTheBlank ? (
-        <div className="space-y-3">
-          <label className="block rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700 transition hover:border-orange-300 hover:bg-orange-50/50">
-            <span className="text-sm font-semibold text-slate-700">Your answer</span>
-            <input
-              type="text"
-              name="answerText"
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-orange-400"
-              placeholder="Type your answer here"
-              autoComplete="off"
-            />
-          </label>
+        <div className="space-y-4">
+          {options.map((option) => (
+            <label
+              key={option.id}
+              className="block rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700 transition hover:border-orange-300 hover:bg-orange-50/50"
+            >
+              <span className="text-sm font-semibold text-slate-700">Blank {option.id}</span>
+              <input
+                type="text"
+                name={`answer_${option.id}`}
+                className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-orange-400"
+                placeholder={`Answer for blank ${option.id}`}
+                autoComplete="off"
+              />
+            </label>
+          ))}
         </div>
       ) : (
         <div className="space-y-3">
@@ -118,17 +123,34 @@ export function SubmissionForm({
             >
               {state.result.isCorrect ? "Correct answer" : "Incorrect answer"}
             </p>
-            <p className="mt-3 text-sm leading-7 text-slate-800">
-              You selected <span className="font-semibold">{state.result.selectedOptionId}</span>
-              {" - "}
-              {state.result.selectedOptionText}
-            </p>
-            <p className="mt-2 text-sm leading-7 text-slate-800">
-              Correct answer:{" "}
-              <span className="font-semibold">
-                {state.result.correctOptionId} - {state.result.correctOptionText}
-              </span>
-            </p>
+            {state.result.answers ? (
+              <div className="mt-4 space-y-3 text-sm leading-7 text-slate-800">
+                {state.result.answers.map((answer) => (
+                  <div key={answer.blankId} className="rounded-2xl border border-slate-200 bg-white/80 p-3">
+                    <p className="font-semibold text-slate-950">Blank {answer.blankId}</p>
+                    <p>Your answer: {answer.submitted}</p>
+                    <p>Expected: {answer.expected}</p>
+                    <p className={answer.isCorrect ? "text-emerald-700" : "text-amber-700"}>
+                      {answer.isCorrect ? "Correct" : "Incorrect"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <p className="mt-3 text-sm leading-7 text-slate-800">
+                  You selected <span className="font-semibold">{state.result.selectedOptionId}</span>
+                  {" - "}
+                  {state.result.selectedOptionText}
+                </p>
+                <p className="mt-2 text-sm leading-7 text-slate-800">
+                  Correct answer:{" "}
+                  <span className="font-semibold">
+                    {state.result.correctOptionId} - {state.result.correctOptionText}
+                  </span>
+                </p>
+              </>
+            )}
             <p className="mt-3 text-sm leading-7 text-slate-700">
               {state.result.solutionExplanation}
             </p>

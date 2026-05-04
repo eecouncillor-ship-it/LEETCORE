@@ -16,6 +16,7 @@ type ParsedQuestionForm = {
   title: string;
   topic: string;
   difficulty: Difficulty;
+  kind: "mcq" | "fib";
   description: string;
   questionImageUrl?: string;
   options: Array<{ id: string; text: string; image_url?: string }>;
@@ -34,7 +35,6 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   const difficulty = String(formData.get("difficulty") ?? "").trim() as Difficulty;
   const kind = (String(formData.get("kind") ?? "mcq").trim() as "mcq" | "fib");
   const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
-  const fibAnswer = String(formData.get("fibAnswer") ?? "").trim();
   const solutionExplanation = String(formData.get("solutionExplanation") ?? "").trim();
   const questionImageUrl = String(formData.get("questionImageUrl") ?? "").trim() || undefined;
   const optionsJson = String(formData.get("optionsJson") ?? "[]").trim();
@@ -52,11 +52,9 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   }
 
   if (kind === "fib") {
-    if (!fibAnswer) {
-      return { ok: false, error: "Please provide the fill-in-the-blank answer." };
+    if (!Array.isArray(options) || options.length < 1 || options.some((opt) => !opt?.id || !opt?.text)) {
+      return { ok: false, error: "Please provide at least one fill-in-the-blank answer." };
     }
-
-    options = [{ id: "A", text: fibAnswer }];
   } else {
     if (
       !Array.isArray(options) ||
@@ -77,10 +75,11 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
       title,
       topic,
       difficulty,
+      kind,
       description,
       questionImageUrl,
       options,
-      correctOptionId: kind === "fib" ? "A" : correctOptionId,
+      correctOptionId: kind === "fib" ? "FIB" : correctOptionId,
       solutionExplanation,
     },
   };

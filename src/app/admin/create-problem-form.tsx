@@ -55,12 +55,10 @@ export function CreateProblemForm({
       : createProblemAction;
 
   const [state, formAction] = useActionState(action, initialState);
-  const [kind, setKind] = React.useState<"mcq" | "fib">
-    (problem?.options?.length === 1 ? "fib" : "mcq");
-  const [questionImage, setQuestionImage] = React.useState<string>(problem?.image_url ?? "");
-  const [fibAnswer, setFibAnswer] = React.useState<string>(
-    problem?.options?.[0]?.text ?? ""
+  const [kind, setKind] = React.useState<"mcq" | "fib">(
+    problem?.correct_answer === "FIB" ? "fib" : "mcq"
   );
+  const [questionImage, setQuestionImage] = React.useState<string>(problem?.image_url ?? "");
   const [options, setOptions] = React.useState<OptionState[]>(
     problem?.options?.map((option) => ({
       id: option.id,
@@ -68,6 +66,13 @@ export function CreateProblemForm({
       image_url: option.image_url ?? undefined,
     })) ?? defaultOptions
   );
+  const [fibBlanks, setFibBlanks] = React.useState<OptionState[]>(
+    problem?.correct_answer === "FIB"
+      ? problem.options.map((option) => ({ id: option.id, text: option.text }))
+      : [{ id: "A", text: "" }]
+  );
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
+  const [uploading, setUploading] = React.useState<boolean>(false);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
   const [uploading, setUploading] = React.useState<boolean>(false);
 
@@ -136,10 +141,7 @@ export function CreateProblemForm({
     }
   };
 
-  const optionData =
-    kind === "fib"
-      ? [{ id: "A", text: fibAnswer, image_url: undefined }]
-      : options;
+  const optionData = kind === "fib" ? fibBlanks : options;
 
   return (
     <form action={formAction} className="grid gap-5">
@@ -376,19 +378,50 @@ export function CreateProblemForm({
         </>
       ) : (
         <div className="grid gap-5">
-          <label className="mb-2 block text-sm font-semibold text-slate-200">Answer</label>
-          <input
-            name="fibAnswer"
-            required
-            value={fibAnswer}
-            onChange={(e) => setFibAnswer(e.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
-            placeholder="Enter the correct answer"
-          />
-          <div className="mt-2">
-            <label className="mb-2 block text-sm font-semibold text-slate-200">Attach photo (answer)</label>
-            <input type="file" accept="image/*" className="text-sm text-slate-200" />
-          </div>
+          <label className="mb-2 block text-sm font-semibold text-slate-200">Fill in the blank answers</label>
+          {fibBlanks.map((blank, index) => (
+            <div key={blank.id} className="grid gap-3 rounded-3xl border border-white/10 bg-slate-950/30 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm font-semibold text-slate-200">Blank {blank.id}</span>
+                {fibBlanks.length > 1 ? (
+                  <button
+                    type="button"
+                    className="text-sm text-orange-300 hover:text-orange-100"
+                    onClick={() => {
+                      setFibBlanks((current) => current.filter((_, i) => i !== index));
+                    }}
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+              <input
+                name={`blank_${blank.id}`}
+                required
+                value={blank.text}
+                onChange={(e) => {
+                  const nextText = e.target.value;
+                  setFibBlanks((current) =>
+                    current.map((item, itemIndex) =>
+                      itemIndex === index ? { ...item, text: nextText } : item,
+                    ),
+                  );
+                }}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+                placeholder="Blank answer text"
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-2xl border border-orange-500 bg-transparent px-4 py-3 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/10"
+            onClick={() => {
+              const nextId = String.fromCharCode(65 + fibBlanks.length);
+              setFibBlanks((current) => [...current, { id: nextId, text: "" }]);
+            }}
+          >
+            Add another blank
+          </button>
         </div>
       )}
 

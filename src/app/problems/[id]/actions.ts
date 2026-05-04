@@ -10,11 +10,17 @@ export type SubmissionState = {
   error?: string;
   result?: {
     isCorrect: boolean;
-    selectedOptionId: string;
-    selectedOptionText: string;
-    correctOptionId: string;
-    correctOptionText: string;
+    selectedOptionId?: string;
+    selectedOptionText?: string;
+    correctOptionId?: string;
+    correctOptionText?: string;
     solutionExplanation: string;
+    answers?: Array<{
+      blankId: string;
+      submitted: string;
+      expected: string;
+      isCorrect: boolean;
+    }>;
   };
 };
 
@@ -24,7 +30,6 @@ export async function submitAnswerAction(
   formData: FormData,
 ): Promise<SubmissionState> {
   const user = await requireAuth();
-  const answerText = String(formData.get("answerText") ?? "").trim();
   const selectedOptionId = String(formData.get("selectedOptionId") ?? "").trim();
 
   const problem = await getProblemBySlug(id);
@@ -33,55 +38,75 @@ export async function submitAnswerAction(
     return { error: "Problem not found. Please go back and try again." };
   }
 
-  const isFillInTheBlank = problem.options.length === 1;
-
-  let selectedOption: QuestionOption | undefined;
-  let selectedOptionText = "";
-  let isCorrect = false;
+  const isFillInTheBlank = problem.correct_answer === "FIB";
 
   if (isFillInTheBlank) {
-    if (!answerText) {
-      return { error: "Please enter your answer before submitting." };
+    const answers = problem.options.map((option) => {
+      const submitted = String(formData.get(`answer_${option.id}`) ?? "").trim();
+
+      return {
+        blankId: option.id,
+        submitted,
+        expected: option.text,
+        isCorrect:
+          option.text.trim().toLowerCase() === submitted.trim().toLowerCase(),
+      };
+    });
+
+    if (answers.some((answer) => !answer.submitted)) {
+      return { error: "Please fill in all blank answers before submitting." };
     }
 
-    const correctOption = problem.options[0];
-    selectedOption = correctOption;
-    selectedOptionText = answerText;
-    isCorrect =
-      correctOption.text.trim().toLowerCase() === answerText.trim().toLowerCase();
-  } else {
-    if (!selectedOptionId) {
-      return { error: "Select an option before submitting your answer." };
-    }
+    const isCorrect = answers.every((answer) => answer.isCorrect);
 
-    selectedOption = problem.options.find(
-      (option: QuestionOption) => option.id === selectedOptionId,
-    );
+    await createSubmission({
+      user_email: user.email,
+      question_id: problem.id,
+      selected_answer: JSON.stringify(answers.map((answer) => ({
+        blankId: answer.blankId,
+        submitted: answer.submitted,
+      }))),
+      is_correct: isCorrect,
+    });
 
-    if (!selectedOption) {
-      return { error: "That option is not valid for this question." };
-    }
+    revalidatePath("/problems");
+    revalidatePath(`/problems/${id}`);
 
-    const correctOption = problem.options.find(
-      (option: QuestionOption) => option.id === problem.correct_answer,
-    );
-
-    if (!correctOption) {
-      return { error: "This question is missing a valid answer key." };
-    }
-
-    isCorrect = selectedOption.id === correctOption.id;
-    selectedOptionText = selectedOption.text;
+    return {
+      result: {
+        isCorrect,
+        solutionExplanation: problem.explanation,
+        answers,
+      },
+    };
   }
+
+  if (!selectedOptionId) {
+    return { error: "Select an option before submitting your answer." };
+  }
+
+  const selectedOption = problem.options.find(
+    (option: QuestionOption) => option.id === selectedOptionId,
+  );
 
   if (!selectedOption) {
-    return { error: "Unable to process your answer." };
+    return { error: "That option is not valid for this question." };
   }
+
+  const correctOption = problem.options.find(
+    (option: QuestionOption) => option.id === problem.correct_answer,
+  );
+
+  if (!correctOption) {
+    return { error: "This question is missing a valid answer key." };
+  }
+
+  const isCorrect = selectedOption.id === correctOption.id;
 
   await createSubmission({
     user_email: user.email,
     question_id: problem.id,
-    selected_answer: isFillInTheBlank ? selectedOptionText : selectedOption.id,
+    selected_answer: selectedOption.id,
     is_correct: isCorrect,
   });
 
@@ -92,9 +117,9 @@ export async function submitAnswerAction(
     result: {
       isCorrect,
       selectedOptionId: selectedOption.id,
-      selectedOptionText,
-      correctOptionId: selectedOption.id,
-      correctOptionText: selectedOption.text,
+      selectedOptionText: selectedOption.text,
+      correctOptionId: correctOption.id,
+      correctOptionText: correctOption.text,
       solutionExplanation: problem.explanation,
     },
   };
