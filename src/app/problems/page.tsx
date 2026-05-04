@@ -109,7 +109,16 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
       <div className="grid gap-5 xl:grid-cols-[1.5fr_0.9fr] w-full">
         <div className="space-y-5">
           {/* Topic Tabs */}
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide max-w-[600px]">
+          <div
+            className="flex gap-3 overflow-x-auto pb-2 scrollbar-hidden w-full"
+            onWheel={(event) => {
+              const target = event.currentTarget;
+              if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+                target.scrollLeft += event.deltaY;
+                event.preventDefault();
+              }
+            }}
+          >
             {topics.map((topic) => {
               const isActive = topic === "All Topics" 
                 ? topicFilter === "" 
