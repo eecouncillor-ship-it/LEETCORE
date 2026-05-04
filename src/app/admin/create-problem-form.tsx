@@ -59,6 +59,14 @@ export function CreateProblemForm({
     problem?.correct_answer === "FIB" ? "fib" : "mcq"
   );
   const [questionImage, setQuestionImage] = React.useState<string>(problem?.image_url ?? "");
+  const knownTopics = ["DSA", "SQL", "DBMS", "OS", "CN"];
+  const isKnownTopic = problem && knownTopics.includes(problem.topic);
+  const [selectedTopic, setSelectedTopic] = React.useState<string>(
+    problem?.topic ? (isKnownTopic ? problem.topic : "new") : ""
+  );
+  const [customTopic, setCustomTopic] = React.useState<string>(
+    problem && !isKnownTopic ? problem.topic : ""
+  );
   const [options, setOptions] = React.useState<OptionState[]>(
     problem?.options?.map((option) => ({
       id: option.id,
@@ -166,7 +174,8 @@ export function CreateProblemForm({
           <select
             name="topic"
             required
-            defaultValue={(problem as any)?.topic ?? ""}
+            value={selectedTopic}
+            onChange={(event) => setSelectedTopic(event.target.value)}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
           >
             <option value="">Select Topic</option>
@@ -175,7 +184,18 @@ export function CreateProblemForm({
             <option value="DBMS">DBMS</option>
             <option value="OS">OS</option>
             <option value="CN">CN</option>
+            <option value="new">Add new topic</option>
           </select>
+          {selectedTopic === "new" ? (
+            <input
+              name="customTopic"
+              required
+              value={customTopic}
+              onChange={(event) => setCustomTopic(event.target.value)}
+              className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
+              placeholder="Enter custom topic"
+            />
+          ) : null}
         </div>
 
         <div>

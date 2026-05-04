@@ -32,6 +32,7 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const topic = String(formData.get("topic") ?? "").trim();
+  const customTopic = String(formData.get("customTopic") ?? "").trim();
   const difficulty = String(formData.get("difficulty") ?? "").trim() as Difficulty;
   const kind = (String(formData.get("kind") ?? "mcq").trim() as "mcq" | "fib");
   const correctOptionId = String(formData.get("correctOptionId") ?? "").trim();
@@ -47,7 +48,9 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
     return { ok: false, error: "Invalid option data." };
   }
 
-  if (!title || !description || !topic || !difficulty || !solutionExplanation) {
+  const resolvedTopic = customTopic || topic;
+
+  if (!title || !description || !resolvedTopic || !difficulty || !solutionExplanation) {
     return { ok: false, error: "Please fill in all required question fields." };
   }
 
@@ -73,7 +76,7 @@ function parseQuestionForm(formData: FormData): ParseQuestionFormResult {
     ok: true,
     data: {
       title,
-      topic,
+      topic: resolvedTopic,
       difficulty,
       kind,
       description,
