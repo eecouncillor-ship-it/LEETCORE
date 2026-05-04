@@ -30,11 +30,18 @@ export function SubmissionForm({
   options,
   nextSlug,
   isFillInTheBlank,
+  previousSubmissions,
 }: {
   slug: string;
   options: Array<{ id: string; text: string; image_url?: string }>;
   nextSlug: string | null;
   isFillInTheBlank: boolean;
+  previousSubmissions: Array<{
+    id: string;
+    selected_answer: string;
+    is_correct: boolean;
+    created_at: string;
+  }>;
 }) {
   const submitWithSlug = submitAnswerAction.bind(null, slug);
   const [state, formAction] = useActionState(submitWithSlug, initialState);
@@ -171,6 +178,44 @@ export function SubmissionForm({
               >
                 Back to all questions
               </Link>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {state.result ? (
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-7 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-900">Your attempts</h2>
+          <div className="mt-5 space-y-4">
+            {previousSubmissions.length > 0 ? (
+              previousSubmissions.map((submission) => (
+                <div
+                  key={submission.id}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-base font-semibold text-white">
+                      You chose {submission.selected_answer}
+                    </p>
+                    <span
+                      className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                        submission.is_correct
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {submission.is_correct ? "Correct" : "Incorrect"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-300">
+                    Submitted {new Date(submission.created_at).toLocaleString()}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                Submit an answer to start your history for this question.
+              </p>
             )}
           </div>
         </div>
