@@ -41,7 +41,12 @@ export async function submitAnswerAction(
   const isFillInTheBlank = problem.correct_answer === "FIB";
 
   if (isFillInTheBlank) {
-    const answers = problem.options.map((option) => {
+    const answers: Array<{
+      blankId: string;
+      submitted: string;
+      expected: string;
+      isCorrect: boolean;
+    }> = problem.options.map((option: QuestionOption) => {
       const submitted = String(formData.get(`answer_${option.id}`) ?? "").trim();
 
       return {

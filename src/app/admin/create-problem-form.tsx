@@ -73,8 +73,6 @@ export function CreateProblemForm({
   );
   const [uploadError, setUploadError] = React.useState<string | null>(null);
   const [uploading, setUploading] = React.useState<boolean>(false);
-  const [uploadError, setUploadError] = React.useState<string | null>(null);
-  const [uploading, setUploading] = React.useState<boolean>(false);
 
   const updateOption = (index: number, patch: Partial<OptionState>) => {
     setOptions((current) => {
