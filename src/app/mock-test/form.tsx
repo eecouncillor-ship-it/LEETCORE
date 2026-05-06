@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { createMockAction, submitMockAction, type MockFormState } from "./actions";
@@ -18,42 +19,175 @@ export function MockForm({ categories }: { categories: string[] }) {
   if ('session' in state) {
     const sess = state.session;
     const problems = state.problems;
+    const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
+    const [answers, setAnswers] = React.useState<Record<string, string>>({});
 
-    // Debug logging
-    console.log('[FORM] Mock test session object:', sess);
-    console.log('[FORM] Session expiresAt:', sess.expiresAt);
-
+    const currentProblem = problems[currentQuestionIndex];
     const submitPending = pending;
 
+    const handleAnswerChange = (questionId: string, optionId: string) => {
+      setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+    };
+
+    const navigateQuestion = (index: number) => {
+      if (index < 0 || index >= problems.length) return;
+      setCurrentQuestionIndex(index);
+    };
+
     return (
-      <div>
-        <div className="mb-4">
-          <ClientTimer endTime={sess.expiresAt} />
-        </div>
-
-        <form action={submitFormAction} className="space-y-6">
-          <input type="hidden" name="sessionId" value={sess.token} />
-          {problems.map((p, idx) => (
-            <section key={p.id} className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <h3 className="text-base font-semibold text-white">{idx + 1}. {p.title}</h3>
-              <p className="mt-2 text-sm text-slate-300">{p.description}</p>
-              <div className="mt-3 grid gap-2">
-                {p.options.map((opt) => (
-                  <label key={opt.id} className="flex items-center gap-3">
-                    <input type="radio" name={`answer_${p.id}`} value={opt.id} required />
-                    <span className="text-slate-100">{opt.id}. {opt.text}</span>
-                  </label>
-                ))}
-              </div>
-            </section>
-          ))}
-
-          {('error' in submitState) && submitState.error ? <div className="text-sm text-rose-500">{submitState.error}</div> : null}
-
-          <div className="flex justify-end">
-            <button type="submit" disabled={submitPending} className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white">{submitPending ? "Submitting..." : "Submit Mock Test"}</button>
+      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+        <aside className="rounded-3xl border border-white/10 bg-white/5 p-5">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Question Palette</p>
+              <p className="text-xs text-slate-500">Tap a number to jump.</p>
+            </div>
+            <div className="rounded-full bg-slate-900/70 px-3 py-1 text-xs font-semibold text-slate-200">{problems.length} total</div>
           </div>
-        </form>
+
+          <div className="grid gap-3">
+            {problems.map((problem, index) => {
+              const status = answers[problem.id] ? "answered" : "unanswered";
+              const isActive = index === currentQuestionIndex;
+
+              return (
+                <button
+                  key={problem.id}
+                  type="button"
+                  onClick={() => navigateQuestion(index)}
+                  className={`flex items-center justify-between rounded-2xl px-4 py-3 text-left transition ${
+                    isActive
+                      ? "border border-orange-400 bg-orange-500/10 text-white"
+                      : "border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+                      isActive
+                        ? "bg-orange-500 text-slate-950"
+                        : status === "answered"
+                        ? "bg-emerald-500 text-white"
+                        : "bg-white/10 text-slate-400"
+                    }`}>
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">Q{index + 1}</p>
+                      <p className="truncate text-xs text-slate-500">{problem.topic}</p>
+                    </div>
+                  </div>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                    status === "answered" ? "bg-emerald-500/15 text-emerald-300" : "bg-slate-700 text-slate-400"
+                  }`}>
+                    {status}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-slate-950/50 p-4 text-sm text-slate-400">
+            <p className="font-semibold text-slate-200 mb-2">Legend</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="h-3 w-3 rounded-full bg-emerald-500" />
+                <span>Answered</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="h-3 w-3 rounded-full bg-white/10" />
+                <span>Unanswered</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="h-3 w-3 rounded-full bg-orange-500" />
+                <span>Current</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main className="space-y-6">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Live Mock Test</p>
+                <h2 className="mt-2 text-2xl font-bold text-white">Question {currentQuestionIndex + 1}</h2>
+              </div>
+              <div className="rounded-2xl bg-slate-900/70 px-4 py-2 text-sm text-slate-200">
+                Time remaining: <ClientTimer endTime={sess.expiresAt} />
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-6">
+              <div className="mb-4 flex flex-wrap gap-3 text-sm text-slate-300">
+                <span className="rounded-full bg-white/5 px-3 py-1">Topic: {currentProblem.topic}</span>
+                <span className="rounded-full bg-white/5 px-3 py-1">Question {currentQuestionIndex + 1} of {problems.length}</span>
+              </div>
+              <div className="prose prose-invert max-w-full text-slate-100">
+                <h3 className="text-xl font-semibold">{currentProblem.title}</h3>
+                <p>{currentProblem.description}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">Select an answer</h3>
+            <div className="mt-4 space-y-4">
+              {currentProblem.options.map((opt) => (
+                <label
+                  key={opt.id}
+                  className="flex cursor-pointer items-center gap-4 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-4 transition hover:border-sky-400"
+                >
+                  <input
+                    type="radio"
+                    name={`answer_${currentProblem.id}`}
+                    value={opt.id}
+                    checked={answers[currentProblem.id] === opt.id}
+                    onChange={() => handleAnswerChange(currentProblem.id, opt.id)}
+                    className="h-5 w-5 text-sky-500"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-white">{opt.id}. {opt.text}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-slate-400">Answered {Object.keys(answers).length} of {problems.length} questions</div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => navigateQuestion(Math.max(0, currentQuestionIndex - 1))}
+                disabled={currentQuestionIndex === 0}
+                className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateQuestion(Math.min(problems.length - 1, currentQuestionIndex + 1))}
+                disabled={currentQuestionIndex === problems.length - 1}
+                className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition"
+              >
+                Next
+              </button>
+              <button
+                type="submit"
+                disabled={submitPending}
+                className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-50"
+              >
+                {submitPending ? "Submitting..." : "Submit Test"}
+              </button>
+            </div>
+          </div>
+
+          {('error' in submitState) && submitState.error ? (
+            <div className="rounded-2xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+              {submitState.error}
+            </div>
+          ) : null}
+        </main>
       </div>
     );
   }

@@ -22,9 +22,11 @@ export default async function MockTestPage() {
         { href: "/contact-us", label: "Contact Us" },
       ]}
     >
-      <div className="mx-auto max-w-2xl">
-        <h1 className="text-2xl font-black text-white mb-4">Mock Test</h1>
-        <p className="mb-4 text-slate-300">Choose a topic and start a timed mock test made of random questions.</p>
+      <div className="mx-auto max-w-[1400px] px-0">
+        <div className="mb-6 flex flex-col gap-3">
+          <h1 className="text-3xl font-black text-white">Mock Test</h1>
+          <p className="max-w-3xl text-slate-300">Choose a topic and start a timed mock test made of random questions. The question palette on the left shows your progress while the current question appears on the right.</p>
+        </div>
         <MockForm categories={categories} />
         <section className="mt-8">
           <h2 className="text-lg font-semibold text-white mb-3">Mock test history</h2>
