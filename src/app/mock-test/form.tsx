@@ -152,6 +152,13 @@ export function MockForm({ categories, results }: { categories: string[]; result
               </div>
               <div className="prose prose-invert max-w-full text-slate-100">
                 <h3 className="text-xl font-semibold">{currentProblem.title}</h3>
+                {currentProblem.image_url ? (
+                  <img
+                    src={currentProblem.image_url}
+                    alt={currentProblem.title}
+                    className="mb-6 max-w-full h-auto rounded-xl"
+                  />
+                ) : null}
                 <p>{currentProblem.description}</p>
               </div>
             </div>
@@ -167,6 +174,13 @@ export function MockForm({ categories, results }: { categories: string[]; result
                       className="block rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-4 transition hover:border-sky-400"
                     >
                       <span className="text-sm font-semibold text-white">Blank {opt.id}</span>
+                      {opt.image_url ? (
+                        <img
+                          src={opt.image_url}
+                          alt={`Option ${opt.id}`}
+                          className="mb-2 max-w-full h-auto rounded-lg"
+                        />
+                      ) : null}
                       <input
                         type="text"
                         name={`answer_${currentProblem.id}_${opt.id}`}
@@ -193,6 +207,13 @@ export function MockForm({ categories, results }: { categories: string[]; result
                         className="h-5 w-5 text-sky-500"
                       />
                       <div>
+                        {opt.image_url ? (
+                          <img
+                            src={opt.image_url}
+                            alt={`Option ${opt.id}`}
+                            className="mb-2 max-w-full h-auto rounded-lg"
+                          />
+                        ) : null}
                         <p className="text-sm font-semibold text-white">{opt.id}. {opt.text}</p>
                       </div>
                     </label>

@@ -280,6 +280,7 @@ export async function getAllProblems() {
     title: problem.title,
     difficulty: problem.difficulty,
     description: problem.description,
+    image_url: problem.image_url,
     options: problem.options,
     correct_answer: problem.correct_answer,
     explanation: problem.explanation,

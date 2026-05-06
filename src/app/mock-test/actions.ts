@@ -7,7 +7,7 @@ import { getAllProblems, createMockSession, getProblemById, createSubmission, cr
 import type { QuestionOption, MockSession, ProblemRecord } from "@/lib/types";
 import { randomUUID } from "node:crypto";
 
-export type MinimalProblem = Pick<ProblemRecord, 'id' | 'title' | 'description' | 'options' | 'correct_answer' | 'explanation' | 'topic'>;
+export type MinimalProblem = Pick<ProblemRecord, 'id' | 'title' | 'description' | 'options' | 'correct_answer' | 'explanation' | 'topic' | 'image_url'>;
 
 export type MockFormState = { error?: string } | { session: MockSession; problems: MinimalProblem[] };
 
@@ -39,7 +39,7 @@ export async function createMockAction(_prev: MockFormState, formData: FormData)
     return { error: "Failed to create mock session. Please try again." };
   }
   // return session and selected problems so client can render the test inline
-  const selectedMinimal: MinimalProblem[] = selected.map((p) => ({ id: p.id, title: p.title, description: p.description, options: p.options, correct_answer: p.correct_answer, explanation: p.explanation, topic: p.topic }));
+  const selectedMinimal: MinimalProblem[] = selected.map((p) => ({ id: p.id, title: p.title, description: p.description, options: p.options, correct_answer: p.correct_answer, explanation: p.explanation, topic: p.topic, image_url: p.image_url }));
 
   return { session, problems: selectedMinimal };
 }
