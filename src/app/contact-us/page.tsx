@@ -37,7 +37,6 @@ export default async function ContactUsPage() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Sarthak Verma</h3>
               <p className="text-slate-300 mb-2">+91 9113798592</p>
-              <p className="text-sm text-slate-400">CORE</p>
             </div>
           </div>
         </div>
@@ -54,7 +53,6 @@ export default async function ContactUsPage() {
               </div>
               <h3 className="text-sm font-semibold text-white mb-1">Team Member</h3>
               <p className="text-xs text-slate-300 mb-1">+1 (555) 111-1111</p>
-              <p className="text-xs text-slate-400">Developer</p>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
               <div className="w-14 h-14 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -64,7 +62,6 @@ export default async function ContactUsPage() {
               </div>
               <h3 className="text-sm font-semibold text-white mb-1">Team Member</h3>
               <p className="text-xs text-slate-300 mb-1">+1 (555) 222-2222</p>
-              <p className="text-xs text-slate-400">Developer</p>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
               <div className="w-14 h-14 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -74,7 +71,6 @@ export default async function ContactUsPage() {
               </div>
               <h3 className="text-sm font-semibold text-white mb-1">Team Member</h3>
               <p className="text-xs text-slate-300 mb-1">+1 (555) 333-3333</p>
-              <p className="text-xs text-slate-400">Developer</p>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
               <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -84,7 +80,6 @@ export default async function ContactUsPage() {
               </div>
               <h3 className="text-sm font-semibold text-white mb-1">Team Member</h3>
               <p className="text-xs text-slate-300 mb-1">+1 (555) 444-4444</p>
-              <p className="text-xs text-slate-400">Developer</p>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
               <div className="w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -94,7 +89,6 @@ export default async function ContactUsPage() {
               </div>
               <h3 className="text-sm font-semibold text-white mb-1">Team Member</h3>
               <p className="text-xs text-slate-300 mb-1">+1 (555) 555-5555</p>
-              <p className="text-xs text-slate-400">Developer</p>
             </div>
           </div>
         </div>
