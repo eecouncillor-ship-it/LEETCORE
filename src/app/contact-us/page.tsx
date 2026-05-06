@@ -33,9 +33,9 @@ export default async function ContactUsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Project Lead</h3>
-            <p className="text-slate-300 mb-2">your.email@example.com</p>
-            <p className="text-sm text-slate-400">Developer</p>
+            <h3 className="text-xl font-semibold text-white mb-2">CORE</h3>
+            <p className="text-slate-300 mb-2">+91 9113798592</p>
+            <p className="text-sm text-slate-400">EE24B103</p>
           </div>
 
           {/* Team Member 1 */}
