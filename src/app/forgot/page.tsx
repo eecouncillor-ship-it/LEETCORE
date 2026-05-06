@@ -6,7 +6,7 @@ export default function ForgotPage() {
       <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-12">
         <h1 className="text-3xl font-bold text-white mb-6">Forgot password</h1>
         <div className="rounded-[20px] border border-white/10 bg-white/5 p-6">
-          <p className="mb-4 text-sm text-slate-300">Enter your email and we'll provide a reset link.</p>
+          <p className="mb-4 text-sm text-slate-300">Enter your email and we&apos;ll provide a reset link.</p>
           <ForgotForm />
         </div>
       </section>

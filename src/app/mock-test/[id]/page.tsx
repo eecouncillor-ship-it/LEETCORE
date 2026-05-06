@@ -16,7 +16,6 @@ export default async function MockSessionPage({ params }: { params: Promise<{ id
   console.log('[SESSION_PAGE] Retrieved session for ID:', id);
   console.log('[SESSION_PAGE] Session object:', session);
   console.log('[SESSION_PAGE] Session expiresAt:', session?.expiresAt);
-  console.log('[SESSION_PAGE] Session expires_at (wrong key):', session ? (session as any).expires_at : 'N/A');
 
   if (!session || session.userId !== user.id) {
     return (
@@ -42,6 +41,7 @@ export default async function MockSessionPage({ params }: { params: Promise<{ id
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions" },
         { href: "/mock-test", label: "Mock Test", active: true },
+        { href: "/contact-us", label: "Contact Us" },
       ]}
     >
       <div className="h-screen flex flex-col gap-4">

@@ -52,6 +52,14 @@ export type PasswordResetRecord = {
   expiresAt: string;
 };
 
+export type MockResultRecord = {
+  id: string;
+  userId: string;
+  correct: number;
+  total: number;
+  createdAt: string;
+};
+
 export type DatabaseShape = {
   schemaVersion: number;
   users: UserRecord[];
@@ -60,7 +68,7 @@ export type DatabaseShape = {
   sessions: SessionRecord[];
   passwordResets?: PasswordResetRecord[];
   mockSessions?: MockSession[];
-  mockResults?: MockResult[];
+  mockResults?: MockResultRecord[];
 };
 
 export type MockSession = {

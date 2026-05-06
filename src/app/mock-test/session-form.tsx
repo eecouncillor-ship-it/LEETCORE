@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { submitMockAction, type MockFormState } from "./actions";
+import { submitMockAction, type MockFormState, type MinimalProblem } from "./actions";
 
 const initial: MockFormState = {};
 
-export function MockSessionForm({ sessionId, problems }: { sessionId: string; problems: any[] }) {
+export function MockSessionForm({ sessionId, problems }: { sessionId: string; problems: MinimalProblem[] }) {
   const [state, formAction] = useActionState(submitMockAction, initial);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -103,7 +103,7 @@ export function MockSessionForm({ sessionId, problems }: { sessionId: string; pr
                 Options
               </h3>
               <div className="space-y-3">
-                {currentProblem.options.map((opt: any) => (
+                {currentProblem.options.map((opt) => (
                   <label
                     key={opt.id}
                     className="flex items-center gap-4 rounded-lg border border-white/10 px-4 py-3 cursor-pointer transition hover:bg-white/5"

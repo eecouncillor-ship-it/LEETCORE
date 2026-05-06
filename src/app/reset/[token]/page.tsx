@@ -11,7 +11,7 @@ type ResetPageProps = {
 export default async function ResetPage({ params }: ResetPageProps) {
   const { token } = await params;
   const reset = await getPasswordReset(token);
-  if (!reset || new Date(reset.expiresAt).getTime() < Date.now()) {
+  if (!reset || new Date(reset.expiresAt).getTime() < new Date().getTime()) {
     notFound();
   }
 
@@ -21,7 +21,6 @@ export default async function ResetPage({ params }: ResetPageProps) {
         <h1 className="text-3xl font-bold text-white mb-6">Reset password</h1>
         <div className="rounded-[20px] border border-white/10 bg-white/5 p-6">
           <p className="mb-4 text-sm text-slate-300">Enter a new password for your account.</p>
-          {/* @ts-ignore server -> client prop passing is fine for simple token string */}
           <ResetForm token={token} />
         </div>
       </section>

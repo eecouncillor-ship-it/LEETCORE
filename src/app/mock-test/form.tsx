@@ -15,38 +15,15 @@ export function MockForm({ categories }: { categories: string[] }) {
   const { pending } = useFormStatus();
 
   // If server returned session and problems, render the inline test UI
-  if ((state as any).session) {
-    const sess = (state as any).session as any;
-    const problems = (state as any).problems as any[];
+  if ('session' in state) {
+    const sess = state.session;
+    const problems = state.problems;
 
     // Debug logging
     console.log('[FORM] Mock test session object:', sess);
     console.log('[FORM] Session expiresAt:', sess.expiresAt);
-    console.log('[FORM] Session expires_at (wrong key):', (sess as any).expires_at);
-    console.log('[FORM] All session keys:', Object.keys(sess));
-    console.log('[FORM] Session field types:', {
-      id: typeof sess.id,
-      userId: typeof sess.userId,
-      problemIds: typeof sess.problemIds,
-      startedAt: typeof sess.startedAt,
-      expiresAt: typeof sess.expiresAt,
-      createdAt: typeof sess.createdAt,
-    });
 
-    // Verify field name mapping
-    console.log('[FORM] Field name verification:');
-    console.log('[FORM]   expiresAt exists:', 'expiresAt' in sess);
-    console.log('[FORM]   expiresAt value:', sess.expiresAt);
-    console.log('[FORM]   expiresAt is valid date:', !isNaN(new Date(sess.expiresAt).getTime()));
-    console.log('[FORM]   expires_at exists (should be false):', 'expires_at' in sess);
-    console.log('[FORM]   expires_at value (should be undefined):', (sess as any).expires_at);
-
-    // Critical debug: Check if session is already expired
-    console.log('[FORM] Session expiresAt:', sess.expiresAt);
-    console.log('[FORM] Current time:', new Date().toISOString());
-    console.log('[FORM] Is session already expired?', new Date(sess.expiresAt).getTime() <= new Date().getTime());
-
-    const submitPending = (submitState as any).pending || false;
+    const submitPending = pending;
 
     return (
       <div>
@@ -55,13 +32,13 @@ export function MockForm({ categories }: { categories: string[] }) {
         </div>
 
         <form action={submitFormAction} className="space-y-6">
-          <input type="hidden" name="sessionId" value={sess.id} />
+          <input type="hidden" name="sessionId" value={sess.token} />
           {problems.map((p, idx) => (
             <section key={p.id} className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-4">
               <h3 className="text-base font-semibold text-white">{idx + 1}. {p.title}</h3>
               <p className="mt-2 text-sm text-slate-300">{p.description}</p>
               <div className="mt-3 grid gap-2">
-                {p.options.map((opt: any) => (
+                {p.options.map((opt) => (
                   <label key={opt.id} className="flex items-center gap-3">
                     <input type="radio" name={`answer_${p.id}`} value={opt.id} required />
                     <span className="text-slate-100">{opt.id}. {opt.text}</span>

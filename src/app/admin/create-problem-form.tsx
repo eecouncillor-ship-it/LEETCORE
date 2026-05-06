@@ -205,7 +205,7 @@ export function CreateProblemForm({
           <select
             name="difficulty"
             required
-            defaultValue={(problem as any)?.difficulty ?? ""}
+            defaultValue={problem?.difficulty ?? ""}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-orange-400"
           >
             <option value="">Select Difficulty</option>

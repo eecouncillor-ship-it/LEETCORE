@@ -104,6 +104,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
         { href: "/problems", label: "Problems", active: true },
         { href: "/submissions", label: "Submissions" },
         { href: "/mock-test", label: "Mock Test" },
+        { href: "/contact-us", label: "Contact Us" },
       ]}
     >
       <div className="grid gap-5 xl:grid-cols-[1.5fr_0.9fr] w-full">

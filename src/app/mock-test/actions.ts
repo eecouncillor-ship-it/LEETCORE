@@ -4,10 +4,12 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
 import { getAllProblems, createMockSession, getProblemById, createSubmission, createMockResult } from "@/lib/db";
-import type { QuestionOption } from "@/lib/types";
+import type { QuestionOption, SessionRecord, ProblemRecord } from "@/lib/types";
 import { randomUUID } from "node:crypto";
 
-export type MockFormState = { error?: string } | { session: any; problems: any[] };
+export type MinimalProblem = Pick<ProblemRecord, 'id' | 'title' | 'description' | 'options' | 'correct_answer' | 'explanation' | 'topic'>;
+
+export type MockFormState = { error?: string } | { session: SessionRecord; problems: MinimalProblem[] };
 
 export async function createMockAction(_prev: MockFormState, formData: FormData) {
   const user = await requireAuth();
@@ -37,9 +39,9 @@ export async function createMockAction(_prev: MockFormState, formData: FormData)
     return { error: "Failed to create mock session. Please try again." };
   }
   // return session and selected problems so client can render the test inline
-  const selectedMinimal = selected.map((p) => ({ id: p.id, title: p.title, description: p.description, options: p.options, correct_answer: p.correct_answer, explanation: p.explanation }));
+  const selectedMinimal: MinimalProblem[] = selected.map((p) => ({ id: p.id, title: p.title, description: p.description, options: p.options, correct_answer: p.correct_answer, explanation: p.explanation, topic: p.topic }));
 
-  return { session, problems: selectedMinimal } as unknown as { session: any; problems: any[] };
+  return { session, problems: selectedMinimal };
 }
 
 export async function submitMockAction(_prev: MockFormState, formData: FormData) {

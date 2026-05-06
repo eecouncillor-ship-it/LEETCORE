@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { getCurrentUser } from "@/lib/auth";
 import { LoginForm } from "./login-form";
@@ -21,7 +22,7 @@ export default async function LoginPage() {
             <p className="text-sm text-slate-400">Sign in to your account</p>
           </div>
           <div>
-            <a href="/" className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">Back</a>
+            <Link href="/" className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">Back</Link>
           </div>
         </header>
 

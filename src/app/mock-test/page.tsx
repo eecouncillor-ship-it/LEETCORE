@@ -1,15 +1,15 @@
 import { MockForm } from "./form";
 import { StudentShell } from "@/components/student-shell";
 import { requireAuth } from "@/lib/auth";
-import { getPublishedProblems, getSubmissionsForUser } from "@/lib/db";
-import { getMockResultsForUser } from "@/lib/db";
+import { getPublishedProblems, getSubmissionsForUser, getMockResultsForUser } from "@/lib/db";
+import type { MockResultRecord } from "@/lib/types";
 
 export const dynamic = 'force-dynamic';
 
 export default async function MockTestPage() {
   const user = await requireAuth();
   const [problems, submissions, results] = await Promise.all([getPublishedProblems(), getSubmissionsForUser(user.email), getMockResultsForUser(user.id)]);
-  const categories = Array.from(new Set(problems.map((p: any) => p.topic))).sort();
+  const categories = Array.from(new Set(problems.map((p) => p.topic))).sort();
 
   return (
     <StudentShell
@@ -19,6 +19,7 @@ export default async function MockTestPage() {
         { href: "/problems", label: "Problems" },
         { href: "/submissions", label: "Submissions" },
         { href: "/mock-test", label: "Mock Test", active: true },
+        { href: "/contact-us", label: "Contact Us" },
       ]}
     >
       <div className="mx-auto max-w-2xl">
@@ -31,7 +32,7 @@ export default async function MockTestPage() {
             <div className="text-sm text-slate-400">No mock tests taken yet.</div>
           ) : (
             <div className="space-y-3">
-              {results.map((r: any) => (
+              {results.map((r) => (
                 <div key={r.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-slate-300">{new Date(r.createdAt).toLocaleString()}</div>

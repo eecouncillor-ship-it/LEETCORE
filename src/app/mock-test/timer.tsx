@@ -51,7 +51,6 @@ export default function ClientTimer({ endTime }: { endTime: string }) {
     const { end, valid } = parseEndTime(endTime);
     if (!valid) {
       console.error('[TIMER] useEffect found invalid endTime:', endTime);
-      setRemaining(0);
       return;
     }
 

@@ -51,6 +51,8 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
       navItems={[
         { href: "/problems", label: "Problems", active: true },
         { href: "/submissions", label: "Submissions" },
+        { href: "/mock-test", label: "Mock Test" },
+        { href: "/contact-us", label: "Contact Us" },
       ]}
     >
       <div className="grid gap-7 xl:grid-cols-[1.08fr_0.92fr]">
