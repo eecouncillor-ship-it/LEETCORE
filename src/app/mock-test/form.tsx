@@ -3,13 +3,14 @@
 import React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import type { MockResultRecord } from "@/lib/types";
 import { createMockAction, submitMockAction, type MockFormState } from "./actions";
 
 import ClientTimer from "./timer";
 
 const initial: MockFormState = {};
 
-export function MockForm({ categories }: { categories: string[] }) {
+export function MockForm({ categories, results }: { categories: string[]; results: MockResultRecord[] }) {
   const [state, formAction] = useActionState(createMockAction, initial as MockFormState);
   // Always call the submit hook, but only use it when we have a session
   const [submitState, submitFormAction] = useActionState(submitMockAction, initial);
@@ -266,6 +267,23 @@ export function MockForm({ categories }: { categories: string[] }) {
       <button type="submit" disabled={pending} className="rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white">
         {pending ? "Creating..." : "Start Mock Test"}
       </button>
+      <section className="mt-8">
+        <h2 className="text-lg font-semibold text-white mb-3">Mock test history</h2>
+        {results.length === 0 ? (
+          <div className="text-sm text-slate-400">No mock tests taken yet.</div>
+        ) : (
+          <div className="space-y-3">
+            {results.map((r) => (
+              <div key={r.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-slate-300">{new Date(r.createdAt).toLocaleString()}</div>
+                  <div className="text-sm font-semibold text-white">Score: {r.correct}/{r.total}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </form>
   );
 }
