@@ -4,12 +4,12 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
 import { getAllProblems, createMockSession, getProblemById, createSubmission, createMockResult } from "@/lib/db";
-import type { QuestionOption, SessionRecord, ProblemRecord } from "@/lib/types";
+import type { QuestionOption, MockSession, ProblemRecord } from "@/lib/types";
 import { randomUUID } from "node:crypto";
 
 export type MinimalProblem = Pick<ProblemRecord, 'id' | 'title' | 'description' | 'options' | 'correct_answer' | 'explanation' | 'topic'>;
 
-export type MockFormState = { error?: string } | { session: SessionRecord; problems: MinimalProblem[] };
+export type MockFormState = { error?: string } | { session: MockSession; problems: MinimalProblem[] };
 
 export async function createMockAction(_prev: MockFormState, formData: FormData) {
   const user = await requireAuth();

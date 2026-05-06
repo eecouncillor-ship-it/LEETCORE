@@ -58,7 +58,7 @@ export function MockForm({ categories, results }: { categories: string[]; result
 
     return (
       <form ref={formRef} action={submitFormAction} className="grid gap-6 xl:grid-cols-[320px_1fr]">
-        <input type="hidden" name="sessionId" value={sess.token} />
+        <input type="hidden" name="sessionId" value={sess.id} />
         <aside className="rounded-3xl border border-white/10 bg-white/5 p-5">
           <div className="mb-6 flex items-center justify-between">
             <div>
