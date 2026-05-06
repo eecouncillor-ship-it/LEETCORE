@@ -26,22 +26,25 @@ export default async function ContactUsPage() {
         </div>
 
         {/* Project Lead - 1 Box */}
-        <div className="flex justify-center mb-12">
-          <div className="w-full max-w-xs bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-            <div className="w-16 h-16 bg-sky-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-              </svg>
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center uppercase">CORE</h2>
+          <div className="flex justify-center mb-12">
+            <div className="w-full max-w-xs bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-sky-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Sarthak Verma</h3>
+              <p className="text-slate-300 mb-2">+91 9113798592</p>
+              <p className="text-sm text-slate-400">CORE</p>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Sarthak Verma</h3>
-            <p className="text-slate-300 mb-2">+91 9113798592</p>
-            <p className="text-sm text-slate-400">CORE</p>
           </div>
         </div>
 
         {/* Team Members - 5 Boxes */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-white mb-6 text-center">Core Team</h2>
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center uppercase">PLACEMENT COORDINATORS</h2>
           <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
               <div className="w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -98,7 +101,7 @@ export default async function ContactUsPage() {
 
         {/* Team Members - 8 Boxes */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-white mb-6 text-center">Extended Team</h2>
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center uppercase">DEPUTY PLACEMENT COORDINATORS</h2>
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
               <div key={num} className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
