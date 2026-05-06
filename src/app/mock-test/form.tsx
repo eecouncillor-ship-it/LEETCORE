@@ -14,13 +14,13 @@ export function MockForm({ categories }: { categories: string[] }) {
   // Always call the submit hook, but only use it when we have a session
   const [submitState, submitFormAction] = useActionState(submitMockAction, initial);
   const { pending } = useFormStatus();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
+  const [answers, setAnswers] = React.useState<Record<string, string>>({});
 
   // If server returned session and problems, render the inline test UI
   if ('session' in state) {
     const sess = state.session;
     const problems = state.problems;
-    const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
-    const [answers, setAnswers] = React.useState<Record<string, string>>({});
 
     const currentProblem = problems[currentQuestionIndex];
     const submitPending = pending;
