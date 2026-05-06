@@ -50,32 +50,58 @@ export async function submitMockAction(_prev: MockFormState, formData: FormData)
 
   if (!sessionId) return { error: "Missing session id." };
 
-  // collect answers: form has fields like answer_<problemId>=optionId
-  const answers: Record<string, string> = {};
+  // collect answers: form fields are either answer_<problemId>=optionId or answer_<problemId>_<blankId>=text
+  const answersByQuestion: Record<string, Record<string, string>> = {};
   for (const [key, value] of Array.from(formData.entries())) {
-    if (typeof key === "string" && key.startsWith("answer_")) {
-      const pid = key.replace("answer_", "");
-      answers[pid] = String(value);
+    if (typeof key !== "string" || !key.startsWith("answer_")) continue;
+
+    const raw = key.slice(7);
+    const lastUnderscore = raw.lastIndexOf("_");
+    if (lastUnderscore === -1) {
+      answersByQuestion[raw] = { selectedOptionId: String(value) };
+    } else {
+      const questionId = raw.slice(0, lastUnderscore);
+      const blankId = raw.slice(lastUnderscore + 1);
+      answersByQuestion[questionId] ??= {};
+      answersByQuestion[questionId][blankId] = String(value);
     }
   }
 
-  // create submissions for each answer and compute score
   let total = 0;
   let correct = 0;
-  for (const [pid, picked] of Object.entries(answers)) {
+  for (const [pid, submitted] of Object.entries(answersByQuestion)) {
     const prob = await getProblemById(pid);
     if (!prob) continue;
     total += 1;
-    const option = prob.options.find((o: QuestionOption) => o.id === picked);
-    const isCorrect = picked === prob.correct_answer;
-    if (isCorrect) correct += 1;
 
-    const correctOpt = prob.options.find((o: QuestionOption) => o.id === prob.correct_answer);
+    let isCorrect = false;
+    let selectedAnswer = "";
+
+    if (prob.correct_answer === "FIB") {
+      const blanks = prob.options.map((opt: QuestionOption) => {
+        const answer = String(submitted[opt.id] ?? "").trim();
+        const expected = String(opt.text ?? "").trim();
+        return {
+          blankId: opt.id,
+          submitted: answer,
+          expected,
+          isCorrect: answer.toLowerCase() === expected.toLowerCase(),
+        };
+      });
+      isCorrect = blanks.every((item: { isCorrect: boolean }) => item.isCorrect);
+      selectedAnswer = JSON.stringify(blanks);
+    } else {
+      const picked = String(submitted.selectedOptionId ?? "");
+      isCorrect = picked === prob.correct_answer;
+      selectedAnswer = picked;
+    }
+
+    if (isCorrect) correct += 1;
 
     await createSubmission({
       user_email: user.email,
       question_id: prob.id,
-      selected_answer: picked,
+      selected_answer: selectedAnswer,
       is_correct: isCorrect,
     });
   }

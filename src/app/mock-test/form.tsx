@@ -14,8 +14,10 @@ export function MockForm({ categories }: { categories: string[] }) {
   // Always call the submit hook, but only use it when we have a session
   const [submitState, submitFormAction] = useActionState(submitMockAction, initial);
   const { pending } = useFormStatus();
+  const formRef = React.useRef<HTMLFormElement>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [answers, setAnswers] = React.useState<Record<string, string>>({});
+  const [autoSubmitted, setAutoSubmitted] = React.useState(false);
 
   // If server returned session and problems, render the inline test UI
   if ('session' in state) {
@@ -23,10 +25,29 @@ export function MockForm({ categories }: { categories: string[] }) {
     const problems = state.problems;
 
     const currentProblem = problems[currentQuestionIndex];
-    const submitPending = pending;
+    const submitPending = pending || autoSubmitted;
 
     const handleAnswerChange = (questionId: string, optionId: string) => {
-      setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+      setAnswers((prev) => ({ ...prev, [`answer_${questionId}`]: optionId }));
+    };
+
+    const handleBlankChange = (questionId: string, blankId: string, value: string) => {
+      setAnswers((prev) => ({ ...prev, [`answer_${questionId}_${blankId}`]: value }));
+    };
+
+    const answeredQuestionCount = problems.reduce((count, problem) => {
+      const baseKey = `answer_${problem.id}`;
+      const isFill = problem.correct_answer === "FIB";
+      const hasAnswer = isFill
+        ? problem.options.some((opt) => Boolean(answers[`${baseKey}_${opt.id}`]))
+        : Boolean(answers[baseKey]);
+      return count + (hasAnswer ? 1 : 0);
+    }, 0);
+
+    const handleExpire = () => {
+      if (autoSubmitted || submitPending) return;
+      setAutoSubmitted(true);
+      formRef.current?.requestSubmit();
     };
 
     const navigateQuestion = (index: number) => {
@@ -35,7 +56,8 @@ export function MockForm({ categories }: { categories: string[] }) {
     };
 
     return (
-      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+      <form ref={formRef} action={submitFormAction} className="grid gap-6 xl:grid-cols-[320px_1fr]">
+        <input type="hidden" name="sessionId" value={sess.token} />
         <aside className="rounded-3xl border border-white/10 bg-white/5 p-5">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -47,7 +69,11 @@ export function MockForm({ categories }: { categories: string[] }) {
 
           <div className="grid gap-3">
             {problems.map((problem, index) => {
-              const status = answers[problem.id] ? "answered" : "unanswered";
+              const baseKey = `answer_${problem.id}`;
+              const isAnswered = problem.correct_answer === "FIB"
+                ? problem.options.some((opt) => Boolean(answers[`${baseKey}_${opt.id}`]))
+                : Boolean(answers[baseKey]);
+              const status = isAnswered ? "answered" : "unanswered";
               const isActive = index === currentQuestionIndex;
 
               return (
@@ -76,7 +102,7 @@ export function MockForm({ categories }: { categories: string[] }) {
                       <p className="truncate text-xs text-slate-500">{problem.topic}</p>
                     </div>
                   </div>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                     status === "answered" ? "bg-emerald-500/15 text-emerald-300" : "bg-slate-700 text-slate-400"
                   }`}>
                     {status}
@@ -111,9 +137,10 @@ export function MockForm({ categories }: { categories: string[] }) {
               <div>
                 <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Live Mock Test</p>
                 <h2 className="mt-2 text-2xl font-bold text-white">Question {currentQuestionIndex + 1}</h2>
+                <p className="mt-2 text-sm text-slate-400">Attempted {answeredQuestionCount} / {problems.length} questions</p>
               </div>
               <div className="rounded-2xl bg-slate-900/70 px-4 py-2 text-sm text-slate-200">
-                Time remaining: <ClientTimer endTime={sess.expiresAt} />
+                Time remaining: <ClientTimer endTime={sess.expiresAt} onExpire={handleExpire} />
               </div>
             </div>
 
@@ -130,31 +157,51 @@ export function MockForm({ categories }: { categories: string[] }) {
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">Select an answer</h3>
-            <div className="mt-4 space-y-4">
-              {currentProblem.options.map((opt) => (
-                <label
-                  key={opt.id}
-                  className="flex cursor-pointer items-center gap-4 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-4 transition hover:border-sky-400"
-                >
-                  <input
-                    type="radio"
-                    name={`answer_${currentProblem.id}`}
-                    value={opt.id}
-                    checked={answers[currentProblem.id] === opt.id}
-                    onChange={() => handleAnswerChange(currentProblem.id, opt.id)}
-                    className="h-5 w-5 text-sky-500"
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-white">{opt.id}. {opt.text}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">Answer panel</h3>
+              <div className="mt-4 space-y-4">
+                {currentProblem.correct_answer === "FIB" ? (
+                  currentProblem.options.map((opt) => (
+                    <label
+                      key={opt.id}
+                      className="block rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-4 transition hover:border-sky-400"
+                    >
+                      <span className="text-sm font-semibold text-white">Blank {opt.id}</span>
+                      <input
+                        type="text"
+                        name={`answer_${currentProblem.id}_${opt.id}`}
+                        value={answers[`answer_${currentProblem.id}_${opt.id}`] ?? ""}
+                        onChange={(event) => handleBlankChange(currentProblem.id, opt.id, event.target.value)}
+                        className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-400"
+                        placeholder={`Enter answer for blank ${opt.id}`}
+                        autoComplete="off"
+                      />
+                    </label>
+                  ))
+                ) : (
+                  currentProblem.options.map((opt) => (
+                    <label
+                      key={opt.id}
+                      className="flex cursor-pointer items-center gap-4 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-4 transition hover:border-sky-400"
+                    >
+                      <input
+                        type="radio"
+                        name={`answer_${currentProblem.id}`}
+                        value={opt.id}
+                        checked={answers[`answer_${currentProblem.id}`] === opt.id}
+                        onChange={() => handleAnswerChange(currentProblem.id, opt.id)}
+                        className="h-5 w-5 text-sky-500"
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-white">{opt.id}. {opt.text}</p>
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-slate-400">Answered {Object.keys(answers).length} of {problems.length} questions</div>
+            <div className="text-sm text-slate-400">Answered {answeredQuestionCount} of {problems.length} questions</div>
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
@@ -188,7 +235,7 @@ export function MockForm({ categories }: { categories: string[] }) {
             </div>
           ) : null}
         </main>
-      </div>
+      </form>
     );
   }
 

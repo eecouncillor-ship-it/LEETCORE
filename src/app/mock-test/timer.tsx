@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function ClientTimer({ endTime }: { endTime: string }) {
+export default function ClientTimer({ endTime, onExpire }: { endTime: string; onExpire?: () => void }) {
   console.log('[TIMER] ClientTimer rendered with endTime:', endTime);
 
   const parseEndTime = (value: string) => {
@@ -54,12 +54,23 @@ export default function ClientTimer({ endTime }: { endTime: string }) {
       return;
     }
 
+    const onExpireRef = { called: false };
+    const triggerExpire = () => {
+      if (!onExpireRef.called) {
+        onExpireRef.called = true;
+        onExpire?.();
+      }
+    };
+
     const updateRemaining = () => {
       const now = new Date();
       const ms = end.getTime() - now.getTime();
       const newRemaining = Math.max(0, Math.floor(ms / 1000));
       console.log('[TIMER] countdown update - now:', now.toISOString(), 'end:', end.toISOString(), 'remainingSecs:', newRemaining);
       setRemaining(newRemaining);
+      if (newRemaining <= 0) {
+        triggerExpire();
+      }
       return newRemaining;
     };
 
