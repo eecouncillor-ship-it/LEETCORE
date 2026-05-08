@@ -41,38 +41,38 @@ export default async function SubmissionsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-[1.65fr_140px_140px_150px_220px] gap-4 border-b border-white/10 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300">
-            <span>Question</span>
-            <span>Picked</span>
-            <span>Correct</span>
-            <span>Status</span>
-            <span>Submitted</span>
+          <div className="grid grid-cols-[2fr_1fr_1fr_1.2fr_1.5fr] gap-4 border-b border-white/10 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300">
+            <span className="min-w-0 truncate">Question</span>
+            <span className="min-w-0 truncate">Picked</span>
+            <span className="min-w-0 truncate">Correct</span>
+            <span className="min-w-0 truncate">Status</span>
+            <span className="min-w-0 truncate">Submitted</span>
           </div>
 
           {submissions.map((submission) => (
             <div
               key={submission.id}
-              className="grid grid-cols-[1.65fr_140px_140px_150px_220px] items-center gap-4 border-b border-white/10 px-7 py-6"
+              className="grid grid-cols-[2fr_1fr_1fr_1.2fr_1.5fr] items-center gap-4 border-b border-white/10 px-7 py-6"
             >
-              <div>
-                <p className="text-base font-semibold text-white">
+              <div className="min-w-0">
+                <p className="truncate text-base font-semibold text-white">
                   {problemTitleById.get(submission.question_id) ?? "Question"}
                 </p>
-                <p className="mt-1 text-sm text-slate-300">
+                <p className="mt-1 truncate text-sm text-slate-300">
                   Selected: {submission.selected_answer}
                 </p>
               </div>
 
-              <span className="text-sm text-slate-200">
+              <span className="min-w-0 truncate text-sm text-slate-200">
                 {submission.is_correct ? 'Correct' : 'Incorrect'}
               </span>
 
-              <span className="text-sm text-slate-200">
+              <span className="min-w-0 truncate text-sm text-slate-200">
                 {formatDate(submission.created_at)}
               </span>
 
               <span
-                className={`justify-self-start rounded-full px-4 py-2 text-base font-semibold ${
+                className={`min-w-0 truncate rounded-full px-4 py-2 text-base font-semibold ${
                   submission.is_correct
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-amber-100 text-amber-700"
@@ -81,7 +81,7 @@ export default async function SubmissionsPage() {
                 {submission.is_correct ? 'Correct' : 'Incorrect'}
               </span>
 
-              <span className="text-sm text-slate-300">
+              <span className="min-w-0 truncate text-sm text-slate-300">
                 {formatDate(submission.created_at)}
               </span>
             </div>
