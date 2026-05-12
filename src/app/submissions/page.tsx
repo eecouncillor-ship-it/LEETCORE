@@ -37,57 +37,59 @@ export default async function SubmissionsPage() {
               Submissions
             </h1>
             <p className="mt-2 text-sm text-slate-300">
-              Review every attempt, your selected answer, and the correct answer.
+              Review every attempt, your selected answer, and the result for each submission.
             </p>
           </div>
 
-          <div className="grid grid-cols-[1.7fr_220px_120px_220px] gap-4 border-b border-white/10 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300">
-            <span>Question</span>
-            <span>Selected</span>
-            <span>Status</span>
-            <span>Submitted</span>
-          </div>
+          <div className="divide-y divide-white/10">
+            <div className="hidden lg:grid grid-cols-[1.7fr_220px_120px_220px] gap-4 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300 bg-white/5">
+              <span>Question</span>
+              <span>Selected</span>
+              <span>Status</span>
+              <span>Submitted</span>
+            </div>
 
-          {submissions.map((submission) => (
-            <div
-              key={submission.id}
-              className="grid grid-cols-[1.7fr_220px_120px_220px] items-center gap-4 border-b border-white/10 px-7 py-6"
-            >
-              <div>
-                <p className="text-base font-semibold text-white">
-                  {problemTitleById.get(submission.question_id) ?? "Question"}
-                </p>
-              </div>
-
-              <div className="text-sm text-slate-300 truncate whitespace-nowrap">
-                {submission.selected_answer}
-              </div>
-
-              <span
-                className={`rounded-full px-4 py-2 text-base font-semibold justify-self-start ${
-                  submission.is_correct
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-amber-100 text-amber-700"
-                }`}
+            {submissions.map((submission) => (
+              <div
+                key={submission.id}
+                className="grid grid-cols-[1.7fr_220px_120px_220px] items-center gap-4 px-7 py-6 hover:bg-white/5 transition border-b border-white/10"
               >
-                {submission.is_correct ? 'Correct' : 'Incorrect'}
-              </span>
+                <div>
+                  <p className="text-base font-semibold text-white truncate">
+                    {problemTitleById.get(submission.question_id) ?? "Question"}
+                  </p>
+                </div>
 
-              <span className="text-sm text-slate-300">
-                {formatDate(submission.created_at)}
-              </span>
-            </div>
-          ))}
+                <div className="text-sm text-slate-300 truncate whitespace-nowrap">
+                  {submission.selected_answer}
+                </div>
 
-          {submissions.length === 0 ? (
-            <div className="px-7 py-10 text-sm text-slate-300">
-              No submissions yet. Open the{" "}
-              <Link href="/problems" className="font-semibold text-sky-300">
-                Problems
-              </Link>{" "}
-              tab and answer your first question.
-            </div>
-          ) : null}
+                <span
+                  className={`rounded-full px-3 py-2 text-sm font-semibold ${
+                    submission.is_correct
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {submission.is_correct ? 'Correct' : 'Incorrect'}
+                </span>
+
+                <span className="text-sm text-slate-300">
+                  {formatDate(submission.created_at)}
+                </span>
+              </div>
+            ))}
+
+            {submissions.length === 0 ? (
+              <div className="px-7 py-10 text-sm text-slate-300">
+                No submissions yet. Open the{" "}
+                <Link href="/problems" className="font-semibold text-sky-300">
+                  Problems
+                </Link>{" "}
+                tab and answer your first question.
+              </div>
+            ) : null}
+          </div>
         </section>
 
         <StudentProgressSidebar problems={problems} submissions={submissions} />
