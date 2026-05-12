@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { bridgeOAuthSession } from "@/app/auth/actions";
 
 /** Survives Strict Mode remounts / clients that strip the URL after the first tick. */
-const OAUTH_CODE_STASH_KEY = "codearena_oauth_pkce_code";
+const OAUTH_CODE_STASH_KEY = "corearena_oauth_pkce_code";
 
 function mergeOAuthParams(): URLSearchParams {
   const merged = new URLSearchParams(window.location.search);
@@ -147,7 +147,7 @@ export function OAuthCallbackContent() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.08),_transparent_28%),linear-gradient(180deg,_#020617_0%,_#08111f_35%,_#0f172a_100%)] px-6 py-16 text-center text-slate-100">
       <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300">
-        CodeArena
+        Corearena
       </p>
       <h1 className="mt-4 text-xl font-bold text-white">
         {status === "working" ? "Signing you in" : "Sign-in issue"}

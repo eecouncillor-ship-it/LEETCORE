@@ -103,13 +103,13 @@ async function seedDatabase() {
     .upsert([
       {
         id: adminId,
-        email: "admin@codearena.dev",
+        email: "admin@corearena.dev",
         password: hashSeedPassword("admin123"),
         role: "admin",
       },
       {
         id: studentId,
-        email: "student@codearena.dev",
+        email: "student@corearena.dev",
         password: hashSeedPassword("student123"),
         role: "user",
       },

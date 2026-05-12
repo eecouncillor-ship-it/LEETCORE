@@ -1,6 +1,6 @@
-# CodeArena
+# Corearena
 
-CodeArena is a LeetCode-style practice platform with two distinct roles:
+Corearena is a LeetCode-style practice platform with two distinct roles:
 
 - `admin` can create and publish multiple-choice questions
 - `user` can browse published questions, answer them, and review explanations
@@ -9,8 +9,8 @@ This project is built with Next.js App Router and Supabase for data storage.
 
 ## Demo accounts
 
-- Admin: `admin@codearena.dev` / `admin123`
-- User: `student@codearena.dev` / `student123`
+- Admin: `admin@corearena.dev` / `admin123`
+- User: `student@corearena.dev` / `student123`
 
 ## Features
 

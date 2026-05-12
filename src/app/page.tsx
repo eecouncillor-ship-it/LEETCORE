@@ -42,12 +42,7 @@ export default async function Home() {
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 sm:px-10 lg:px-12">
         <header className="landing-animate-fade-up landing-nav-glow sticky top-6 z-50 flex flex-wrap items-center justify-between gap-4 rounded-full border border-white/[0.09] bg-slate-950/55 px-5 py-3 backdrop-blur-xl md:flex-nowrap">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.42em] text-sky-400/95">
-              CodeArena
-            </p>
-            <p className="mt-0.5 truncate text-sm text-slate-400">
-              Premium MCQ practice for serious learners
-            </p>
+            <p className="text-lg font-bold tracking-tight text-white">Corearena</p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
             <Link
@@ -120,7 +115,7 @@ export default async function Home() {
                     Welcome back
                   </p>
                   <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
-                    Sign in to CodeArena
+                    Sign in to Corearena
                   </h2>
                   <p className="mt-3 text-sm leading-relaxed text-slate-400">
                     Secure entry for students and admins—same portal, role-aware routing after login.
@@ -162,7 +157,7 @@ export default async function Home() {
         </div>
 
         <footer className="landing-animate-fade-up mt-auto border-t border-white/[0.06] py-8 text-center text-xs text-slate-500">
-          CodeArena · Practice with intention
+          Corearena · Practice with intention
         </footer>
       </section>
     </main>

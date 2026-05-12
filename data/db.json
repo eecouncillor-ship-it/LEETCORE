@@ -15,13 +15,13 @@
     },
     {
       "id": "bd80fe62-f048-4d03-95a9-5424568a1e49",
-      "email": "admin@codearena.dev",
+      "email": "admin@corearena.dev",
       "password": "0e38f245b7f2941a32ee9aa3a7ec816c409be8645b8d077b71cfdba8b75df4efcf5690609c0f2d602d2f219199bf721b209ab46201a8eca42ce430e4b58fb7c8",
       "role": "admin"
     },
     {
       "id": "dd3aeb35-8eb7-4a9d-a355-69786c41ec38",
-      "email": "student@codearena.dev",
+      "email": "student@corearena.dev",
       "password": "a9820bc7f05ca61f1393ee4d83415a173d470b77a0473a120828b17e7f5e6d2535b765428eabe5d6010aeb8a65e0187580be80b5f4e77184ae220087b58eb027",
       "role": "user"
     }

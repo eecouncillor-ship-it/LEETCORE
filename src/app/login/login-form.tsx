@@ -58,7 +58,7 @@ export function LoginForm({ oauthError }: LoginFormProps) {
           type="email"
           required
           className="w-full rounded-2xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400"
-          placeholder="student@codearena.dev"
+          placeholder="student@corearena.dev"
         />
       </div>
 

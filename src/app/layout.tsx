@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CodeArena",
-  description: "LeetCode-style MCQ platform with separate admin and user portals.",
+  title: "Corearena",
+  description: "MCQ practice platform with separate admin and student portals.",
 };
 
 export default function RootLayout({
