@@ -8,6 +8,7 @@ import {
   submitAnswerAction,
   type SubmissionState,
 } from "@/app/problems/[id]/actions";
+import { formatSubmissionAnswerDisplay } from "@/lib/utils";
 
 const initialState: SubmissionState = {};
 
@@ -194,8 +195,11 @@ export function SubmissionForm({
                   className="rounded-2xl border border-white/10 bg-white/5 p-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-base font-semibold text-white">
-                      You chose {submission.selected_answer}
+                    <p className="whitespace-pre-line text-base font-semibold text-white">
+                      You chose{" "}
+                      <span className="font-semibold">
+                        {formatSubmissionAnswerDisplay(submission.selected_answer)}
+                      </span>
                     </p>
                     <span
                       className={`rounded-full px-4 py-2 text-sm font-semibold ${

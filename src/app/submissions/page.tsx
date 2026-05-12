@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 import { getPublishedProblems, getSubmissionsForUser } from "@/lib/db";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatSubmissionAnswerDisplay } from "@/lib/utils";
 
 export default async function SubmissionsPage() {
   const user = await requireAuth();
@@ -69,8 +69,8 @@ export default async function SubmissionsPage() {
                   </p>
                 </div>
 
-                <div className="text-sm text-slate-300 truncate whitespace-nowrap overflow-hidden">
-                  {submission.selected_answer}
+                <div className="text-sm text-slate-300 whitespace-pre-line break-words min-w-0">
+                  {formatSubmissionAnswerDisplay(submission.selected_answer)}
                 </div>
 
                 <span
