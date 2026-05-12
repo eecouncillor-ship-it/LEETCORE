@@ -2,35 +2,56 @@
 
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { bridgeOAuthSession } from "@/app/auth/actions";
 
+function oauthParamsFromWindow(): URLSearchParams {
+  const fromSearch = new URLSearchParams(window.location.search);
+  if (fromSearch.has("code") || fromSearch.has("error")) {
+    return fromSearch;
+  }
+  const hash = window.location.hash.replace(/^#/, "");
+  if (hash) {
+    return new URLSearchParams(hash);
+  }
+  return fromSearch;
+}
+
+function decodeOAuthDescription(raw: string | null): string | undefined {
+  if (!raw) return undefined;
+  try {
+    return decodeURIComponent(raw.replace(/\+/g, " "));
+  } catch {
+    return raw.replace(/\+/g, " ");
+  }
+}
+
 export function OAuthCallbackContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [status, setStatus] = useState<"working" | "error">("working");
   const [message, setMessage] = useState("Completing sign-in…");
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    const err = searchParams.get("error");
-    const errDesc = searchParams.get("error_description");
+    const params = oauthParamsFromWindow();
+    const code = params.get("code");
+    const err = params.get("error");
+    const errDesc = decodeOAuthDescription(params.get("error_description"));
 
     if (err) {
       setStatus("error");
       setMessage(
-        errDesc?.replace(/\+/g, " ") ||
-          err ||
-          "Google sign-in did not complete.",
+        errDesc || err || "Google sign-in did not complete.",
       );
       return;
     }
 
     if (!code) {
       setStatus("error");
-      setMessage("Missing authorization code. Start sign-in again from the login page.");
+      setMessage(
+        "Missing authorization code. Start sign-in again from the login page.",
+      );
       return;
     }
 
@@ -94,7 +115,8 @@ export function OAuthCallbackContent() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams, router]);
+    // Read window.location only after mount — Next.js useSearchParams can miss OAuth query params on the first tick after redirect.
+  }, [router]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.08),_transparent_28%),linear-gradient(180deg,_#020617_0%,_#08111f_35%,_#0f172a_100%)] px-6 py-16 text-center text-slate-100">
