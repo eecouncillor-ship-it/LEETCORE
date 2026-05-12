@@ -18,7 +18,9 @@ export function GoogleSignInButton({ label = "Continue with Google" }: Props) {
       return;
     }
 
-    const supabase = createClient(url, key);
+    const supabase = createClient(url, key, {
+      auth: { flowType: "pkce" },
+    });
     const redirectTo = `${window.location.origin}/auth/callback`;
 
     const { error } = await supabase.auth.signInWithOAuth({

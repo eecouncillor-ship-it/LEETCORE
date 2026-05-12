@@ -7,16 +7,19 @@ import { useEffect, useState } from "react";
 
 import { bridgeOAuthSession } from "@/app/auth/actions";
 
-function oauthParamsFromWindow(): URLSearchParams {
-  const fromSearch = new URLSearchParams(window.location.search);
-  if (fromSearch.has("code") || fromSearch.has("error")) {
-    return fromSearch;
-  }
+/** Survives Strict Mode remounts / clients that strip the URL after the first tick. */
+const OAUTH_CODE_STASH_KEY = "codearena_oauth_pkce_code";
+
+function mergeOAuthParams(): URLSearchParams {
+  const merged = new URLSearchParams(window.location.search);
   const hash = window.location.hash.replace(/^#/, "");
   if (hash) {
-    return new URLSearchParams(hash);
+    const fromHash = new URLSearchParams(hash);
+    fromHash.forEach((value, key) => {
+      if (!merged.has(key)) merged.set(key, value);
+    });
   }
-  return fromSearch;
+  return merged;
 }
 
 function decodeOAuthDescription(raw: string | null): string | undefined {
@@ -34,12 +37,12 @@ export function OAuthCallbackContent() {
   const [message, setMessage] = useState("Completing sign-in…");
 
   useEffect(() => {
-    const params = oauthParamsFromWindow();
-    const code = params.get("code");
+    const params = mergeOAuthParams();
     const err = params.get("error");
     const errDesc = decodeOAuthDescription(params.get("error_description"));
 
     if (err) {
+      sessionStorage.removeItem(OAUTH_CODE_STASH_KEY);
       setStatus("error");
       setMessage(
         errDesc || err || "Google sign-in did not complete.",
@@ -47,15 +50,14 @@ export function OAuthCallbackContent() {
       return;
     }
 
-    if (!code) {
-      setStatus("error");
-      setMessage(
-        "Missing authorization code. Start sign-in again from the login page.",
-      );
-      return;
+    let code = params.get("code");
+    if (code) {
+      sessionStorage.setItem(OAUTH_CODE_STASH_KEY, code);
+    } else {
+      code = sessionStorage.getItem(OAUTH_CODE_STASH_KEY);
     }
 
-    const authCode = code;
+    const accessTokenFromUrl = params.get("access_token");
 
     let cancelled = false;
 
@@ -70,42 +72,66 @@ export function OAuthCallbackContent() {
         return;
       }
 
-      const supabase = createClient(url, key);
-      const { error: exchangeError } =
-        await supabase.auth.exchangeCodeForSession(authCode);
+      const supabase = createClient(url, key, {
+        auth: {
+          flowType: "pkce",
+        },
+      });
 
-      if (exchangeError) {
-        if (!cancelled) {
-          setStatus("error");
-          setMessage(
-            exchangeError.message ||
-              "Could not verify Google sign-in. Try again.",
-          );
+      let accessToken: string | null = accessTokenFromUrl;
+
+      if (!accessToken && code) {
+        const { error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(code);
+
+        if (exchangeError) {
+          const {
+            data: { session: recovered },
+          } = await supabase.auth.getSession();
+          if (recovered?.access_token) {
+            accessToken = recovered.access_token;
+          } else if (!cancelled) {
+            sessionStorage.removeItem(OAUTH_CODE_STASH_KEY);
+            setStatus("error");
+            setMessage(
+              exchangeError.message ||
+                "Could not verify Google sign-in. Try again.",
+            );
+          }
+          if (!accessToken) return;
         }
-        return;
       }
 
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.access_token) {
+      const token = accessToken ?? session?.access_token ?? null;
+
+      if (!token) {
         if (!cancelled) {
+          sessionStorage.removeItem(OAUTH_CODE_STASH_KEY);
           setStatus("error");
-          setMessage("No session returned after Google sign-in.");
+          setMessage(
+            code || accessTokenFromUrl
+              ? "No session returned after Google sign-in."
+              : "Missing authorization code. Start sign-in again from the login page. If you use a Vercel preview URL, add it under Supabase Authentication redirect URLs (or use a wildcard like https://*.vercel.app/auth/callback).",
+          );
         }
         return;
       }
 
-      const result = await bridgeOAuthSession(session.access_token);
+      const result = await bridgeOAuthSession(token);
 
       if (cancelled) return;
 
       if (result.ok) {
+        sessionStorage.removeItem(OAUTH_CODE_STASH_KEY);
         router.replace(result.role === "admin" ? "/admin" : "/problems");
         return;
       }
 
+      sessionStorage.removeItem(OAUTH_CODE_STASH_KEY);
       setStatus("error");
       setMessage("Could not start your session. Please try again.");
     }
@@ -115,7 +141,7 @@ export function OAuthCallbackContent() {
     return () => {
       cancelled = true;
     };
-    // Read window.location only after mount — Next.js useSearchParams can miss OAuth query params on the first tick after redirect.
+    // Read window.location after mount; stash PKCE code so remounts still work (e.g. React Strict Mode).
   }, [router]);
 
   return (
