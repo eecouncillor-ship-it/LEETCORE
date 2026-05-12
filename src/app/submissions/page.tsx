@@ -19,6 +19,10 @@ export default async function SubmissionsPage() {
     problems.map((problem) => [problem.id, problem.title]),
   );
 
+  const problemNumberById = new Map(
+    problems.map((problem, idx) => [problem.id, idx + 1]),
+  );
+
   return (
     <StudentShell
       userName={user.email}
@@ -42,7 +46,8 @@ export default async function SubmissionsPage() {
           </div>
 
           <div className="divide-y divide-white/10">
-            <div className="hidden lg:grid grid-cols-[1.7fr_220px_120px_220px] gap-4 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300 bg-white/5">
+            <div className="hidden lg:grid grid-cols-[60px_1.55fr_220px_120px_220px] gap-4 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300 bg-white/5">
+              <span>No</span>
               <span>Question</span>
               <span>Selected</span>
               <span>Status</span>
@@ -52,15 +57,19 @@ export default async function SubmissionsPage() {
             {submissions.map((submission) => (
               <div
                 key={submission.id}
-                className="grid grid-cols-[1.7fr_220px_120px_220px] items-center gap-4 px-7 py-6 hover:bg-white/5 transition border-b border-white/10"
+                className="grid grid-cols-[60px_1.55fr_220px_120px_220px] items-center gap-4 px-7 py-6 hover:bg-white/5 transition border-b border-white/10"
               >
-                <div>
+                <div className="text-sm text-slate-300">
+                  {problemNumberById.get(submission.question_id) ?? "-"}
+                </div>
+
+                <div className="overflow-hidden">
                   <p className="text-base font-semibold text-white truncate">
                     {problemTitleById.get(submission.question_id) ?? "Question"}
                   </p>
                 </div>
 
-                <div className="text-sm text-slate-300 truncate whitespace-nowrap">
+                <div className="text-sm text-slate-300 truncate whitespace-nowrap overflow-hidden">
                   {submission.selected_answer}
                 </div>
 
