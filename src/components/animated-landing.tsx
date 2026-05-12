@@ -4,8 +4,6 @@ import { useEffect } from "react";
 
 export default function AnimatedLanding() {
   useEffect(() => {
-    console.log("AnimatedLanding mounted");
-
     let ticking = false;
 
     function updateState(collapsed: boolean) {

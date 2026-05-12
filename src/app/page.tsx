@@ -6,7 +6,11 @@ import AnimatedLanding from "@/components/animated-landing";
 import { getCurrentUser } from "@/lib/auth";
 import { getPublishedProblems, getStats } from "@/lib/db";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+
+function formatStat(n: number) {
+  return n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n);
+}
 
 export default async function Home() {
   const [user, stats, problems] = await Promise.all([
@@ -19,74 +23,187 @@ export default async function Home() {
     redirect(user.role === "admin" ? "/admin" : "/problems");
   }
 
+  const publishedCount = problems.length;
+  const topicsCount = new Set(problems.map((p) => p.topic)).size;
+
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.12),_transparent_22%),linear-gradient(180deg,_#020617_0%,_#08111f_35%,_#0f172a_100%)] text-slate-100">
-      <section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 sm:px-10 lg:px-12">
-        <header className="flex items-center justify-between gap-4 rounded-full border border-white/10 bg-white/5 px-5 py-3 shadow-[0_10px_40px_rgba(2,6,23,0.4)] backdrop-blur">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300">
+    <main className="relative min-h-screen overflow-x-hidden text-slate-100">
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div
+          className="absolute inset-0 bg-[linear-gradient(180deg,#010409_0%,#071525_42%,#0c1428_100%)]"
+          aria-hidden
+        />
+        <div
+          className="landing-blob absolute -right-[18%] top-[8%] h-[min(560px,85vw)] w-[min(560px,85vw)] rounded-full bg-sky-500/[0.22]"
+          aria-hidden
+        />
+        <div
+          className="landing-blob-delayed absolute -left-[12%] bottom-[18%] h-[min(480px,78vw)] w-[min(480px,78vw)] rounded-full bg-cyan-400/[0.14]"
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_-10%,rgba(56,189,248,0.15),transparent_52%)]"
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_80%_90%,rgba(14,165,233,0.08),transparent_45%)]"
+          aria-hidden
+        />
+      </div>
+
+      <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 sm:px-10 lg:px-12">
+        <header className="landing-animate-fade-up landing-nav-glow sticky top-6 z-50 flex flex-wrap items-center justify-between gap-4 rounded-full border border-white/[0.09] bg-slate-950/55 px-5 py-3 backdrop-blur-xl md:flex-nowrap">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.42em] text-sky-400/95">
               CodeArena
             </p>
-            <p className="text-sm text-slate-400">
-              MCQ practice platform with admin and student portals
+            <p className="mt-0.5 truncate text-sm text-slate-400">
+              Premium MCQ practice for serious learners
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <a
-              href="#signin"
-              suppressHydrationWarning
-              className="rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-sky-400"
-            >
-              Sign in
-            </a>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
             <Link
               href="/register"
               prefetch={false}
-              className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-sky-400/40 hover:text-white"
+              className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-sky-400/45 hover:bg-white/[0.06] hover:text-white"
             >
               Register
             </Link>
+            <a
+              href="#signin"
+              suppressHydrationWarning
+              className="rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 px-5 py-2 text-sm font-semibold text-white shadow-[0_8px_28px_-6px_rgba(14,165,233,0.55)] transition hover:brightness-110 hover:shadow-[0_12px_36px_-8px_rgba(14,165,233,0.65)]"
+            >
+              Sign in
+            </a>
           </div>
         </header>
 
-        <div className="grid flex-1 items-center gap-12 py-14 lg:grid-cols-1">
-          <AnimatedLanding />
-          <div className="lg:col-span-2 flex flex-col items-center justify-center gap-8 min-h-[64vh]">
-            <div className="flex flex-col items-center gap-8 w-full">
+        <AnimatedLanding />
+
+        <div className="landing-animate-fade-up landing-delay-1 mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: "Questions", value: formatStat(publishedCount), hint: "Published" },
+            { label: "Students", value: formatStat(stats.totalUsers), hint: "Registered" },
+            { label: "Attempts", value: formatStat(stats.totalSubmissions), hint: "Submissions" },
+            { label: "Topics", value: formatStat(topicsCount), hint: "Categories" },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3 backdrop-blur-sm transition hover:border-white/[0.12] hover:bg-white/[0.05]"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {item.label}
+              </p>
+              <p className="mt-1 font-mono text-2xl font-bold tracking-tight text-white tabular-nums">
+                {item.value}
+              </p>
+              <p className="text-xs text-slate-500">{item.hint}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid flex-1 items-center gap-14 py-14 lg:grid-cols-1 lg:gap-16 lg:py-20">
+          <div className="flex min-h-[56vh] flex-col items-center justify-center gap-10 lg:col-span-2">
+            <div className="flex w-full max-w-4xl flex-col items-center gap-6 text-center">
+              <p className="landing-animate-fade-up landing-delay-2 text-xs font-semibold uppercase tracking-[0.35em] text-sky-400/90">
+                Built for depth · timed mocks · instant feedback
+              </p>
               <h1
                 id="leetcore-title"
-                className="text-[4.5rem] sm:text-[6rem] md:text-[7.5rem] lg:text-[8.5rem] font-black tracking-tight text-white leading-none text-center"
+                className="relative max-w-[95vw] bg-gradient-to-br from-white via-slate-100 to-sky-400 bg-clip-text text-[3.2rem] font-black leading-[0.95] tracking-tight text-transparent sm:text-[5rem] md:text-[6.25rem] lg:text-[7rem]"
               >
                 LEETCORE
               </h1>
-
-              <img
-                id="hero-illustration"
-                src="/hero-illustration.svg"
-                alt="hero illustration"
-                className="w-[86%] max-w-[720px] rounded-2xl shadow-lg mx-auto"
-              />
+              <p className="landing-animate-fade-up landing-delay-3 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
+                Curated multiple-choice sets, realistic mock exams, and a calm workspace so you
+                focus on mastery—not noise.
+              </p>
+              <div className="landing-animate-fade-up landing-delay-4 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/register"
+                  prefetch={false}
+                  className="rounded-full bg-white px-7 py-3 text-sm font-semibold text-slate-950 shadow-[0_12px_36px_-12px_rgba(255,255,255,0.35)] transition hover:-translate-y-0.5 hover:bg-slate-100"
+                >
+                  Start free
+                </Link>
+                <a
+                  href="#signin"
+                  suppressHydrationWarning
+                  className="rounded-full border border-white/15 px-7 py-3 text-sm font-semibold text-slate-200 transition hover:border-sky-400/40 hover:bg-white/[0.05] hover:text-white"
+                >
+                  I already have an account
+                </a>
+              </div>
             </div>
-            <div
-              id="signin"
-              className="w-full max-w-md rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,_rgba(15,23,42,0.92)_0%,_rgba(2,6,23,0.92)_100%)] p-6 shadow-[0_35px_90px_rgba(2,6,23,0.42)] opacity-0 translate-y-6 transition-all duration-500 mx-auto"
-            >
-              <div className="mb-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-300">
-                  Unified entry
-                </p>
-                <h2 className="mt-3 text-2xl font-black text-white">Sign in to CodeArena</h2>
-                <p className="mt-3 text-sm leading-7 text-slate-400">
-                  One screen for both the product overview and login.
-                </p>
-              </div>
 
-              <div className="rounded-[20px] border border-white/10 bg-white/[0.03] p-4">
-                <LoginForm />
+            <div className="landing-animate-scale-in landing-delay-3 relative w-full max-w-[720px] px-2">
+              <div
+                className="landing-shimmer-border pointer-events-none absolute -inset-[1px] rounded-[26px] opacity-60"
+                aria-hidden
+              />
+              <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-slate-950/40 p-1 shadow-[0_40px_100px_-24px_rgba(2,6,23,0.85)] backdrop-blur-sm ring-1 ring-white/[0.04]">
+                <img
+                  id="hero-illustration"
+                  src="/hero-illustration.svg"
+                  alt="Abstract preview of the CodeArena practice workspace"
+                  className="w-full rounded-[20px] opacity-95"
+                />
               </div>
+            </div>
+
+            <div className="landing-animate-fade-up landing-delay-5 grid w-full max-w-4xl gap-4 sm:grid-cols-3">
+              {[
+                {
+                  title: "Smart question bank",
+                  body: "Browse by topic and difficulty with explanations that stick.",
+                },
+                {
+                  title: "Timed mock tests",
+                  body: "Palette navigation and countdown that mirror real pressure.",
+                },
+                {
+                  title: "Progress you can trust",
+                  body: "History and accuracy visible without clutter.",
+                },
+              ].map((card) => (
+                <div
+                  key={card.title}
+                  className="landing-card-hover rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 text-left"
+                >
+                  <div className="mb-3 h-px w-10 rounded-full bg-gradient-to-r from-sky-400 to-transparent" />
+                  <h3 className="text-sm font-bold text-white">{card.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500">{card.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            id="signin"
+            className="mx-auto w-full max-w-md rounded-[28px] border border-white/[0.1] bg-[linear-gradient(165deg,rgba(15,23,42,0.94)_0%,rgba(2,6,23,0.96)_55%,rgba(8,17,31,0.98)_100%)] p-7 shadow-[0_40px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-white/[0.05]"
+          >
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-400/95">
+                Welcome back
+              </p>
+              <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
+                Sign in to CodeArena
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                Secure entry for students and admins—same portal, role-aware routing after login.
+              </p>
+            </div>
+
+            <div className="rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4 backdrop-blur-sm">
+              <LoginForm />
             </div>
           </div>
         </div>
+
+        <footer className="landing-animate-fade-up mt-auto border-t border-white/[0.06] py-8 text-center text-xs text-slate-500">
+          CodeArena · Practice with intention
+        </footer>
       </section>
     </main>
   );
