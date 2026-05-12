@@ -151,6 +151,7 @@ export async function submitMockAction(_prev: MockFormState, formData: FormData)
       questionOutcomes.push({
         questionNumber: index + 1,
         questionId: pid,
+        slug: prob.slug,
         title: prob.title,
         outcome: "unattempted",
       });
@@ -162,6 +163,7 @@ export async function submitMockAction(_prev: MockFormState, formData: FormData)
     questionOutcomes.push({
       questionNumber: index + 1,
       questionId: pid,
+      slug: prob.slug,
       title: prob.title,
       outcome: graded.isCorrect ? "correct" : "incorrect",
     });

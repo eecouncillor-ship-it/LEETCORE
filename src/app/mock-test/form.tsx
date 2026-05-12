@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -335,7 +336,16 @@ export function MockForm({ categories, results }: { categories: string[]; result
                         <span className="font-semibold">
                           Q{q.questionNumber}.
                         </span>{" "}
-                        {q.title}
+                        {q.slug ? (
+                          <Link
+                            href={`/problems/${q.slug}`}
+                            className="underline decoration-white/25 underline-offset-2 transition hover:decoration-current"
+                          >
+                            {q.title}
+                          </Link>
+                        ) : (
+                          q.title
+                        )}
                       </div>
                     ))
                   ) : (

@@ -55,6 +55,8 @@ export type PasswordResetRecord = {
 export type MockQuestionOutcome = {
   questionNumber: number;
   questionId: string;
+  /** Problem URL segment (routes use slug, see `/problems/[id]`). */
+  slug?: string;
   title: string;
   outcome: "correct" | "incorrect" | "unattempted";
 };
