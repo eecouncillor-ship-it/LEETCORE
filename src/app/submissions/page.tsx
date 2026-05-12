@@ -41,10 +41,9 @@ export default async function SubmissionsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-[1.65fr_140px_140px_150px_220px] gap-4 border-b border-white/10 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300">
+          <div className="grid grid-cols-[1.7fr_220px_120px_220px] gap-4 border-b border-white/10 px-7 py-5 text-xs font-semibold uppercase tracking-[0.08em] text-slate-300">
             <span>Question</span>
-            <span>Picked</span>
-            <span>Correct</span>
+            <span>Selected</span>
             <span>Status</span>
             <span>Submitted</span>
           </div>
@@ -52,27 +51,20 @@ export default async function SubmissionsPage() {
           {submissions.map((submission) => (
             <div
               key={submission.id}
-              className="grid grid-cols-[1.65fr_140px_140px_150px_220px] items-center gap-4 border-b border-white/10 px-7 py-6"
+              className="grid grid-cols-[1.7fr_220px_120px_220px] items-center gap-4 border-b border-white/10 px-7 py-6"
             >
               <div>
                 <p className="text-base font-semibold text-white">
                   {problemTitleById.get(submission.question_id) ?? "Question"}
                 </p>
-                <p className="mt-1 text-sm text-slate-300">
-                  Selected: {submission.selected_answer}
-                </p>
               </div>
 
-              <span className="text-sm text-slate-200">
-                {submission.is_correct ? 'Correct' : 'Incorrect'}
-              </span>
-
-              <span className="text-sm text-slate-200">
-                {formatDate(submission.created_at)}
-              </span>
+              <div className="text-sm text-slate-300 truncate whitespace-nowrap">
+                {submission.selected_answer}
+              </div>
 
               <span
-                className={`justify-self-start rounded-full px-4 py-2 text-base font-semibold ${
+                className={`rounded-full px-4 py-2 text-base font-semibold justify-self-start ${
                   submission.is_correct
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-amber-100 text-amber-700"
