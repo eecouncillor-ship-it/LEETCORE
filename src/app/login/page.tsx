@@ -6,7 +6,29 @@ import { LoginForm } from "./login-form";
 
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage() {
+function loginOAuthErrorMessage(code: string | undefined): string | undefined {
+  if (!code) return undefined;
+  const messages: Record<string, string> = {
+    oauth_missing_code:
+      "The sign-in link was incomplete. Please try Google sign-in again.",
+    oauth_exchange:
+      "Google sign-in could not be verified. Please try again.",
+    oauth_no_email:
+      "Your Google account did not return an email. Use another method or check Google permissions.",
+    invalid_session:
+      "Your Google session could not be verified. Please sign in again.",
+  };
+  return messages[code] ?? code.replace(/_/g, " ");
+}
+
+type LoginPageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const oauthError = loginOAuthErrorMessage(params.error);
+
   const user = await getCurrentUser();
 
   if (user) {
@@ -34,7 +56,7 @@ export default async function LoginPage() {
               <p className="mt-2 text-sm leading-7 text-slate-300">Access your dashboard and continue solving problems.</p>
             </div>
 
-            <LoginForm />
+            <LoginForm oauthError={oauthError} />
           </div>
         </div>
       </section>

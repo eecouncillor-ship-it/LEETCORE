@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { registerAction, type RegisterState } from "./actions";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 const initialState: RegisterState = {};
 
@@ -25,6 +26,17 @@ export function RegisterForm() {
   const [state, formAction] = useActionState(registerAction, initialState);
 
   return (
+    <div className="space-y-6">
+      <GoogleSignInButton label="Continue with Google" />
+
+      <div className="relative flex items-center gap-4">
+        <div className="h-px flex-1 bg-white/10" />
+        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          Or register with email
+        </span>
+        <div className="h-px flex-1 bg-white/10" />
+      </div>
+
     <form action={formAction} className="space-y-4">
       <div>
         <label className="mb-2 block text-sm font-semibold text-slate-700">Email</label>
@@ -70,5 +82,6 @@ export function RegisterForm() {
 
       <SubmitButton />
     </form>
+    </div>
   );
 }

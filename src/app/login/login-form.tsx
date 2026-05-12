@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { loginAction, type LoginState } from "@/app/login/actions";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 const initialState: LoginState = {};
 
@@ -22,11 +23,32 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm() {
+type LoginFormProps = {
+  oauthError?: string;
+};
+
+export function LoginForm({ oauthError }: LoginFormProps) {
   const [state, formAction] = useActionState(loginAction, initialState);
 
   return (
+    <div className="space-y-6">
+      <GoogleSignInButton label="Continue with Google" />
+
+      <div className="relative flex items-center gap-4">
+        <div className="h-px flex-1 bg-white/10" />
+        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          Or email
+        </span>
+        <div className="h-px flex-1 bg-white/10" />
+      </div>
+
     <form action={formAction} className="space-y-4">
+      {oauthError ? (
+        <p className="rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+          {oauthError}
+        </p>
+      ) : null}
+
       <div>
         <label className="mb-2 block text-sm font-semibold text-slate-700">
           Email
@@ -64,5 +86,6 @@ export function LoginForm() {
             <a href="/forgot" className="underline">Forgot password?</a>
           </div>
     </form>
+    </div>
   );
 }

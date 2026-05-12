@@ -16,6 +16,11 @@ function hashSeedPassword(password: string) {
   return scryptSync(password, "codearena-seed-salt", 64).toString("hex");
 }
 
+/** Stored password hash for OAuth-only rows so password login cannot succeed with a guessable secret. */
+export function oauthPlaceholderPasswordHash() {
+  return hashSeedPassword(randomUUID());
+}
+
 function createOptions(
   items: [string, string, string, string],
 ): QuestionOption[] {
