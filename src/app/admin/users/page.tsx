@@ -74,24 +74,21 @@ export default async function AdminUsersPage() {
         </div>
 
         <section className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-sm">
-          <div className="grid grid-cols-[1.2fr_1.2fr_100px_100px_100px_160px_120px] gap-4 border-b border-white/10 px-6 py-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
-            <span>Name</span>
+          <div className="grid grid-cols-[1.2fr_100px_100px_100px_120px] gap-4 border-b border-white/10 px-6 py-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
             <span>Email</span>
             <span>Solved</span>
             <span>Submissions</span>
             <span>Accuracy</span>
-            <span>Joined</span>
             <span>Actions</span>
           </div>
 
           {studentsWithStats.map((student) => (
             <details key={student.id} className="group border-b border-white/10">
-              <summary className="list-none grid grid-cols-[1.2fr_1.2fr_100px_100px_100px_120px] gap-4 px-6 py-5 items-center cursor-pointer">
+              <summary className="list-none grid grid-cols-[1.2fr_100px_100px_100px_120px] gap-4 px-6 py-5 items-center cursor-pointer">
                 <div>
                   <div className="font-semibold text-white">{student.email}</div>
                   <p className="mt-1 text-sm text-slate-300">Student account</p>
                 </div>
-                <div className="text-sm text-slate-200">{student.email}</div>
                 <div className="text-sm font-semibold text-emerald-400">{student.solvedCount}</div>
                 <div className="text-sm text-slate-200">{student.submissionCount}</div>
                 <div className="text-sm text-slate-200">{formatPercentage(student.accuracy)}</div>
