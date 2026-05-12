@@ -45,31 +45,7 @@ body {
   /* reduce size visually when collapsed */
 }
 
-/* Signin panel animation: only animate transform & opacity for smoother performance */
-#signin {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: transform 620ms cubic-bezier(.2,.9,.2,1), opacity 620ms ease;
-  will-change: transform, opacity;
-}
-
-#signin.signin-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Hero illustration: smooth fade-in and slight slide-up when visible */
-#hero-illustration {
-  opacity: 0;
-  transform: translateY(12px) scale(0.995);
-  transition: transform 520ms cubic-bezier(.22,.9,.24,1), opacity 520ms ease;
-  will-change: transform, opacity;
-}
-
-#hero-illustration.hero-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
+/* Hero login panel stays visible; entrance handled by .landing-animate-scale-in */
 
 a,
 button {

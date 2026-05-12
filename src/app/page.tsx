@@ -4,27 +4,15 @@ import { redirect } from "next/navigation";
 import { LoginForm } from "@/app/login/login-form";
 import AnimatedLanding from "@/components/animated-landing";
 import { getCurrentUser } from "@/lib/auth";
-import { getPublishedProblems, getStats } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-function formatStat(n: number) {
-  return n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n);
-}
-
 export default async function Home() {
-  const [user, stats, problems] = await Promise.all([
-    getCurrentUser(),
-    getStats(),
-    getPublishedProblems(),
-  ]);
+  const user = await getCurrentUser();
 
   if (user) {
     redirect(user.role === "admin" ? "/admin" : "/problems");
   }
-
-  const publishedCount = problems.length;
-  const topicsCount = new Set(problems.map((p) => p.topic)).size;
 
   return (
     <main className="relative min-h-screen overflow-x-hidden text-slate-100">
@@ -81,28 +69,6 @@ export default async function Home() {
 
         <AnimatedLanding />
 
-        <div className="landing-animate-fade-up landing-delay-1 mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { label: "Questions", value: formatStat(publishedCount), hint: "Published" },
-            { label: "Students", value: formatStat(stats.totalUsers), hint: "Registered" },
-            { label: "Attempts", value: formatStat(stats.totalSubmissions), hint: "Submissions" },
-            { label: "Topics", value: formatStat(topicsCount), hint: "Categories" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3 backdrop-blur-sm transition hover:border-white/[0.12] hover:bg-white/[0.05]"
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                {item.label}
-              </p>
-              <p className="mt-1 font-mono text-2xl font-bold tracking-tight text-white tabular-nums">
-                {item.value}
-              </p>
-              <p className="text-xs text-slate-500">{item.hint}</p>
-            </div>
-          ))}
-        </div>
-
         <div className="grid flex-1 items-center gap-14 py-14 lg:grid-cols-1 lg:gap-16 lg:py-20">
           <div className="flex min-h-[56vh] flex-col items-center justify-center gap-10 lg:col-span-2">
             <div className="flex w-full max-w-4xl flex-col items-center gap-6 text-center">
@@ -137,18 +103,33 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="landing-animate-scale-in landing-delay-3 relative w-full max-w-[720px] px-2">
+            <div
+              id="hero-login-panel"
+              className="landing-animate-scale-in landing-delay-3 relative w-full max-w-md px-2"
+            >
               <div
-                className="landing-shimmer-border pointer-events-none absolute -inset-[1px] rounded-[26px] opacity-60"
+                className="landing-shimmer-border pointer-events-none absolute -inset-[1px] rounded-[28px] opacity-60"
                 aria-hidden
               />
-              <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-slate-950/40 p-1 shadow-[0_40px_100px_-24px_rgba(2,6,23,0.85)] backdrop-blur-sm ring-1 ring-white/[0.04]">
-                <img
-                  id="hero-illustration"
-                  src="/hero-illustration.svg"
-                  alt="Abstract preview of the CodeArena practice workspace"
-                  className="w-full rounded-[20px] opacity-95"
-                />
+              <div
+                id="signin"
+                className="relative rounded-[26px] border border-white/[0.1] bg-[linear-gradient(165deg,rgba(15,23,42,0.94)_0%,rgba(2,6,23,0.96)_55%,rgba(8,17,31,0.98)_100%)] p-7 shadow-[0_40px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-white/[0.05]"
+              >
+                <div className="mb-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-400/95">
+                    Welcome back
+                  </p>
+                  <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
+                    Sign in to CodeArena
+                  </h2>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                    Secure entry for students and admins—same portal, role-aware routing after login.
+                  </p>
+                </div>
+
+                <div className="rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4 backdrop-blur-sm">
+                  <LoginForm />
+                </div>
               </div>
             </div>
 
@@ -176,27 +157,6 @@ export default async function Home() {
                   <p className="mt-2 text-sm leading-relaxed text-slate-500">{card.body}</p>
                 </div>
               ))}
-            </div>
-          </div>
-
-          <div
-            id="signin"
-            className="mx-auto w-full max-w-md rounded-[28px] border border-white/[0.1] bg-[linear-gradient(165deg,rgba(15,23,42,0.94)_0%,rgba(2,6,23,0.96)_55%,rgba(8,17,31,0.98)_100%)] p-7 shadow-[0_40px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-white/[0.05]"
-          >
-            <div className="mb-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-400/95">
-                Welcome back
-              </p>
-              <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
-                Sign in to CodeArena
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-400">
-                Secure entry for students and admins—same portal, role-aware routing after login.
-              </p>
-            </div>
-
-            <div className="rounded-[22px] border border-white/[0.07] bg-white/[0.03] p-4 backdrop-blur-sm">
-              <LoginForm />
             </div>
           </div>
         </div>

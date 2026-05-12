@@ -8,19 +8,9 @@ export default function AnimatedLanding() {
 
     function updateState(collapsed: boolean) {
       const title = document.getElementById("leetcore-title");
-      const signin = document.getElementById("signin");
-      const hero = document.getElementById("hero-illustration");
 
       if (title) {
         title.classList.toggle("leetcore-collapsed", collapsed);
-      }
-
-      if (signin) {
-        signin.classList.toggle("signin-visible", collapsed);
-      }
-      if (hero) {
-        // hero visible when not collapsed
-        hero.classList.toggle("hero-visible", !collapsed);
       }
     }
 
