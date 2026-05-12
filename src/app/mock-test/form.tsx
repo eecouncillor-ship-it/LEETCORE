@@ -59,6 +59,12 @@ export function MockForm({ categories, results }: { categories: string[]; result
     return (
       <form ref={formRef} action={submitFormAction} className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <input type="hidden" name="sessionId" value={sess.id} />
+        {/* Only the current question mounts visible inputs; serialize full palette via hidden fields */}
+        {Object.entries(answers).map(([fieldName, value]) =>
+          value !== "" ? (
+            <input key={fieldName} type="hidden" name={fieldName} value={value} />
+          ) : null,
+        )}
         <aside className="rounded-3xl border border-white/10 bg-white/5 p-5">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -183,7 +189,6 @@ export function MockForm({ categories, results }: { categories: string[]; result
                       ) : null}
                       <input
                         type="text"
-                        name={`answer_${currentProblem.id}_${opt.id}`}
                         value={answers[`answer_${currentProblem.id}_${opt.id}`] ?? ""}
                         onChange={(event) => handleBlankChange(currentProblem.id, opt.id, event.target.value)}
                         className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-400"
@@ -200,7 +205,6 @@ export function MockForm({ categories, results }: { categories: string[]; result
                     >
                       <input
                         type="radio"
-                        name={`answer_${currentProblem.id}`}
                         value={opt.id}
                         checked={answers[`answer_${currentProblem.id}`] === opt.id}
                         onChange={() => handleAnswerChange(currentProblem.id, opt.id)}

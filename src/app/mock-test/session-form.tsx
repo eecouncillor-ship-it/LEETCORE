@@ -13,8 +13,10 @@ export function MockSessionForm({ sessionId, problems }: { sessionId: string; pr
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const currentProblem = problems[currentQuestionIndex];
 
+  const answerFieldKey = (questionId: string) => `answer_${questionId}`;
+
   const handleAnswerChange = (questionId: string, value: string) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+    setAnswers((prev) => ({ ...prev, [answerFieldKey(questionId)]: value }));
   };
 
   const handleNavigate = (index: number) => {
@@ -24,6 +26,11 @@ export function MockSessionForm({ sessionId, problems }: { sessionId: string; pr
   return (
     <form action={formAction} className="flex gap-6 h-full">
       <input type="hidden" name="sessionId" value={sessionId} />
+      {Object.entries(answers).map(([fieldName, value]) =>
+        value !== "" ? (
+          <input key={fieldName} type="hidden" name={fieldName} value={value} />
+        ) : null,
+      )}
 
       {/* Left Sidebar - Question List */}
       <div className="w-64 flex-shrink-0 h-full overflow-hidden">
@@ -33,7 +40,8 @@ export function MockSessionForm({ sessionId, problems }: { sessionId: string; pr
           </div>
           <div className="divide-y divide-white/10 overflow-y-auto flex-1">
             {problems.map((problem, index) => {
-              const isAnswered = answers[problem.id] !== undefined;
+              const isAnswered =
+                answers[answerFieldKey(problem.id)] !== undefined;
               const isActive = index === currentQuestionIndex;
 
               return (
@@ -110,10 +118,13 @@ export function MockSessionForm({ sessionId, problems }: { sessionId: string; pr
                   >
                     <input
                       type="radio"
-                      name={`answer_${currentProblem.id}`}
                       value={opt.id}
-                      checked={answers[currentProblem.id] === opt.id}
-                      onChange={() => handleAnswerChange(currentProblem.id, opt.id)}
+                      checked={
+                        answers[answerFieldKey(currentProblem.id)] === opt.id
+                      }
+                      onChange={() =>
+                        handleAnswerChange(currentProblem.id, opt.id)
+                      }
                       className="h-4 w-4"
                     />
                     <span className="text-sm text-slate-200">
