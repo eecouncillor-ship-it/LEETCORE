@@ -65,10 +65,10 @@ export default async function SubmissionsPage() {
                 </div>
 
                 <span
-                  className={`rounded-full px-3 py-2 text-sm font-semibold ${
+                  className={`text-sm font-semibold ${
                     submission.is_correct
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-amber-100 text-amber-700"
+                      ? "text-emerald-400"
+                      : "text-rose-400"
                   }`}
                 >
                   {submission.is_correct ? 'Correct' : 'Incorrect'}
