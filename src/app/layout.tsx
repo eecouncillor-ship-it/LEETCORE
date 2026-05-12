@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Corearena",
+  title: "CoreArena",
   description: "MCQ practice platform with separate admin and student portals.",
 };
 

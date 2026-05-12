@@ -7,7 +7,7 @@ export default function RegisterPage() {
       <section className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-6 py-12 sm:px-10 lg:px-12">
         <header className="mb-8 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300">Corearena</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300">CoreArena</p>
             <p className="text-sm text-slate-400">Create a student account</p>
           </div>
           <div>

@@ -1,6 +1,6 @@
-# Corearena
+# CoreArena
 
-Corearena is a LeetCode-style practice platform with two distinct roles:
+CoreArena is a LeetCode-style practice platform with two distinct roles:
 
 - `admin` can create and publish multiple-choice questions
 - `user` can browse published questions, answer them, and review explanations
