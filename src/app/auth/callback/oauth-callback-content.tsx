@@ -34,6 +34,8 @@ export function OAuthCallbackContent() {
       return;
     }
 
+    const authCode = code;
+
     let cancelled = false;
 
     async function run() {
@@ -49,7 +51,7 @@ export function OAuthCallbackContent() {
 
       const supabase = createClient(url, key);
       const { error: exchangeError } =
-        await supabase.auth.exchangeCodeForSession(code);
+        await supabase.auth.exchangeCodeForSession(authCode);
 
       if (exchangeError) {
         if (!cancelled) {
