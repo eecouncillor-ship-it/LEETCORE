@@ -295,12 +295,55 @@ export function MockForm({ categories, results }: { categories: string[]; result
         ) : (
           <div className="space-y-3">
             {results.map((r) => (
-              <div key={r.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-slate-300">{new Date(r.createdAt).toLocaleString()}</div>
-                  <div className="text-sm font-semibold text-white">Score: {r.correct}/{r.total}</div>
+              <details
+                key={r.id}
+                className="group rounded-2xl border border-white/10 bg-white/5 overflow-hidden"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-4 [&::-webkit-details-marker]:hidden">
+                  <div className="text-sm text-slate-300">
+                    {new Date(r.createdAt).toLocaleString()}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-semibold text-white">
+                      Score: {r.correct}/{r.total}
+                    </div>
+                    <span
+                      className="inline-block text-xs text-slate-400 transition-transform group-open:rotate-180"
+                      aria-hidden
+                    >
+                      ▼
+                    </span>
+                  </div>
+                </summary>
+                <div className="space-y-2 border-t border-white/10 px-4 pb-4 pt-3">
+                  {r.questionOutcomes?.length ? (
+                    r.questionOutcomes.map((q) => (
+                      <div
+                        key={`${r.id}-${q.questionNumber}-${q.questionId}`}
+                        className={`text-sm leading-snug ${
+                          q.outcome === "correct"
+                            ? "font-medium text-emerald-400"
+                            : q.outcome === "incorrect"
+                              ? "font-medium text-rose-400"
+                              : "text-white"
+                        }`}
+                      >
+                        <span className="font-semibold">
+                          Q{q.questionNumber}.
+                        </span>{" "}
+                        {q.title}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-400">
+                      No saved per-question breakdown for this row (older attempt). New mock tests
+                      store question-level results here; ensure Supabase has a{" "}
+                      <span className="text-slate-300">question_breakdown</span> column on{" "}
+                      <span className="text-slate-300">mock_results</span> if inserts fail.
+                    </p>
+                  )}
                 </div>
-              </div>
+              </details>
             ))}
           </div>
         )}

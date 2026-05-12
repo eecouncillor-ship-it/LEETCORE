@@ -3,13 +3,68 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
-import { getAllProblems, createMockSession, getProblemById, createSubmission, createMockResult } from "@/lib/db";
-import type { QuestionOption, MockSession, ProblemRecord } from "@/lib/types";
-import { randomUUID } from "node:crypto";
-
+import {
+  getAllProblems,
+  createMockSession,
+  getProblemById,
+  createSubmission,
+  createMockResult,
+  getMockSessionById,
+} from "@/lib/db";
+import type {
+  QuestionOption,
+  MockSession,
+  ProblemRecord,
+  MockQuestionOutcome,
+} from "@/lib/types";
 export type MinimalProblem = Pick<ProblemRecord, 'id' | 'title' | 'description' | 'options' | 'correct_answer' | 'explanation' | 'topic' | 'image_url'>;
 
 export type MockFormState = { error?: string } | { session: MockSession; problems: MinimalProblem[] };
+
+function gradeMockAnswer(
+  prob: ProblemRecord,
+  submitted: Record<string, string> | undefined,
+): { attempted: boolean; isCorrect: boolean; selectedAnswer: string } {
+  if (!submitted) {
+    return { attempted: false, isCorrect: false, selectedAnswer: "" };
+  }
+
+  if (prob.correct_answer === "FIB") {
+    const attempted = prob.options.some(
+      (opt) => String(submitted[opt.id] ?? "").trim() !== "",
+    );
+    if (!attempted) {
+      return { attempted: false, isCorrect: false, selectedAnswer: "" };
+    }
+    const blanks = prob.options.map((opt: QuestionOption) => {
+      const answer = String(submitted[opt.id] ?? "").trim();
+      const expected = String(opt.text ?? "").trim();
+      return {
+        blankId: opt.id,
+        submitted: answer,
+        expected,
+        isCorrect: answer.toLowerCase() === expected.toLowerCase(),
+      };
+    });
+    const isCorrect = blanks.every((item: { isCorrect: boolean }) => item.isCorrect);
+    return {
+      attempted: true,
+      isCorrect,
+      selectedAnswer: JSON.stringify(blanks),
+    };
+  }
+
+  const picked = String(submitted.selectedOptionId ?? "").trim();
+  if (!picked) {
+    return { attempted: false, isCorrect: false, selectedAnswer: "" };
+  }
+
+  return {
+    attempted: true,
+    isCorrect: picked === prob.correct_answer,
+    selectedAnswer: picked,
+  };
+}
 
 export async function createMockAction(_prev: MockFormState, formData: FormData) {
   const user = await requireAuth();
@@ -67,47 +122,59 @@ export async function submitMockAction(_prev: MockFormState, formData: FormData)
     }
   }
 
-  let total = 0;
+  const sessionRow = await getMockSessionById(sessionId);
+  if (!sessionRow || sessionRow.userId !== user.id) {
+    return { error: "This mock session is invalid or does not belong to you." };
+  }
+
+  const total = sessionRow.problemIds.length;
   let correct = 0;
-  for (const [pid, submitted] of Object.entries(answersByQuestion)) {
+  const questionOutcomes: MockQuestionOutcome[] = [];
+
+  for (let index = 0; index < sessionRow.problemIds.length; index++) {
+    const pid = sessionRow.problemIds[index];
     const prob = await getProblemById(pid);
-    if (!prob) continue;
-    total += 1;
-
-    let isCorrect = false;
-    let selectedAnswer = "";
-
-    if (prob.correct_answer === "FIB") {
-      const blanks = prob.options.map((opt: QuestionOption) => {
-        const answer = String(submitted[opt.id] ?? "").trim();
-        const expected = String(opt.text ?? "").trim();
-        return {
-          blankId: opt.id,
-          submitted: answer,
-          expected,
-          isCorrect: answer.toLowerCase() === expected.toLowerCase(),
-        };
+    if (!prob) {
+      questionOutcomes.push({
+        questionNumber: index + 1,
+        questionId: pid,
+        title: "Unknown question",
+        outcome: "unattempted",
       });
-      isCorrect = blanks.every((item: { isCorrect: boolean }) => item.isCorrect);
-      selectedAnswer = JSON.stringify(blanks);
-    } else {
-      const picked = String(submitted.selectedOptionId ?? "");
-      isCorrect = picked === prob.correct_answer;
-      selectedAnswer = picked;
+      continue;
     }
 
-    if (isCorrect) correct += 1;
+    const submitted = answersByQuestion[pid];
+    const graded = gradeMockAnswer(prob, submitted);
+
+    if (!graded.attempted) {
+      questionOutcomes.push({
+        questionNumber: index + 1,
+        questionId: pid,
+        title: prob.title,
+        outcome: "unattempted",
+      });
+      continue;
+    }
+
+    if (graded.isCorrect) correct += 1;
+
+    questionOutcomes.push({
+      questionNumber: index + 1,
+      questionId: pid,
+      title: prob.title,
+      outcome: graded.isCorrect ? "correct" : "incorrect",
+    });
 
     await createSubmission({
       user_email: user.email,
       question_id: prob.id,
-      selected_answer: selectedAnswer,
-      is_correct: isCorrect,
+      selected_answer: graded.selectedAnswer,
+      is_correct: graded.isCorrect,
     });
   }
 
-  // record mock result
-  await createMockResult(user.id, sessionId, total, correct);
+  await createMockResult(user.id, sessionId, total, correct, questionOutcomes);
 
   // revalidate mock test page and redirect to overview (so history shows immediately)
   revalidatePath("/mock-test");

@@ -26,3 +26,6 @@ CREATE INDEX IF NOT EXISTS idx_mock_sessions_user_id ON mock_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_mock_sessions_expires_at ON mock_sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_mock_results_user_id ON mock_results(user_id);
 CREATE INDEX IF NOT EXISTS idx_mock_results_session_id ON mock_results(session_id);
+
+-- Per-question outcomes for mock history UI (run once in SQL editor if missing)
+ALTER TABLE mock_results ADD COLUMN IF NOT EXISTS question_breakdown JSONB;

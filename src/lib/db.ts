@@ -5,6 +5,7 @@ import { slugify } from "@/lib/utils";
 import type {
   DatabaseShape,
   Difficulty,
+  MockQuestionOutcome,
   ProblemRecord,
   QuestionOption,
   SessionRecord,
@@ -830,8 +831,14 @@ export async function getMockSessionById(id: string) {
   };
 }
 
-export async function createMockResult(userId: string, sessionId: string, total: number, correct: number) {
-  const result = {
+export async function createMockResult(
+  userId: string,
+  sessionId: string,
+  total: number,
+  correct: number,
+  questionBreakdown?: MockQuestionOutcome[],
+) {
+  const result: Record<string, unknown> = {
     id: randomUUID(),
     user_id: userId,
     session_id: sessionId,
@@ -839,6 +846,10 @@ export async function createMockResult(userId: string, sessionId: string, total:
     correct,
     created_at: new Date().toISOString(),
   };
+
+  if (questionBreakdown?.length) {
+    result.question_breakdown = questionBreakdown;
+  }
 
   const { data, error } = await getSupabase()
     .from('mock_results')
@@ -873,13 +884,21 @@ export async function getMockResultsForUser(userId: string) {
     return [];
   }
 
-  return (data || []).map(result => ({
-    id: result.id,
-    userId: result.user_id,
-    sessionId: result.session_id,
-    total: result.total,
-    correct: result.correct,
-    createdAt: result.created_at,
-  }));
+  return (data || []).map((result) => {
+    const rawBreakdown = result.question_breakdown;
+    const questionOutcomes = Array.isArray(rawBreakdown)
+      ? (rawBreakdown as MockQuestionOutcome[])
+      : undefined;
+
+    return {
+      id: result.id,
+      userId: result.user_id,
+      sessionId: result.session_id,
+      total: result.total,
+      correct: result.correct,
+      createdAt: result.created_at,
+      questionOutcomes,
+    };
+  });
 }
 

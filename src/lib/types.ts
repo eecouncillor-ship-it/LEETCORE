@@ -52,12 +52,22 @@ export type PasswordResetRecord = {
   expiresAt: string;
 };
 
+export type MockQuestionOutcome = {
+  questionNumber: number;
+  questionId: string;
+  title: string;
+  outcome: "correct" | "incorrect" | "unattempted";
+};
+
 export type MockResultRecord = {
   id: string;
   userId: string;
+  sessionId: string;
   correct: number;
   total: number;
   createdAt: string;
+  /** Present when stored by newer submits (requires `question_breakdown` column). */
+  questionOutcomes?: MockQuestionOutcome[];
 };
 
 export type DatabaseShape = {

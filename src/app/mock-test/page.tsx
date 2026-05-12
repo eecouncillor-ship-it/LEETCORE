@@ -1,14 +1,17 @@
 import { MockForm } from "./form";
 import { StudentShell } from "@/components/student-shell";
 import { requireAuth } from "@/lib/auth";
-import { getPublishedProblems, getSubmissionsForUser, getMockResultsForUser } from "@/lib/db";
+import { getPublishedProblems, getMockResultsForUser } from "@/lib/db";
 import type { MockResultRecord } from "@/lib/types";
 
 export const dynamic = 'force-dynamic';
 
 export default async function MockTestPage() {
   const user = await requireAuth();
-  const [problems, submissions, results] = await Promise.all([getPublishedProblems(), getSubmissionsForUser(user.email), getMockResultsForUser(user.id)]);
+  const [problems, results] = await Promise.all([
+    getPublishedProblems(),
+    getMockResultsForUser(user.id),
+  ]);
   const categories = Array.from(new Set(problems.map((p) => p.topic))).sort();
 
   return (
