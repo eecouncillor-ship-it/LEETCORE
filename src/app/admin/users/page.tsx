@@ -74,17 +74,17 @@ export default async function AdminUsersPage() {
         </div>
 
         <section className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-sm">
-          <div className="grid grid-cols-[minmax(0,1.7fr)_90px_90px_90px_120px] gap-4 border-b border-white/10 px-6 py-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+          <div className="grid grid-cols-[minmax(0,1.7fr)_90px_90px_90px_120px] items-center gap-4 border-b border-white/10 px-6 py-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
             <span>Email</span>
-            <span>Solved</span>
-            <span>Submissions</span>
-            <span>Accuracy</span>
-            <span>Actions</span>
+            <span className="text-right">Solved</span>
+            <span className="text-right">Submissions</span>
+            <span className="text-right">Accuracy</span>
+            <span className="text-right">Actions</span>
           </div>
 
           {studentsWithStats.map((student) => (
             <details key={student.id} className="group border-b border-white/10">
-              <summary className="list-none grid grid-cols-[minmax(0,1.7fr)_90px_90px_90px_120px] gap-4 px-6 py-4 items-start cursor-pointer">
+              <summary className="list-none grid grid-cols-[minmax(0,1.7fr)_90px_90px_90px_120px] items-center gap-4 px-6 py-4 cursor-pointer">
                 <div className="min-w-0">
                   <div className="font-semibold text-white truncate">{student.email}</div>
                   <p className="mt-1 text-sm text-slate-300 truncate">Student account</p>
