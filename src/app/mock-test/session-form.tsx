@@ -23,6 +23,20 @@ export function MockSessionForm({ sessionId, problems }: { sessionId: string; pr
     setCurrentQuestionIndex(index);
   };
 
+  const clearCurrentSelection = () => {
+    if (!currentProblem) return;
+    const key = answerFieldKey(currentProblem.id);
+    setAnswers((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const currentHasSelection = currentProblem
+    ? answers[answerFieldKey(currentProblem.id)] !== undefined
+    : false;
+
   return (
     <form action={formAction} className="flex gap-6 h-full">
       <input type="hidden" name="sessionId" value={sessionId} />
@@ -153,6 +167,14 @@ export function MockSessionForm({ sessionId, problems }: { sessionId: string; pr
                   className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition"
                 >
                   Next →
+                </button>
+                <button
+                  type="button"
+                  onClick={clearCurrentSelection}
+                  disabled={!currentHasSelection}
+                  className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-100 transition hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Clear selection
                 </button>
               </div>
 

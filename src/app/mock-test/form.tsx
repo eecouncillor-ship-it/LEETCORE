@@ -57,6 +57,28 @@ export function MockForm({ categories, results }: { categories: string[]; result
       setCurrentQuestionIndex(index);
     };
 
+    const clearCurrentSelection = () => {
+      const pid = currentProblem.id;
+      setAnswers((prev) => {
+        const next = { ...prev };
+        if (currentProblem.correct_answer === "FIB") {
+          for (const opt of currentProblem.options) {
+            delete next[`answer_${pid}_${opt.id}`];
+          }
+        } else {
+          delete next[`answer_${pid}`];
+        }
+        return next;
+      });
+    };
+
+    const currentHasSelection =
+      currentProblem.correct_answer === "FIB"
+        ? currentProblem.options.some((opt) =>
+            Boolean((answers[`answer_${currentProblem.id}_${opt.id}`] ?? "").trim()),
+          )
+        : Boolean(answers[`answer_${currentProblem.id}`]);
+
     return (
       <form ref={formRef} action={submitFormAction} className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <input type="hidden" name="sessionId" value={sess.id} />
@@ -245,6 +267,14 @@ export function MockForm({ categories, results }: { categories: string[]; result
                 className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition"
               >
                 Next
+              </button>
+              <button
+                type="button"
+                onClick={clearCurrentSelection}
+                disabled={!currentHasSelection || submitPending}
+                className="rounded-2xl border border-amber-500/35 bg-amber-500/10 px-5 py-3 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Clear selection
               </button>
               <button
                 type="submit"
