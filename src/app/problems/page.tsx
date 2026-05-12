@@ -34,9 +34,9 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
   const solvedProblemIds = getSolvedProblemIds(submissions);
 
   const filteredProblems = problems.filter((problem) => {
+    const titleLower = problem.title.toLowerCase();
     const matchesSearch =
-      search.length === 0 ||
-      problem.title.toLowerCase().includes(search);
+      search.length === 0 || titleLower.startsWith(search);
 
     const matchesDifficulty =
       difficultyFilter.length === 0 ||
@@ -148,7 +148,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
                 type="search"
                 name="q"
                 defaultValue={resolvedSearchParams.q ?? ""}
-                placeholder="Search questions"
+                placeholder="Search by title (starts with…)"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 pl-10 text-sm text-slate-100 outline-none transition focus:border-sky-500"
               />
             </div>
