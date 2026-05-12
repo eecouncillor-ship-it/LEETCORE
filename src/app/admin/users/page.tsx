@@ -84,7 +84,7 @@ export default async function AdminUsersPage() {
 
           {studentsWithStats.map((student) => (
             <details key={student.id} className="group border-b border-white/10">
-              <summary className="list-none grid grid-cols-[minmax(0,1.7fr)_90px_90px_90px_120px] gap-4 px-6 py-5 items-center cursor-pointer">
+              <summary className="list-none grid grid-cols-[minmax(0,1.7fr)_90px_90px_90px_120px] gap-4 px-6 py-4 items-start cursor-pointer">
                 <div className="min-w-0">
                   <div className="font-semibold text-white truncate">{student.email}</div>
                   <p className="mt-1 text-sm text-slate-300 truncate">Student account</p>
