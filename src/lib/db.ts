@@ -735,12 +735,7 @@ export async function createUser(user: {
     return null;
   }
 
-  return {
-    id: data.id,
-    email: data.email,
-    password: data.password,
-    role: data.role,
-  };
+  return mapUserRow(data);
 }
 
 export async function createMockSession(userId: string, problemIds: string[], durationMinutes: number) {
