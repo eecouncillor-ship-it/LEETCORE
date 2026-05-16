@@ -17,6 +17,8 @@ function loginOAuthErrorMessage(code: string | undefined): string | undefined {
       "Your Google account did not return an email. Use another method or check Google permissions.",
     invalid_session:
       "Your Google session could not be verified. Please sign in again.",
+    blocked:
+      "Your account has been blocked. Contact an administrator.",
   };
   return messages[code] ?? code.replace(/_/g, " ");
 }

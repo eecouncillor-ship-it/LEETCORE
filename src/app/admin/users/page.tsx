@@ -3,7 +3,7 @@ import { AppShell } from "@/components/shell";
 import { requireAuth } from "@/lib/auth";
 import { getStudentUsers, getSubmissionsForUser, getStats, getAllProblems } from "@/lib/db";
 import { formatDate, formatPercentage } from "@/lib/utils";
-import { toggleUserBlockAction } from "@/app/admin/actions";
+import { UserBlockButton } from "@/components/user-block-button";
 
 export const dynamic = 'force-dynamic';
 
@@ -87,22 +87,15 @@ export default async function AdminUsersPage() {
               <summary className="list-none grid grid-cols-[minmax(0,1.7fr)_90px_90px_90px_120px] items-center gap-4 px-6 py-4 cursor-pointer">
                 <div className="min-w-0">
                   <div className="font-semibold text-white truncate">{student.email}</div>
-                  <p className="mt-1 text-sm text-slate-300 truncate">Student account</p>
+                  <p className="mt-1 text-sm text-slate-300 truncate">
+                    {student.isBlocked ? "Blocked" : "Student account"}
+                  </p>
                 </div>
                 <div className="text-sm font-semibold text-emerald-400 text-right">{student.solvedCount}</div>
                 <div className="text-sm text-slate-200 text-right">{student.submissionCount}</div>
                 <div className="text-sm text-slate-200 text-right">{formatPercentage(student.accuracy)}</div>
                 <div className="flex justify-end">
-                  <form action={toggleUserBlockAction}>
-                    <input type="hidden" name="userId" value={student.id} />
-                    <input type="hidden" name="block" value="0" />
-                    <button
-                      type="submit"
-                      className={`rounded-full px-3 py-2 text-sm font-semibold transition bg-rose-500 text-white`}
-                    >
-                      Block
-                    </button>
-                  </form>
+                  <UserBlockButton userId={student.id} isBlocked={Boolean(student.isBlocked)} />
                 </div>
               </summary>
 

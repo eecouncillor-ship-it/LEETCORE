@@ -29,3 +29,6 @@ CREATE INDEX IF NOT EXISTS idx_mock_results_session_id ON mock_results(session_i
 
 -- Per-question outcomes for mock history UI (run once in SQL editor if missing)
 ALTER TABLE mock_results ADD COLUMN IF NOT EXISTS question_breakdown JSONB;
+
+-- Block student accounts from admin users page (run once if missing)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN NOT NULL DEFAULT false;

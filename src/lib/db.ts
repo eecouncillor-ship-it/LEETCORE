@@ -147,12 +147,23 @@ export async function getUsers() {
     return [];
   }
 
-  return (data || []).map(user => ({
+  return (data || []).map(mapUserRow);
+}
+
+function mapUserRow(user: {
+  id: string;
+  email: string;
+  password: string;
+  role: string;
+  is_blocked?: boolean | null;
+}) {
+  return {
     id: user.id,
     email: user.email,
     password: user.password,
-    role: user.role,
-  }));
+    role: user.role as UserRecord["role"],
+    isBlocked: Boolean(user.is_blocked),
+  };
 }
 
 export async function getStudentUsers() {
@@ -167,12 +178,7 @@ export async function getStudentUsers() {
     return [];
   }
 
-  return (data || []).map(user => ({
-    id: user.id,
-    email: user.email,
-    password: user.password,
-    role: user.role,
-  }));
+  return (data || []).map(mapUserRow);
 }
 
 export async function getUserByEmail(email: string) {
@@ -189,12 +195,7 @@ export async function getUserByEmail(email: string) {
 
   if (!data) return null;
 
-  return {
-    id: data.id,
-    email: data.email,
-    password: data.password,
-    role: data.role,
-  };
+  return mapUserRow(data);
 }
 
 export async function getUserById(id: string) {
@@ -211,12 +212,7 @@ export async function getUserById(id: string) {
 
   if (!data) return null;
 
-  return {
-    id: data.id,
-    email: data.email,
-    password: data.password,
-    role: data.role,
-  };
+  return mapUserRow(data);
 }
 
 export async function updateUserBlockedStatus(id: string, isBlocked: boolean) {

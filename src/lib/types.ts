@@ -13,6 +13,7 @@ export type UserRecord = {
   email: string;
   password: string;
   role: Role;
+  isBlocked?: boolean;
 };
 
 export type ProblemRecord = {

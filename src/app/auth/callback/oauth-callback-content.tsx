@@ -133,7 +133,11 @@ export function OAuthCallbackContent() {
 
       sessionStorage.removeItem(OAUTH_CODE_STASH_KEY);
       setStatus("error");
-      setMessage("Could not start your session. Please try again.");
+      setMessage(
+        result.error === "blocked"
+          ? "Your account has been blocked. Contact an administrator."
+          : "Could not start your session. Please try again.",
+      );
     }
 
     void run();

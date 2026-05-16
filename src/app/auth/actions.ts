@@ -65,6 +65,10 @@ export async function bridgeOAuthSession(
     return { ok: false, error: "user_setup_failed" };
   }
 
+  if (appUser.isBlocked) {
+    return { ok: false, error: "blocked" };
+  }
+
   const session = await createSession(appUser.id);
   if (!session) {
     return { ok: false, error: "session_failed" };

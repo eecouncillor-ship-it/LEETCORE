@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { signIn as signInWithSession, signOut as clearSession } from "@/lib/auth";
+import { getUserByEmail } from "@/lib/db";
 
 export type LoginState = {
   error?: string;
@@ -17,6 +18,13 @@ export async function loginAction(
 
   if (!email || !password) {
     return { error: "Please enter both email and password." };
+  }
+
+  const existing = await getUserByEmail(email);
+  if (existing?.isBlocked) {
+    return {
+      error: "Your account has been blocked. Contact an administrator.",
+    };
   }
 
   const user = await signInWithSession(email, password);

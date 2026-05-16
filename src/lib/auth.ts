@@ -37,6 +37,10 @@ export async function signIn(email: string, password: string) {
     return null;
   }
 
+  if (data.is_blocked) {
+    return null;
+  }
+
   // Verify the password against the stored hash
   if (!verifyPassword(password, data.password)) {
     return null;
@@ -111,6 +115,16 @@ export async function requireAuth(role?: Role) {
 
   if (!user) {
     redirect("/login");
+  }
+
+  if (user.isBlocked) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(sessionCookieName)?.value;
+    if (token) {
+      await deleteSession(token);
+      cookieStore.delete(sessionCookieName);
+    }
+    redirect("/login?error=blocked");
   }
 
   if (role && user.role !== role) {
