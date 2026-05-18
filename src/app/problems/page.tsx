@@ -107,7 +107,7 @@ export default async function ProblemsPage({ searchParams }: ProblemsPageProps) 
         { href: "/contact-us", label: "Contact Us" },
       ]}
     >
-      <div className="grid gap-5 xl:grid-cols-[1.5fr_0.9fr] w-full">
+      <div className="grid gap-5 w-full xl:grid-cols-[80%_20%]">
         <div className="space-y-5">
           {/* Topic Tabs */}
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hidden w-full">
